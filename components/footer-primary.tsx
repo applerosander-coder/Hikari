@@ -61,6 +61,11 @@ export default function FooterPrimary() {
                 </AnimatedUnderline>
               </li>
               <li>
+                <AnimatedUnderline href="https://supacrawler.com" className="text-primary">
+                  Supacrawler
+                </AnimatedUnderline>
+              </li>
+              <li>
                 <AnimatedUnderline href="https://github.com/antoineross/Autogen-UI" className="text-primary">
                   Autogen UI
                 </AnimatedUnderline>

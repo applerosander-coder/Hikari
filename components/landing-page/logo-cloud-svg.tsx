@@ -5,7 +5,8 @@ import {
   NextjsSvg,
   SupabaseSvg,
   VercelSvg,
-  GithubSvg
+  GithubSvg,
+  LogoSupacrawler
 } from '@/components/svg';
 
 export default function LogoCloud() {
@@ -23,7 +24,7 @@ export default function LogoCloud() {
       <p className="mt-12 text-xs uppercase text-primary text-center font-bold tracking-[0.3em]">
         Built with these brands
       </p>
-      <div className="grid grid-cols-1 place-items-center justify-center my-12 space-y-4 sm:mt-8 sm:space-y-0 md:mx-auto md:max-w-2xl sm:grid sm:gap-6 sm:grid-cols-5">
+      <div className="grid grid-cols-1 place-items-center justify-center my-12 space-y-4 sm:mt-8 sm:space-y-0 md:mx-auto md:max-w-2xl sm:grid sm:gap-10 sm:grid-cols-6">
         <div className="flex items-center justify-center h-15 w-24">
           <a href="https://nextjs.org" aria-label="Next.js Link">
             <NextjsSvg className="size-full" style={{ color: primaryColor }} />
@@ -39,7 +40,8 @@ export default function LogoCloud() {
             <StripeSvg className="size-full" style={{ color: primaryColor }} />
           </a>
         </div>
-        <div className="flex items-center justify-center h-15 w-24">
+        <LogoSupacrawler />
+        <div className="flex items-center justify-center h-15 w-24 sm:ml-8">
           <a href="https://supabase.io" aria-label="supabase.io Link">
             <SupabaseSvg
               className="size-full"

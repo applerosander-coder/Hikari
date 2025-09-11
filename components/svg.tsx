@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+import Link from 'next/link';
 import * as React from 'react';
 import { SVGProps } from 'react';
 
@@ -93,6 +95,29 @@ export const GithubSvg = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+export function LogoSupacrawler() {
+  return (
+    <Link href="https://supacrawler.com" aria-label="Home" className={clsx('flex items-center gap-x-1 mr-2')}>
+      <img src="/images/supacrawler.jpg" className="size-6 sm:size-8" />
+      <span
+        className={clsx(
+          'flex items-center text-sm py-1 tracking-tighter text-slate-900',
+        )}
+      >
+        <span
+          className={clsx(
+            'pointer-events-none whitespace-pre-wrap font-bold bg-gradient-to-b bg-clip-text text-transparent text-slate-900',
+          )}
+        >
+          Supacrawler
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+
 
 export const GithubIcon = (props: SVGProps<SVGSVGElement>) => {
   return (

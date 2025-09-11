@@ -4,7 +4,6 @@ import { updateSession } from '@/utils/supabase/middleware';
 export async function middleware(request: NextRequest) {
   const response = await updateSession(request);
   response.headers.set('x-current-path', request.nextUrl.pathname);
-  console.log("Middleware response", response)
   return response;
 }
 

@@ -16,7 +16,6 @@ const supabase = createClient<Database>(
 );
 
 const upsertProductRecord = async (product: Stripe.Product) => {
-  console.log('Upserting product:', product.id);
   const productData: Product = {
     id: product.id,
     active: product.active,
@@ -33,7 +32,6 @@ const upsertProductRecord = async (product: Stripe.Product) => {
     console.error(`Product insert/update failed: ${upsertError.message}`);
     throw new Error(`Product insert/update failed: ${upsertError.message}`);
   }
-  console.log(`Product inserted/updated: ${product.id}`);
 };
 
 const upsertPriceRecord = async (
@@ -41,7 +39,6 @@ const upsertPriceRecord = async (
   retryCount = 0,
   maxRetries = 3
 ) => {
-  console.log('Upserting price:', price.id);
   const priceData: Price = {
     id: price.id,
     product_id: typeof price.product === 'string' ? price.product : '',
@@ -62,7 +59,6 @@ const upsertPriceRecord = async (
 
   if (upsertError?.message.includes('foreign key constraint')) {
     if (retryCount < maxRetries) {
-      console.log(`Retry attempt ${retryCount + 1} for price ID: ${price.id}`);
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await upsertPriceRecord(price, retryCount + 1, maxRetries);
     } else {
@@ -77,12 +73,10 @@ const upsertPriceRecord = async (
     console.error(`Price insert/update failed: ${upsertError.message}`);
     throw new Error(`Price insert/update failed: ${upsertError.message}`);
   } else {
-    console.log(`Price inserted/updated: ${price.id}`);
   }
 };
 
 const deleteProductRecord = async (product: Stripe.Product) => {
-  console.log('Deleting product:', product.id);
   const { error: deletionError } = await supabase
     .from('products')
     .delete()
@@ -91,11 +85,9 @@ const deleteProductRecord = async (product: Stripe.Product) => {
     console.error(`Product deletion failed: ${deletionError.message}`);
     throw new Error(`Product deletion failed: ${deletionError.message}`);
   }
-  console.log(`Product deleted: ${product.id}`);
 };
 
 const deletePriceRecord = async (price: Stripe.Price) => {
-  console.log('Deleting price:', price.id);
   const { error: deletionError } = await supabase
     .from('prices')
     .delete()
@@ -104,11 +96,9 @@ const deletePriceRecord = async (price: Stripe.Price) => {
     console.error(`Price deletion failed: ${deletionError.message}`);
     throw new Error(`Price deletion failed: ${deletionError.message}`);
   }
-  console.log(`Price deleted: ${price.id}`);
 };
 
 const upsertCustomerToSupabase = async (uuid: string, customerId: string) => {
-  console.log('Upserting customer to Supabase:', uuid);
   const { error: upsertError } = await supabase
     .from('customers')
     .upsert([{ id: uuid, stripe_customer_id: customerId }]);
@@ -126,7 +116,6 @@ const upsertCustomerToSupabase = async (uuid: string, customerId: string) => {
 };
 
 const createCustomerInStripe = async (uuid: string, email: string) => {
-  console.log('Creating customer in Stripe for UUID:', uuid);
   const customerData = { metadata: { supabaseUUID: uuid }, email: email };
   const newCustomer = await stripe.customers.create(customerData);
   if (!newCustomer) {
@@ -144,7 +133,6 @@ const createOrRetrieveCustomer = async ({
   email: string;
   uuid: string;
 }) => {
-  console.log('Creating or retrieving customer:', uuid);
 
   // Check if the customer already exists in Supabase
   const { data: existingSupabaseCustomer, error: queryError } =
@@ -162,16 +150,12 @@ const createOrRetrieveCustomer = async ({
   // Retrieve the Stripe customer ID using the Supabase customer ID, with email fallback
   let stripeCustomerId: string | undefined;
   if (existingSupabaseCustomer?.stripe_customer_id) {
-    console.log('Existing Supabase customer found.');
     const existingStripeCustomer = await stripe.customers.retrieve(
       existingSupabaseCustomer.stripe_customer_id
     );
     stripeCustomerId = existingStripeCustomer.id;
   } else {
     // If Stripe ID is missing from Supabase, try to retrieve Stripe customer ID by email
-    console.log(
-      'No existing Supabase customer found. Checking Stripe by email.'
-    );
     const stripeCustomers = await stripe.customers.list({ email: email });
     stripeCustomerId =
       stripeCustomers.data.length > 0 ? stripeCustomers.data[0].id : undefined;
@@ -229,7 +213,6 @@ const copyBillingDetailsToCustomer = async (
   uuid: string,
   payment_method: Stripe.PaymentMethod
 ) => {
-  console.log('Copying billing details to customer:', uuid);
   //Todo: check this assertion
   const customer = payment_method.customer as string;
   const { name, phone, address } = payment_method.billing_details;
@@ -254,7 +237,6 @@ const manageSubscriptionStatusChange = async (
   customerId: string,
   createAction = false
 ) => {
-  console.log('Managing subscription status change:', subscriptionId);
   // Get customer's UUID from mapping table.
   const { data: customerData, error: noCustomerError } = await supabase
     .from('customers')
@@ -315,10 +297,7 @@ const manageSubscriptionStatusChange = async (
     throw new Error(
       `Subscription insert/update failed: ${upsertError.message}`
     );
-  }
-  console.log(
-    `Inserted/updated subscription [${subscription.id}] for user [${uuid}]`
-  );
+  } 
 
   // For a new subscription copy the billing details to the customer object.
   // NOTE: This is a costly operation and should happen at the very end.

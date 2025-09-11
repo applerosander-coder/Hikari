@@ -45,5 +45,4 @@ export const features = [
     fillRule: 'evenodd',
     link: './'
   },
-
 ];

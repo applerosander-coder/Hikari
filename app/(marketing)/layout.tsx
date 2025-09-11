@@ -16,9 +16,6 @@ export default async function MarketingLayout({
   const supabase = createClient();
   const user = await getUser(supabase);
 
-  console.log('Marketing user', user);
-
-
   return (
     <div className="flex min-h-screen flex-col items-center w-full">
       <CircularNavigation items={marketingConfig.mainNav} user={user ? true : false} />
