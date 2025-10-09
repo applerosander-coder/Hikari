@@ -1,4 +1,14 @@
-'use client';
+
+"use client";
+
+const handleGithubOAuth = () => {
+  const supabase = require('@/utils/supabase/client').createClient();
+  const redirectURL = window.location.origin + '/auth/callback';
+  supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: { redirectTo: redirectURL }
+  });
+};
 
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { signUp } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
+import { handleRequest, signInWithOAuth } from '@/utils/auth-helpers/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -93,7 +103,11 @@ export default function SignUp() {
             </div>
             <Separator className="my-6" />
             <div className="grid gap-2">
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleGithubOAuth}
+              >
                 <GithubIcon className="mr-2 h-4 w-4" />
                 Sign up with GitHub
               </Button>

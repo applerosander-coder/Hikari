@@ -61,9 +61,7 @@ export default function HeroSection() {
             >
               <AnimatedGradientText className="inline-flex items-center justify-center px-4 py-2 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
                 <span>🎉</span>
-                <span className="mx-2 inline-block align-middle">
-                  <hr className="h-4 w-[1px] shrink-0 bg-gray-300" />
-                </span>
+                <span className="mx-2 inline-block align-middle"></span>
                 <span
                   className={cn(
                     `inline animate-gradient bg-gradient-to-r from-[#b76a24] via-[#6a24b7] to-[#b76a24] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
@@ -73,6 +71,7 @@ export default function HeroSection() {
                 </span>
                 <ArrowRightIcon className="ml-2 size-4 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
               </AnimatedGradientText>
+              <hr className="h-4 w-[1px] shrink-0 bg-gray-300 mx-2" />
             </div>
           </Link>
 

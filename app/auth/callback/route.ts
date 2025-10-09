@@ -10,9 +10,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code');
   if (code) {
     const supabase = createClient();
-
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-
     if (error) {
       return NextResponse.redirect(
         getErrorRedirect(
@@ -22,12 +20,19 @@ export async function GET(request: NextRequest) {
         )
       );
     }
+    // After successful exchange, redirect to dashboard
+    return NextResponse.redirect(
+      getStatusRedirect(
+        `${requestUrl.origin}/dashboard`,
+        'Success!',
+        'You are now signed in.'
+      )
+    );
   }
-
-  // URL to redirect to after sign in process completes
+  // If no code, just redirect
   return NextResponse.redirect(
     getStatusRedirect(
-      `${requestUrl.origin}/dashboard/account`,
+      `${requestUrl.origin}/dashboard`,
       'Success!',
       'You are now signed in.'
     )

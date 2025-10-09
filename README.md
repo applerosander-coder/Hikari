@@ -1,74 +1,183 @@
-# 🚀 Complete Next.js Subscription Starter Template
+# Supabase CLI
 
-The all-in-one starter kit for building high-performance SaaS applications using Next.js, TailwindCSS, and Supabase.
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-> **Warning**: This app is a work in progress. I'm building this in public. Follow the progress on Twitter [@antoineross\_\_](https://twitter.com/antoineross__). Check out the features below.
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-## 🎉 Features
+This repository contains all the functionality for Supabase CLI.
 
-- 🔐 **Complete Auth Package**: Secure user management and authentication with [Supabase](https://supabase.io/docs/guides/auth)
-- 🛠️ **Data Management**: Powerful data access & management tooling on top of PostgreSQL with [Supabase](https://supabase.io/docs/guides/database)
-- 💳 **Stripe Integration**: Seamless integration with [Stripe Checkout](https://stripe.com/docs/payments/checkout) and the [Stripe customer portal](https://stripe.com/docs/billing/subscriptions/customer-portal)
-- 🌐 **Pricing & Subscriptions**: Automatic syncing of pricing plans and subscription statuses via [Stripe webhooks](https://stripe.com/docs/webhooks)
-- 🌈 **TailwindCSS & Tailwind UI**: Customized and flexible UI components with Tailwind UI
-- ⚛️ **React 18**: Enjoy the latest features and improvements with React 18
-- 📘 **TypeScript**: Strongly typed programming for better development experience
-- 🎨 **Shadcn/ui**: Beautiful and customizable UI components
-- 🔍 **Zod Validation**: Schema validation to keep your data safe and sound
-- 🧪 **Testing Tools**: Integrated unit and e2e testing with Jest, React Testing Library, and Playwright
-- 🧑‍💻 **Developer Experience**: ESLint, Prettier, Husky, and Commitlint for maintaining code quality and consistency
-- 📀 **Supabase storage** - Included are setting up policies, and handling image compression in the browser.
-- ⼬ **tRPC** - Included a guide on how to add a very lean trpc router for your api. You just need to add 3 folders, and 1 file.
-- ⚙️ **Local Development**: Develop locally with Supabase, Docker, and a set of custom commands
-- 📚 **Documentation & Blog**: Utilize MDX compiler from the open-source project Fumadocs for documentation and blog content.
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-## 🎬 Demo
+## Getting started
 
-[Live Demo](https://hikari.antoineross.com/)
+### Install the CLI
 
-**Hero Section:** ![Screenshot of demo](./public/hikari-landingpage.png)
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
-**Dashboard View:** ![Screenshot of dashboard](./public/hikari-dashboard.png)
+```bash
+npm i supabase --save-dev
+```
 
-**Pricing Table:** ![Screenshot of pricing](./public/hikari-pricing.png)
+To install the beta release channel:
 
-**Documentation:** ![Screenshot of documentation](./public/hikari-documentation.png)
+```bash
+npm i supabase@beta --save-dev
+```
 
-**Blog:** ![Screenshot of blog](./public/hikari-blog.png)
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-## 📄 Quick Start Guide
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
 
-Get up and running quickly by following the [Quick Start Guide](https://hikari.antoineross.com/docs/quick-start).
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-## 🚀 Going Live
+<details>
+  <summary><b>macOS</b></summary>
 
-### **1. Archive Testing Products**
+  Available via [Homebrew](https://brew.sh). To install:
 
-Before going live, archive all test mode Stripe products. Switch Stripe from test mode to production mode and update your environment variables.
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-### **2. Redeploy**
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
 
-After updating environment variables, redeploy your application through Vercel.
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
 
-## 📚 Additional Features
+<details>
+  <summary><b>Windows</b></summary>
 
-- 📈 **Analytics Ready**: Easy integration with analytics tools like Google Analytics
-- 🌐 **I18n Support**: Built-in internationalization with Paraglide
-- 🔥 **Lighthouse Performance**: Achieve a perfect score with optimized performance, accessibility, and SEO
+  Available via [Scoop](https://scoop.sh). To install:
 
-## 🤝 Contribution
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
 
-To contribute:
+  To upgrade:
 
-1. Fork the repository.
-2. Create a new branch.
-3. Make your changes and commit them.
-4. Push to the forked repository.
-5. Create a pull request.
+  ```powershell
+  scoop update supabase
+  ```
+</details>
 
-## ❤️ Support
+<details>
+  <summary><b>Linux</b></summary>
 
-If you like the project, consider leaving a star. 🌟
-[![Star History Chart](https://api.star-history.com/svg?repos=antoineross/Hikari&type=Date)](https://star-history.com/#antoineross/Hikari&Date)
+  Available via [Homebrew](https://brew.sh) and Linux packages.
 
-Made by [Antoine Ross](https://antoineross.com).
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
+```bash
+supabase bootstrap
+```
+
+Or using npx:
+
+```bash
+npx supabase bootstrap
+```
+
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```
