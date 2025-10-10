@@ -144,10 +144,10 @@ export function MyBidsDisplay({
 
     return (
       <CarouselItem key={auction.id} className="md:basis-1/2 lg:basis-1/3">
-        <div className="p-2">
+        <div className="p-2 h-full">
           <Card
             className={cn(
-              'overflow-hidden transition-all duration-300 hover:shadow-2xl',
+              'overflow-hidden transition-all duration-300 hover:shadow-2xl h-full flex flex-col',
               isActive &&
                 'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl relative'
             )}
@@ -181,20 +181,24 @@ export function MyBidsDisplay({
                 </div>
               )}
             </div>
-            <CardContent className="p-6">
+            <CardContent className="p-6 flex-1 flex flex-col">
               <div className="mb-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-lg font-bold line-clamp-2 flex-1 text-black dark:text-white">
+                  <h3 className="text-lg font-bold line-clamp-2 flex-1 text-black dark:text-white min-h-[3.5rem]">
                     {auction.title}
                   </h3>
                 </div>
-                {auction.category && (
-                  <Badge variant="outline" className="text-xs">
-                    {auction.category}
-                  </Badge>
-                )}
+                <div className="min-h-[1.5rem]">
+                  {auction.category && (
+                    <Badge variant="outline" className="text-xs">
+                      {auction.category}
+                    </Badge>
+                  )}
+                </div>
               </div>
               
+              <div className="flex-1" />
+
               <div className="mb-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Your Bid:</span>
