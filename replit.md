@@ -76,6 +76,18 @@ Configured for Replit Autoscale deployment:
 
 ## Recent Changes
 
+### Auction Categories Mobile Fix - October 10, 2025
+Fixed auction categories not displaying properly on mobile view:
+- ✅ Improved color contrast for dark mode (changed from zinc-950 to pure black backgrounds)
+- ✅ Made category card text explicitly colored (black/white) instead of using theme variables
+- ✅ Added visible borders with proper dark/light mode colors (gray-300/gray-700)
+- ✅ Enhanced SVG icon visibility with explicit text color classes
+- ✅ Added mobile padding (px-4) to grid for proper spacing on small screens
+- ✅ Fixed TypeScript error for fillRule SVG attribute
+
+**Components Fixed:**
+- `components/landing-page/features-hover.tsx` - Auction categories display
+
 ### Mobile Optimization - October 10, 2025
 Made the entire BidWin application fully responsive and mobile-friendly:
 - ✅ Updated mobile navigation with user avatar dropdown and proper authentication state
