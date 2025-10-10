@@ -4,6 +4,16 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
 ### Recent Changes
+**October 10, 2025 - Interactive Particle Background:**
+- Added interactive particle background to hero section using @tsparticles/react and @tsparticles/slim
+- 80 lightweight particles with smooth movement (speed: 1)
+- Mouse-following grab interaction (particles connect with lines on hover within 140px)
+- Particles auto-connect with thin lines when close (distance: 150px, opacity: 0.3)
+- Radial gradient mask creates fade-toward-edges effect for smooth blending
+- Theme-aware: black particles in light mode, white particles in dark mode
+- Layered properly with existing Ripple gradient background (Ripple → Particles → Content)
+- Responsive and optimized for performance across devices
+
 **October 10, 2025 - Dashboard Logo Fix:**
 - Restored original BidWin logo design (SunIcon + text) on dashboard and mybids pages
 - Removed broken PNG logo files and replaced with icon-based implementation from landing page
@@ -18,7 +28,6 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 - Reduced search section margin for better visual density
 
 **October 10, 2025 - Performance Optimizations:**
-- Removed heavy Particles animation component (300 particles with mouse tracking) from hero section for faster page loads
 - Replaced continuous 1-second polling interval with smart exponential backoff retry mechanism (5 attempts over ~5 seconds max)
 - Changed window.location.reload() to router.refresh() with targeted data fetching to avoid full page reloads
 - Improved bid success verification with retry logic: attempts at 0ms, 500ms, 1s, 1.5s, 2s intervals
