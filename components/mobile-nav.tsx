@@ -26,48 +26,50 @@ export function MobileNav({ items, children, user, userDetails }: MobileNavProps
   return (
     <div
       className={cn(
-        'fixed inset-0 mx-auto z-50 top-16 w-full grid h-[calc(100vh-4rem)] grid-flow-row auto-rows-max overflow-auto p-6 pb-32 shadow-md animate-in slide-in-from-bottom-80 md:hidden'
+        'fixed inset-0 z-50 bg-background/95 backdrop-blur-sm animate-in fade-in-50 md:hidden'
       )}
     >
-      <div className="relative z-20 grid gap-6 rounded-md bg-popover p-4 text-popover-foreground shadow-md">
-        <Link href="/" className="flex items-center space-x-2">
-          <SunIcon className="size-6" />
-          <span className="font-bold">BidWin</span>
-        </Link>
-        <nav className="grid grid-flow-row auto-rows-max text-sm items-center">
-          {items.map((item, index) => (
-            <Link
-              key={index}
-              href={item.disabled ? '#' : item.href}
-              className={cn(
-                'flex w-full items-center rounded-md p-2 text-sm font-medium hover:underline',
-                item.disabled && 'cursor-not-allowed opacity-60'
-              )}
-            >
-              {item.title}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center justify-between gap-2 mt-4">
-          <ModeToggle />
-          {user && userDetails ? (
-            <UserAccountNav user={{
-              ...userDetails,
-              email: user.email || null
-            }} />
-          ) : (
-            <Link
-              href="/signin"
-              className={cn(
-                buttonVariants({ variant: 'secondary', size: 'sm' }),
-                'px-4'
-              )}
-            >
-              Login
-            </Link>
-          )}
+      <div className="fixed inset-x-0 top-16 bottom-0 z-50 grid h-[calc(100vh-4rem)] w-full grid-flow-row auto-rows-max overflow-auto bg-background p-6 pb-32 shadow-xl animate-in slide-in-from-bottom-80">
+        <div className="relative z-20 grid gap-6 rounded-lg border-2 border-border bg-background p-6 shadow-lg">
+          <Link href="/" className="flex items-center space-x-2 pb-4 border-b border-border">
+            <SunIcon className="size-6" />
+            <span className="text-xl font-bold">BidWin</span>
+          </Link>
+          <nav className="grid grid-flow-row auto-rows-max text-base gap-2">
+            {items.map((item, index) => (
+              <Link
+                key={index}
+                href={item.disabled ? '#' : item.href}
+                className={cn(
+                  'flex w-full items-center rounded-md p-3 text-base font-medium hover:bg-muted transition-colors',
+                  item.disabled && 'cursor-not-allowed opacity-60'
+                )}
+              >
+                {item.title}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex items-center justify-between gap-4 pt-4 border-t border-border">
+            <ModeToggle />
+            {user && userDetails ? (
+              <UserAccountNav user={{
+                ...userDetails,
+                email: user.email || null
+              }} />
+            ) : (
+              <Link
+                href="/signin"
+                className={cn(
+                  buttonVariants({ variant: 'default', size: 'default' }),
+                  'px-6 rounded-full'
+                )}
+              >
+                Login
+              </Link>
+            )}
+          </div>
+          {children}
         </div>
-        {children}
       </div>
     </div>
   );
