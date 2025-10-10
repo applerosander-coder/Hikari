@@ -35,7 +35,7 @@ export default function FooterPrimary() {
 
       toast({
         title: "Subscribed! 🎉",
-        description: "Thank you for subscribing! You will get an email when the app comes out.",
+        description: "You'll now receive notifications about new auctions and exclusive deals!",
       })
       setEmail('')
     } catch (error) {
@@ -53,26 +53,26 @@ export default function FooterPrimary() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-bold mb-4">Work</h3>
+            <h3 className="text-lg font-bold mb-4">Browse</h3>
             <ul className="space-y-2">
               <li>
-                <AnimatedUnderline href="https://github.com/antoineross/hikari" className="text-primary">
-                  Hikari
+                <AnimatedUnderline href="/dashboard" className="text-primary">
+                  Active Auctions
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="https://supacrawler.com" className="text-primary">
-                  Supacrawler
+                <AnimatedUnderline href="/dashboard" className="text-primary">
+                  My Bids
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="https://github.com/antoineross/Autogen-UI" className="text-primary">
-                  Autogen UI
+                <AnimatedUnderline href="/pricing" className="text-primary">
+                  Pricing Plans
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="#" className="text-primary">
-                  See all →
+                <AnimatedUnderline href="/dashboard" className="text-primary">
+                  All Categories →
                 </AnimatedUnderline>
               </li>
             </ul>
@@ -82,53 +82,52 @@ export default function FooterPrimary() {
             <ul className="space-y-2">
               <li>
                 <AnimatedUnderline href="#" className="text-primary">
-                  About
+                  About BidWin
                 </AnimatedUnderline>
               </li>
               <li>
                 <AnimatedUnderline href="/documentation" className="text-primary">
-                  Documentation
+                  How It Works
                 </AnimatedUnderline>
               </li>
               <li>
                 <AnimatedUnderline href="/blog" className="text-primary">
-                  Blog
+                  Success Stories
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="mailto:hello@antoineross.com" className="text-primary">
-                  Contact us
+                <AnimatedUnderline href="mailto:support@bidwin.com" className="text-primary">
+                  Support
                 </AnimatedUnderline>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-bold mb-4">Connect</h3>
+            <h3 className="text-lg font-bold mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <AnimatedUnderline href="https://x.com/antoineross__" className="text-primary">
-                  X
+                <AnimatedUnderline href="#" className="text-primary">
+                  Terms of Service
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="https://linkedin.com/in/antoineross" className="text-primary">
-                  LinkedIn
+                <AnimatedUnderline href="#" className="text-primary">
+                  Privacy Policy
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="https://github.com/antoineross/hikari" className="text-primary">
-                  GitHub
+                <AnimatedUnderline href="#" className="text-primary">
+                  Bidding Guidelines
                 </AnimatedUnderline>
               </li>
             </ul>
           </div>
           <div>
             <h3 className="text-lg font-bold mb-4">
-              Sign up for our newsletter
+              Get Auction Alerts
             </h3>
             <p className="text-primary mb-4">
-              Hikari is a growing project. Subscribe to get the latest design news, articles, resources, updates and
-              inspiration.
+              Subscribe to receive notifications about new auctions, winning bids, and exclusive deals delivered to your inbox.
             </p>
             <form onSubmit={handleSubmit} className="flex">
               <div className="flex items-center w-full border border-gray-300 rounded-md focus-within:outline-none">
@@ -158,9 +157,9 @@ export default function FooterPrimary() {
         <div className="border-t mt-10 pt-6 flex flex-col items-center md:flex-row justify-between">
           <div className="flex items-center space-x-2">
             <LogInIcon className="h-6 w-6" />
-            <span className="text-xl font-bold">Hikari.</span>
+            <span className="text-xl font-bold">BidWin.</span>
           </div>
-          <p className="text-gray-500 mt-4 md:mt-0">© Hikari Inc. 2024</p>
+          <p className="text-gray-500 mt-4 md:mt-0">© BidWin Inc. 2025</p>
         </div>
       </div>
     </footer>
