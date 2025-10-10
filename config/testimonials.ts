@@ -1,86 +1,86 @@
 export const testimonials = [
   {
-    name: 'dcodesdev',
-    title: 'TypeScript Developer',
-    avatarFallback: 'DC',
+    name: 'Sarah M.',
+    title: 'Tech Enthusiast',
+    avatarFallback: 'SM',
     avatarImg: '/images/dcodes.png',
-    text: "That's beautiful bro!"
+    text: "Won an amazing laptop for half the retail price! The bidding process was so smooth and transparent."
   },
   {
-    name: 'SuhailKakar',
-    title: 'Developer at joinOnboard',
-    avatarFallback: 'SK',
+    name: 'Michael R.',
+    title: 'Collector',
+    avatarFallback: 'MR',
     avatarImg: '/images/SuhailKakar.jpg',
-    text: "If you've built this a few months ago, it would have saved me hours :D"
+    text: "I've been using BidWin for 6 months now. Best place to find rare collectibles at great prices!"
   },
   {
-    name: 'SaidAitmbarek',
-    title: 'Founder of microlaunch.net',
-    avatarFallback: 'SA',
+    name: 'Emma L.',
+    title: 'Fashion Buyer',
+    avatarFallback: 'EL',
     avatarImg: '/images/said.jpg',
-    text: "So cool, looks really clean. Any plan to open source it? ☺️ Wanna play with it!"
+    text: "The real-time bidding is addictive! Snagged a designer watch I've wanted for years. Love this platform!"
   },
   {
-    name: 'magicuidesign',
-    title: 'UI Design Company',
-    avatarFallback: 'MU',
+    name: 'James K.',
+    title: 'Home Decorator',
+    avatarFallback: 'JK',
     avatarImg: '/images/magicui.jpg',
-    text: "Clean 🤌"
+    text: "Finally furnished my entire living room at auction prices. The quality and authenticity are guaranteed!"
   },
   {
-    name: 'YasmeenRoumie',
-    title: 'Developer',
-    avatarFallback: 'YR',
+    name: 'Lisa P.',
+    title: 'Music Teacher',
+    avatarFallback: 'LP',
     avatarImg: '/images/yasmeen.jpg',
-    text: "Ooh would love to try this out"
+    text: "Won a vintage guitar in perfect condition. The countdown timers keep the excitement going!"
   },
   {
-    name: 'shadcn',
-    title: 'Developer',
-    avatarFallback: 'SC',
+    name: 'David C.',
+    title: 'Sports Fan',
+    avatarFallback: 'DC',
     avatarImg: '/images/shadcn.jpg',
-    text: "👀"
+    text: "Best auction platform I've used. Clean interface, fair bidding, and amazing deals on sports memorabilia."
   },
   {
-    name: 'bzagrodzki',
-    title: 'Developer',
-    avatarFallback: 'BZ',
+    name: 'Rachel T.',
+    title: 'Art Collector',
+    avatarFallback: 'RT',
     avatarImg: '/images/bzrag.jpg',
-    text: "Nice one! But I would prefer some more \"sans\" font 😉"
+    text: "Discovered incredible artwork here. The swipe interface makes browsing auctions so enjoyable!"
   },
   {
-    name: 'MPlegas',
-    title: 'Developer',
-    avatarFallback: 'MP',
+    name: 'Tom W.',
+    title: 'Electronics Buyer',
+    avatarFallback: 'TW',
     avatarImg: '/images/MPlegas.jpg',
-    text: "Exceptional!"
+    text: "Scored a top-tier camera for my photography business at an unbeatable price. Highly recommend!"
   },
   {
-    name: 'kvncyf_',
-    title: 'Developer',
-    avatarFallback: 'KC',
+    name: 'Nina S.',
+    title: 'Jewelry Enthusiast',
+    avatarFallback: 'NS',
     avatarImg: '/images/kvn.jpg',
-    text: "Nice move."
+    text: "The platform is transparent and trustworthy. Won beautiful jewelry pieces without breaking the bank!"
   },
   {
-    name: '0xRaduan',
-    title: 'Developer',
-    avatarFallback: 'RA',
+    name: 'Chris B.',
+    title: 'Gadget Lover',
+    avatarFallback: 'CB',
     avatarImg: '/images/0xraduan.jpg',
-    text: "This looks fire"
+    text: "BidWin is my go-to for tech deals. The live auction experience is thrilling and totally worth it!"
   },
   {
-    name: 'Luax0',
-    title: 'Developer',
-    avatarFallback: 'LX',
+    name: 'Amanda H.',
+    title: 'Travel Enthusiast',
+    avatarFallback: 'AH',
     avatarImg: '/images/luax0.jpg',
-    text: "Can't wait to see more 👀"
+    text: "Won an amazing travel package! The service auctions are a game-changer for unique experiences."
   },
   {
-    name: 'ausrobdev',
-    title: 'Developer',
-    avatarFallback: 'RA',
+    name: 'Mark D.',
+    title: 'Smart Shopper',
+    avatarFallback: 'MD',
     avatarImg: '/images/robdev.jpg',
-    text: "Let me know when its ready, I'll add it to buildatlightspeed.com - we need more high quality open source boilerplates"
+    text: "Been bidding here for months. The deals are real, the platform is fast, and I always come back for more!"
   }
 ];

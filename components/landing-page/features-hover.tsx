@@ -12,12 +12,11 @@ export default function FeaturesHover() {
     >
       <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
         <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
-          Features
+          Explore Auction Categories
         </h2>
         <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-          This project is a complete assortment of the best open source projects
-          that can be used for SaaS products. Built with Nextjs14 and Supabase
-          using the app router.
+          Browse our diverse selection of auction categories. From electronics to collectibles,
+          discover amazing deals on items and services across all your favorite categories.
         </p>
       </div>
       <div className="mx-auto grid w-full gap-6 sm:grid-cols-2 md:grid-cols-3 md:max-w-[64rem]">
