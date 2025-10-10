@@ -1,9 +1,13 @@
--- Auction Status Enum
+-- Drop existing tables and types to start fresh
+DROP TABLE IF EXISTS bids CASCADE;
+DROP TABLE IF EXISTS auctions CASCADE;
 DROP TYPE IF EXISTS auction_status CASCADE;
+
+-- Auction Status Enum
 CREATE TYPE auction_status AS ENUM ('draft', 'upcoming', 'active', 'ended', 'cancelled');
 
 -- Auctions Table
-CREATE TABLE IF NOT EXISTS auctions (
+CREATE TABLE auctions (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   title text NOT NULL,
   description text,
@@ -33,7 +37,7 @@ CREATE TABLE IF NOT EXISTS auctions (
 );
 
 -- Bids Table
-CREATE TABLE IF NOT EXISTS bids (
+CREATE TABLE bids (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   auction_id uuid references auctions ON DELETE CASCADE NOT NULL,
   user_id uuid references auth.users NOT NULL,
