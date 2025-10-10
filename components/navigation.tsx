@@ -12,17 +12,29 @@ import { SunIcon } from '@heroicons/react/24/solid'
 import { User } from '@supabase/supabase-js';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import Image from 'next/image';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface CircularNavProps {
   items?: MainNavItem[];
   children?: React.ReactNode;
   user?: User | null;
+  userDetails?: {
+    avatar_url: string | null;
+    full_name: string | null;
+  } | null;
 }
 
 export default function CircularNavigation({
   items,
   children,
-  user
+  user,
+  userDetails
 }: CircularNavProps) {
   const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
   const [hasShownWelcome, setHasShownWelcome] = React.useState(false);
@@ -65,15 +77,39 @@ export default function CircularNavigation({
         <div className="hidden md:block">
           <ModeToggle />
         </div>
-        <Link
-          href={user ? '/dashboard/account' : '/signin'}
-          className={cn(
-            buttonVariants({ variant: 'outline', size: 'sm' }),
-            'rounded-full p-2 md:p-5 text-xs md:text-sm hidden md:inline-flex'
-          )}
-        >
-          {user ? 'Profile' : 'Login'}
-        </Link>
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="rounded-full overflow-hidden border-2 border-muted hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hidden md:block">
+                <Image
+                  src={userDetails?.avatar_url || '/avatars/default-avatar.svg'}
+                  width={40}
+                  height={40}
+                  alt="Profile"
+                  className="object-cover"
+                  unoptimized
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/account" className="w-full cursor-pointer">
+                  My Account
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Link
+            href="/signin"
+            className={cn(
+              buttonVariants({ variant: 'outline', size: 'sm' }),
+              'rounded-full p-2 md:p-5 text-xs md:text-sm hidden md:inline-flex'
+            )}
+          >
+            Login
+          </Link>
+        )}
         <button
           className="md:hidden"
           onClick={() => setShowMobileMenu(!showMobileMenu)}

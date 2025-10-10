@@ -3,7 +3,7 @@ import FooterPrimary from '@/components/footer-primary';
 import CircularNavigation from '@/components/navigation';
 import React from 'react';
 
-import { getUser } from '@/utils/supabase/queries';
+import { getUser, getUserDetails } from '@/utils/supabase/queries';
 import { createClient } from '@/utils/supabase/server';
 
 interface MarketingLayoutProps {
@@ -14,11 +14,14 @@ export default async function MarketingLayout({
   children
 }: MarketingLayoutProps) {
   const supabase = createClient();
-  const user = await getUser(supabase);
+  const [user, userDetails] = await Promise.all([
+    getUser(supabase),
+    getUserDetails(supabase)
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col items-center w-full">
-      <CircularNavigation items={marketingConfig.mainNav} user={user} />
+      <CircularNavigation items={marketingConfig.mainNav} user={user} userDetails={userDetails} />
       <main className="flex-1">{children}</main>
       <FooterPrimary />
     </div>
