@@ -2,33 +2,33 @@
 
 export const faqItems = [
   {
-    question: 'Is everything really included in the price?',
+    question: 'How does bidding work on BidWin?',
     answer:
-      'Yes, everything is included in the price. There are no hidden fees or additional charges.'
+      'Simply browse auctions, place your bid, and watch the real-time countdown. If you have the highest bid when time expires, you win! You\'ll receive a notification and instructions to complete your purchase.'
   },
   {
-    question: 'How do revisions work?',
+    question: 'Are there any fees to place bids?',
     answer:
-      "You can request revisions within the first 30 days of your project. We'll work with you to make any necessary changes."
+      "Registration and browsing are completely free. You only pay when you win an auction. There are no hidden fees or bidding charges - what you bid is what you pay."
   },
   {
-    question: 'What do you mean by high-converting?',
+    question: 'How do I know the items are authentic?',
     answer:
-      'High-converting means our designs are optimized to drive more conversions, such as signups, purchases, or other desired actions.'
+      'All items are verified by our team before listing. We guarantee authenticity and quality. Items come with certificates of authenticity when applicable, and we offer buyer protection on all purchases.'
   },
   {
-    question: 'What does site optimization mean exactly?',
+    question: 'What happens if I win an auction?',
     answer:
-      'Site optimization refers to the process of improving the performance, user experience, and search engine visibility of your website.'
+      'You\'ll receive an instant notification and email with payment instructions. Complete payment within 48 hours to secure your item. We accept all major payment methods and offer secure checkout.'
   },
   {
-    question: 'Why do you use Framer?',
+    question: 'Can I track auctions I\'m interested in?',
     answer:
-      'We use Framer because it allows us to create highly interactive and visually stunning designs with ease.'
+      'Yes! Use the "My Bids" page to see all auctions you\'ve bid on with their current status and countdown timers. You can also save auctions to watch later and receive notifications before they end.'
   },
   {
-    question: 'Are there any refunds?',
+    question: 'What if I change my mind after bidding?',
     answer:
-      "We offer a 30-day money-back guarantee. If you're not satisfied with our services, you can request a full refund."
+      "Bids are binding once placed. However, if you haven't won yet, simply let the auction end without placing additional bids. We recommend bidding only on items you're committed to purchasing."
   }
 ];

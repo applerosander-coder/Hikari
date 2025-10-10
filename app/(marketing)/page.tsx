@@ -18,15 +18,26 @@ export default async function IndexPage() {
         <section className="my-16">
           <div className="flex items-center w-full mb-8">
             <div className="flex flex-col items-center justify-center w-full">
-              <h2 className="text-3xl font-bold">Community highlights</h2>
-              <Link href="https://x.com/antoineross__" target="_blank" rel="noopener noreferrer" className="mt-2 text-blue-500 hover:underline">
-               Join the community
-              </Link>
+              <h2 className="text-3xl font-bold">Join Our Community</h2>
+              <p className="mt-2 text-muted-foreground max-w-xl text-center">
+                Connect with thousands of bidders, share your wins, and discover insider tips from our active community
+              </p>
             </div>
           </div>
-          <Link href="https://x.com/antoineross__/status/1812493114948600317" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full mx-auto">
-            <Image src="/images/tweet.png" alt="Tweet by shadcn" width={550} height={300} />
-          </Link>
+          <div className="flex items-center justify-center gap-4 w-full mx-auto">
+            <Link 
+              href="/dashboard" 
+              className="px-6 py-3 rounded-full border-2 border-primary dark:border-white bg-primary text-white hover:bg-primary/90 transition-colors font-semibold"
+            >
+              Start Bidding Now
+            </Link>
+            <Link 
+              href="/pricing" 
+              className="px-6 py-3 rounded-full border-2 border-primary dark:border-white hover:bg-muted transition-colors font-semibold"
+            >
+              View Plans
+            </Link>
+          </div>
         </section>
       <FAQSection />
     </div>

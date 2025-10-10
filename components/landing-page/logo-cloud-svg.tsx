@@ -22,7 +22,7 @@ export default function LogoCloud() {
   return (
     <div>
       <p className="mt-12 text-xs uppercase text-primary text-center font-bold tracking-[0.3em]">
-        Built with these brands
+        Trusted by thousands of bidders
       </p>
       <div className="grid grid-cols-1 place-items-center justify-center my-12 space-y-4 sm:mt-8 sm:space-y-0 md:mx-auto md:max-w-2xl sm:grid sm:gap-10 sm:grid-cols-6">
         <div className="flex items-center justify-center h-15 w-24">
