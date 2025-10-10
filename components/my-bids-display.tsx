@@ -333,7 +333,7 @@ export function MyBidsDisplay({
               skipSnaps: false,
               dragFree: false
             }}
-            className="w-full"
+            className="w-full py-8"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
               {filteredActiveBids.map((bidWithAuction, index) => 
@@ -386,7 +386,7 @@ export function MyBidsDisplay({
               skipSnaps: false,
               dragFree: false
             }}
-            className="w-full"
+            className="w-full py-8"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
               {filteredNonActiveBids.map((bidWithAuction, index) => 
