@@ -4,6 +4,12 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
 ### Recent Changes
+**October 10, 2025 - My Bids Page UI Improvements:**
+- Made top menu more compact with reduced padding (py-2 sm:py-4) for cleaner interface
+- Removed card scaling animation - all cards now maintain consistent size
+- Reduced carousel container padding from py-12 to py-4 for tighter layout
+- Reduced search section margin for better visual density
+
 **October 10, 2025 - Performance Optimizations:**
 - Removed heavy Particles animation component (300 particles with mouse tracking) from hero section for faster page loads
 - Replaced continuous 1-second polling interval with smart exponential backoff retry mechanism (5 attempts over ~5 seconds max)
@@ -15,12 +21,10 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 
 **October 10, 2025 - Infinite Looping Carousel on My Bids:**
 - Implemented infinite looping carousel displaying 1.2-1.5 cards per view with partial edges visible
-- Added scale effect: centered card is larger (scale-105) while others are smaller (scale-95) with reduced opacity
 - Enabled seamless loop navigation with smooth snap transitions (duration-500 ease-out)
 - Supports both drag/swipe gestures and arrow navigation (arrows hidden on mobile)
 - Applied to both Active Bids and Outbid sections
 - Responsive card sizing: basis-[85%] mobile, basis-[70%] small screens, basis-[65%] desktop
-- Added py-12 vertical padding to carousel containers to prevent clipping of scaled cards with ring borders
 
 **October 10, 2025 - My Bids Page Header Cleanup:**
 - Removed "My Bids" title and subtitle ("Track all your auction bids in one place") from My Bids page

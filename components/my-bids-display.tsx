@@ -207,7 +207,6 @@ export function MyBidsDisplay({
           <Card
             className={cn(
               'overflow-hidden transition-all duration-500 ease-out hover:shadow-2xl h-full flex flex-col relative',
-              isCentered ? 'scale-105 opacity-100' : 'scale-95 opacity-60',
               isActive &&
                 'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl'
             )}
@@ -298,8 +297,8 @@ export function MyBidsDisplay({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-      <div className="mb-6 sm:mb-8">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-2 sm:py-4">
+      <div className="mb-4">
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -331,7 +330,7 @@ export function MyBidsDisplay({
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             You're currently the highest bidder on these auctions
           </p>
-          <div className="py-12">
+          <div className="py-4">
             <Carousel
               setApi={setActiveApi}
               opts={{
@@ -376,7 +375,7 @@ export function MyBidsDisplay({
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Someone has placed a higher bid on these auctions
           </p>
-          <div className="py-12">
+          <div className="py-4">
             <Carousel
               setApi={setOutbidApi}
               opts={{
