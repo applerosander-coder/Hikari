@@ -195,7 +195,7 @@ export async function signUp(formData: FormData) {
       error.message
     );
   } else if (data.session) {
-    redirectPath = getStatusRedirect('/', 'Success!', 'You are now signed in.');
+    redirectPath = getStatusRedirect('/signin', 'Success!', 'You are now signed in.');
   } else if (
     data.user &&
     data.user.identities &&
@@ -208,7 +208,7 @@ export async function signUp(formData: FormData) {
     );
   } else if (data.user) {
     redirectPath = getStatusRedirect(
-      '/',
+      '/signin',
       'Success!',
       'Please check your email for a confirmation link. You may now close this tab.'
     );

@@ -336,7 +336,7 @@ export function MyBidsDisplay({
               className="w-full"
             >
               <CarouselContent className="-ml-2 md:-ml-4">
-                {filteredActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, true))}
+                {filteredActiveBids.map((bidWithAuction, index) => renderBidCard(bidWithAuction, true, index, activeCurrent))}
               </CarouselContent>
               <CarouselPrevious className="hidden md:flex" />
               <CarouselNext className="hidden md:flex" />
@@ -381,7 +381,7 @@ export function MyBidsDisplay({
               className="w-full"
             >
               <CarouselContent className="-ml-2 md:-ml-4">
-                {filteredNonActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, false))}
+                {filteredNonActiveBids.map((bidWithAuction, index) => renderBidCard(bidWithAuction, false, index, outbidCurrent))}
               </CarouselContent>
               <CarouselPrevious className="hidden md:flex" />
               <CarouselNext className="hidden md:flex" />
