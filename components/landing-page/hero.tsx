@@ -83,7 +83,7 @@ export default function HeroSection() {
             Join thousands of bidders competing in real-time auctions with transparent pricing.
           </div>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/auctions" className={cn(buttonVariants({ size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-bold text-white')}>
+            <Link href="/dashboard" className={cn(buttonVariants({ size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-bold text-white')}>
               Browse Auctions
             </Link>
             <Link
