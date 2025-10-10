@@ -116,12 +116,12 @@ export default function PricingRounded({
     );
   } else {
     return (
-      <section className="container mx-auto" id="pricing">
-        <div className="flex flex-col items-center justify-center w-full min-h-screen py-10 ">
-          <h1 className="text-3xl font-bold text-center">
+      <section className="container mx-auto px-4 sm:px-6" id="pricing">
+        <div className="flex flex-col items-center justify-center w-full min-h-screen py-10">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center px-4">
             Flat pricing, no management fees.
           </h1>
-          <p className="mt-2 text-center text-muted-foreground">
+          <p className="mt-2 text-center text-muted-foreground text-sm sm:text-base px-4 max-w-2xl">
             Whether you're one person trying to get ahead or a big firm trying
             to take over the world, we've got a plan for you.
           </p>

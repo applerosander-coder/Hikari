@@ -9,7 +9,7 @@ import Image from 'next/image';
 
 export default async function IndexPage() {
   return (
-      <div className="flex-col gap-10 mb-5">
+      <div className="flex-col gap-10 mb-5 w-full overflow-x-hidden">
         <Hero />
         <LogoCloud />
         <FeaturesHover />

@@ -51,7 +51,7 @@ export default function HeroSection() {
         />
         <Ripple />
       </div>
-      <div className="container mx-auto px-4 py-12 md:py-16 lg:py-32">
+      <div className="container mx-auto px-4 sm:px-6 py-12 md:py-16 lg:py-32">
         <div className="relative z-10 flex max-w-[64rem] flex-col items-center gap-4 text-center mx-auto">
           <Link href={siteConfig.links.twitter} className="w-fit">
             <div
@@ -59,25 +59,25 @@ export default function HeroSection() {
                 'group rounded-full border border-black/5 bg-neutral-100 text-base text-secondary transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800',
               )}
             >
-              <AnimatedGradientText className="inline-flex items-center justify-center px-4 py-2 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
+              <AnimatedGradientText className="inline-flex items-center justify-center px-3 sm:px-4 py-2 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
                 <span>🎉</span>
-                <span className="mx-2 inline-block align-middle"></span>
+                <span className="mx-1 sm:mx-2 inline-block align-middle"></span>
                 <span
                   className={cn(
-                    `inline animate-gradient bg-gradient-to-r from-[#b76a24] via-[#6a24b7] to-[#b76a24] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
+                    `inline animate-gradient bg-gradient-to-r from-[#b76a24] via-[#6a24b7] to-[#b76a24] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent text-sm sm:text-base`,
                   )}
                 >
                   Follow the progress on X
                 </span>
-                <ArrowRightIcon className="ml-2 size-4 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
+                <ArrowRightIcon className="ml-1 sm:ml-2 size-3 sm:size-4 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
               </AnimatedGradientText>
             </div>
           </Link>
 
-          <h1 className="font-heading tracking-tight   font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl">
+          <h1 className="font-heading tracking-tight font-bold text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl px-2">
             Win Amazing Items Through Live Online Auctions
           </h1>
-          <div className="max-w-[42rem] font-bold tracking-tight text-primary sm:text-xl sm:leading-8 rounded-full p-2">
+          <div className="max-w-[42rem] font-bold tracking-tight text-primary text-sm sm:text-base md:text-lg lg:text-xl sm:leading-8 rounded-full p-2 px-4">
             Discover unique items, place your bids, and win incredible deals. 
             Join thousands of bidders competing in real-time auctions with transparent pricing.
           </div>
