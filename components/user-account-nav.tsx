@@ -32,7 +32,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.refresh()
+    router.push('/signin')
   }
 
 
