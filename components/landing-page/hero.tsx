@@ -40,7 +40,7 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative z-0 w-full overflow-hidden">
+    <section className="relative w-full overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Particles
           className="absolute inset-0"

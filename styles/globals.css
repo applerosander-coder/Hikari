@@ -116,11 +116,3 @@
   background-color: black; /* or any color you prefer */
   margin-top: 5px; /* Adjust spacing as needed */
 }
-
-/* Mobile menu overlay pointer-events management */
-body.menu-open main,
-body.menu-open main *,
-body.menu-open footer,
-body.menu-open footer * {
-  pointer-events: none;
-}

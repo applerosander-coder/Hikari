@@ -12,7 +12,6 @@ The application is built on **Next.js 14 with the App Router** for routing and s
 **UI/UX Decisions:**
 - **Color Scheme:** Strict monochrome palette (black, white, gray) applied consistently across all UI elements, including dashboard components, buttons, and navigation.
 - **Responsive Design:** Fully mobile-friendly with optimized layouts for various screen sizes, including responsive text, image scaling, and component adaptations (e.g., single-column layouts on mobile for category cards, hidden dashboard sidebar with hamburger menu).
-- **Mobile Navigation:** Fixed full-screen overlay with mostly opaque background (90-95%) that appears on top of all page content. Features prominent logo, larger menu items for touch interaction, visual separators, and improved spacing. Properly blocks clicks to underlying content when open.
 - **Interactive Elements:** Utilizes **Embla Carousel** for swipeable browsing experiences and **Framer Motion** for animations.
 - **Component Library:** Built with **Radix UI** primitives and styled with **Tailwind CSS**.
 - **User Flow:**
