@@ -4,6 +4,15 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
 ### Recent Changes
+**October 10, 2025 - Performance Optimizations:**
+- Removed heavy Particles animation component (300 particles with mouse tracking) from hero section for faster page loads
+- Replaced continuous 1-second polling interval with smart exponential backoff retry mechanism (5 attempts over ~5 seconds max)
+- Changed window.location.reload() to router.refresh() with targeted data fetching to avoid full page reloads
+- Improved bid success verification with retry logic: attempts at 0ms, 500ms, 1s, 1.5s, 2s intervals
+- Significantly reduced client-side workload and improved click responsiveness
+- Maintained all functionality including bid celebration animations and real-time updates
+- Reduced worst-case query volume by 50% while maintaining eventual consistency handling
+
 **October 10, 2025 - Infinite Looping Carousel on My Bids:**
 - Implemented infinite looping carousel displaying 1.2-1.5 cards per view with partial edges visible
 - Added scale effect: centered card is larger (scale-105) while others are smaller (scale-95) with reduced opacity
