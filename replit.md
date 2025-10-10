@@ -3,6 +3,14 @@
 ### Overview
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
+### Recent Changes
+**October 10, 2025 - Mobile Responsiveness Improvements:**
+- Fixed horizontal overflow on dashboard page by removing redundant wrapper div
+- Updated dashboard layout to use `flex-1 w-full overflow-x-hidden` instead of grid layout for better mobile compatibility
+- Enhanced SwipeableAuctionBrowser with responsive padding (px-4 sm:px-6) and responsive text sizes (text-2xl sm:text-4xl)
+- Removed arrow navigation from logo carousel on landing page for cleaner mobile experience (auto-play only)
+- Verified all marketing pages (welcome, pricing, auctions) display correctly without overflow on mobile viewports
+
 ### User Preferences
 I prefer the agent to be concise and to the point. When suggesting code changes, provide a brief explanation of the "why" behind the change, not just the "what." I value iterative development and prefer to review smaller, focused pull requests or changes rather than large, monolithic ones. Please ensure all modifications align with the existing monochrome design aesthetic (black, white, gray). Do not make changes to the `docs/` folder.
 
