@@ -98,9 +98,7 @@ export default function CircularNavigation({
         </button>
       </div>
       {showMobileMenu && items && (
-        <div className="absolute top-full left-0 right-0 w-full md:hidden mt-2">
-          <MobileNav items={items} user={user} userDetails={userDetails}>{children}</MobileNav>
-        </div>
+        <MobileNav items={items} user={user} userDetails={userDetails}>{children}</MobileNav>
       )}
     </nav>
   );
