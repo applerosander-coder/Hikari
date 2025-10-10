@@ -9,11 +9,14 @@ import { Icons } from '@/components/icons';
 import { buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { SunIcon } from '@heroicons/react/24/solid'
+import { User } from '@supabase/supabase-js';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface CircularNavProps {
   items?: MainNavItem[];
   children?: React.ReactNode;
-  user?: boolean;
+  user?: User | null;
 }
 
 export default function CircularNavigation({
@@ -22,6 +25,17 @@ export default function CircularNavigation({
   user
 }: CircularNavProps) {
   const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
+  const [hasShownWelcome, setHasShownWelcome] = React.useState(false);
+
+  useEffect(() => {
+    if (user && !hasShownWelcome) {
+      const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'there';
+      toast.success(`Welcome ${userName}!`, {
+        duration: 3000,
+      });
+      setHasShownWelcome(true);
+    }
+  }, [user, hasShownWelcome]);
 
   return (
     <nav className="flex flex-wrap items-center justify-between w-full md:w-fit p-2 md:p-1 gap-4 md:gap-20 md:bg-zinc-50 md:dark:bg-zinc-900 md:rounded-full md:px-8 md:border-2 md:border-muted/30 md:dark:border-muted/80 md:shadow-md mx-auto mt-4 backdrop-blur-sm md:backdrop-blur-none">
@@ -52,13 +66,13 @@ export default function CircularNavigation({
           <ModeToggle />
         </div>
         <Link
-          href={user ? '/dashboard' : '/signin'}
+          href={user ? '/dashboard/account' : '/signin'}
           className={cn(
             buttonVariants({ variant: 'outline', size: 'sm' }),
             'rounded-full p-2 md:p-5 text-xs md:text-sm hidden md:inline-flex'
           )}
         >
-          {user ? 'Dashboard' : 'Login'}
+          {user ? 'Profile' : 'Login'}
         </Link>
         <button
           className="md:hidden"

@@ -131,8 +131,14 @@ Transformed from SaaS subscription platform to live auction/bidding platform:
 - Sign-in page: `/signin` with email/password form
 - Sign-up page: `/signup` for new user registration
 - After successful sign-in, users are redirected to the welcome page (`/`) as authenticated users
-- Navigation bar automatically shows "Dashboard" instead of "Login" when user is signed in
+- Navigation bar shows "Profile" button (links to `/dashboard/account`) when user is signed in, "Login" when not
+- Welcome toast notification displays "Welcome [user's name]!" when user logs in
 - Authentication state persists via Supabase session cookies
+
+**User Interface When Authenticated:**
+- Navigation button changes from "Login" to "Profile"
+- Profile button links to `/dashboard/account` for account settings
+- Welcome message displays user's full name from profile, or falls back to email username
 
 **OAuth Authentication:**
 - GitHub OAuth uses popup window for authentication when running in Replit's iframe (cross-origin security restriction)
