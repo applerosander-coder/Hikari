@@ -156,7 +156,21 @@ Transformed from SaaS subscription platform to live auction/bidding platform:
 5. The navigation bar will show "Dashboard" instead of "Login"
 6. You can also test GitHub OAuth (Google is disabled for testing)
 
+## Authentication Configuration
+
+### Preventing Duplicate Accounts
+**Important**: To prevent users from creating duplicate accounts with the same email using different auth methods (email/password vs. GitHub OAuth), you must enable automatic account linking in Supabase:
+
+1. Go to your Supabase Dashboard → Authentication → Settings
+2. Under "User Signups", enable **"Automatically link OAuth accounts"**
+3. Enable **"Confirm email"** for better security
+
+See `docs/AUTHENTICATION_SETUP.md` for detailed configuration instructions.
+
+**Current Protection**: The codebase already prevents duplicate email/password signups if an OAuth account exists with the same email.
+
 ## Notes
 - Uses pnpm as package manager (specified in package.json)
 - All environment secrets are managed through Replit Secrets
 - Development server includes Fast Refresh for improved DX
+- Sign out button is available in the dashboard navbar (next to search bar)

@@ -14,8 +14,8 @@ import { Input } from '@/components/ui/input';
 
 import { UserAccountNav } from '@/components/user-account-nav';
 import Link from 'next/link';
-import { Package2, Search, Settings, Menu } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { Package2, Search, Settings, Menu, LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { NavItem, iconComponents } from '@/config/dashboard';
 
@@ -27,6 +27,14 @@ export function Navbar({
   navConfig: NavItem[];
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    const { createClient } = await import('@/utils/supabase/client');
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/signin');
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -120,6 +128,15 @@ export function Navbar({
           className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
         />
       </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleSignOut}
+        className="gap-2"
+      >
+        <LogOut className="h-4 w-4" />
+        <span className="hidden sm:inline">Sign Out</span>
+      </Button>
       <UserAccountNav user={userDetails} />
     </header>
   );
