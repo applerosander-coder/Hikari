@@ -76,19 +76,22 @@ Configured for Replit Autoscale deployment:
 
 ## Recent Changes
 
-### Avatar Library Implementation - October 10, 2025
-Added fully functional avatar selection system:
-- ✅ Created 6 professional avatar images + default SVG avatar in `/public/avatars/`
-- ✅ Built avatar picker UI on account page with visual selection feedback
+### Avatar & Navigation Updates - October 10, 2025
+Unified navigation and avatar system with monochrome design:
+- ✅ Replaced 6 avatar images with black & white cartoon avatars in `/public/avatars/`
+- ✅ Updated avatar selection checkmark to black check in white circle with border
+- ✅ Unified UserAccountNav component used on both marketing and dashboard pages
+- ✅ Made "My Account" menu item clickable to navigate to /dashboard/account
+- ✅ Fixed TypeScript prop types to accept `full_name: string | null`
+- ✅ Avatar displays in both dashboard and welcome page navigation dropdowns
 - ✅ Default avatar (`/avatars/default-avatar.svg`) automatically set for new users on signup
-- ✅ User's full name displays on account page from signup metadata
-- ✅ Avatar displays in dashboard navbar dropdown with user's name
 - ✅ Avatar persists to `users.avatar_url` via API endpoint
 - ⚠️ **Requires Supabase schema setup** - see `docs/SUPABASE_SCHEMA_SETUP.md`
 
 **Components:**
-- `app/(dashboard)/dashboard/account/avatar-picker.tsx` - Avatar selection grid UI
-- `/public/avatars/` - 7 avatar images (6 professional + 1 default)
+- `components/user-account-nav.tsx` - Unified dropdown for both marketing and dashboard
+- `app/(dashboard)/dashboard/account/avatar-picker.tsx` - Avatar selection grid with monochrome checkmark
+- `/public/avatars/` - 7 avatar images (6 black & white cartoon + 1 default SVG)
 - Updated signup flow to include default avatar in user metadata
 
 ### Welcome Page Transformation - October 10, 2025
