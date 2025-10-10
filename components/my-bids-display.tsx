@@ -199,10 +199,10 @@ export function MyBidsDisplay({
         <div className="p-2 h-full transition-all duration-500 ease-out">
           <Card
             className={cn(
-              'overflow-hidden transition-all duration-500 ease-out hover:shadow-2xl h-full flex flex-col',
+              'overflow-hidden transition-all duration-500 ease-out hover:shadow-2xl h-full flex flex-col relative',
               isCentered ? 'scale-105 opacity-100' : 'scale-95 opacity-60',
               isActive &&
-                'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl relative'
+                'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl'
             )}
           >
             {isActive && (
