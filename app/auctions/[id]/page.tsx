@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BidDialog } from '@/components/bid-dialog';
-import { BidSuccessCelebration } from '@/components/bid-success-celebration';
 import { Hammer, TrendingUp, User } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -21,8 +20,6 @@ export default function AuctionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [celebrationBid, setCelebrationBid] = useState<{ amount: number; title: string } | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -63,50 +60,6 @@ export default function AuctionDetailPage() {
     }
 
     fetchData();
-
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('bid_success') === 'true') {
-        const checkBidInterval = setInterval(async () => {
-          const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          if (user) {
-            const { data: userBid } = await supabase
-              .from('bids')
-              .select('*')
-              .eq('auction_id', params.id)
-              .eq('user_id', user.id)
-              .order('created_at', { ascending: false })
-              .limit(1)
-              .single();
-            
-            if (userBid) {
-              clearInterval(checkBidInterval);
-              
-              const { data: auctionData } = await supabase
-                .from('auctions')
-                .select('*')
-                .eq('id', params.id)
-                .single();
-              
-              if (auctionData && auctionData.current_bid === userBid.bid_amount) {
-                setCelebrationBid({
-                  amount: userBid.bid_amount,
-                  title: auctionData.title
-                });
-                setShowCelebration(true);
-              }
-              
-              fetchData();
-              window.history.replaceState({}, '', `/auctions/${params.id}`);
-            }
-          }
-        }, 1000);
-
-        setTimeout(() => clearInterval(checkBidInterval), 10000);
-      }
-    }
   }, [params.id]);
 
   const handleOpenBidDialog = () => {
@@ -283,15 +236,6 @@ export default function AuctionDetailPage() {
           currentBid={currentBid}
           userId={user.id}
           onBidPlaced={handleBidPlaced}
-        />
-      )}
-
-      {celebrationBid && (
-        <BidSuccessCelebration
-          show={showCelebration}
-          bidAmount={celebrationBid.amount}
-          auctionTitle={celebrationBid.title}
-          onClose={() => setShowCelebration(false)}
         />
       )}
     </div>

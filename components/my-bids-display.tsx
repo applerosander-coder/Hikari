@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Carousel,
   CarouselContent,
@@ -15,8 +15,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { AuctionCountdown } from './auction-countdown';
+import { BidSuccessCelebration } from './bid-success-celebration';
 import { Heart, Clock, TrendingUp, Sparkles, Search, X, AlertCircle } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { createClient } from '@/utils/supabase/client';
 
 interface Auction {
   id: string;
@@ -53,11 +55,14 @@ export function MyBidsDisplay({
   userId
 }: MyBidsDisplayProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeApi, setActiveApi] = useState<CarouselApi>();
   const [activeCurrent, setActiveCurrent] = useState(0);
   const [outbidApi, setOutbidApi] = useState<CarouselApi>();
   const [outbidCurrent, setOutbidCurrent] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationBid, setCelebrationBid] = useState<{ amount: number; title: string } | null>(null);
 
   React.useEffect(() => {
     if (!activeApi) return;
@@ -88,6 +93,52 @@ export function MyBidsDisplay({
       outbidApi.off('select', onSelect);
     };
   }, [outbidApi]);
+
+  useEffect(() => {
+    const bidSuccess = searchParams.get('bid_success');
+    const auctionId = searchParams.get('auction_id');
+    const auctionTitle = searchParams.get('auction_title');
+    const bidAmount = searchParams.get('bid_amount');
+
+    if (bidSuccess === 'true' && auctionId && auctionTitle && bidAmount) {
+      const checkBidInterval = setInterval(async () => {
+        const supabase = createClient();
+        
+        const { data: userBid } = await supabase
+          .from('bids')
+          .select('*')
+          .eq('auction_id', auctionId)
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (userBid) {
+          clearInterval(checkBidInterval);
+          
+          const { data: auctionData } = await supabase
+            .from('auctions')
+            .select('*')
+            .eq('id', auctionId)
+            .single();
+          
+          if (auctionData && auctionData.current_bid === userBid.bid_amount) {
+            setCelebrationBid({
+              amount: userBid.bid_amount,
+              title: auctionTitle
+            });
+            setShowCelebration(true);
+          }
+          
+          router.replace('/dashboard/mybids');
+        }
+      }, 1000);
+
+      setTimeout(() => clearInterval(checkBidInterval), 10000);
+      
+      return () => clearInterval(checkBidInterval);
+    }
+  }, [searchParams, userId, router]);
 
   const formatPrice = (priceInCents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -376,6 +427,15 @@ export function MyBidsDisplay({
             {searchQuery ? 'Try a different search term' : 'Start bidding on auctions to see them here!'}
           </p>
         </div>
+      )}
+
+      {celebrationBid && (
+        <BidSuccessCelebration
+          show={showCelebration}
+          bidAmount={celebrationBid.amount}
+          auctionTitle={celebrationBid.title}
+          onClose={() => setShowCelebration(false)}
+        />
       )}
     </div>
   );

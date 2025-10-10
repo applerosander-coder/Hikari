@@ -31,12 +31,14 @@ interface BidDialogProps {
 
 function BidCheckoutForm({
   auctionId,
+  auctionTitle,
   bidAmount,
   userId,
   onSuccess,
   onCancel,
 }: {
   auctionId: string;
+  auctionTitle: string;
   bidAmount: number;
   userId: string;
   onSuccess: () => void;
@@ -66,7 +68,7 @@ function BidCheckoutForm({
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/auctions/${auctionId}?bid_success=true`,
+          return_url: `${window.location.origin}/dashboard/mybids?bid_success=true&auction_id=${auctionId}&auction_title=${encodeURIComponent(auctionTitle)}&bid_amount=${bidAmount}`,
         },
         redirect: 'if_required',
       });
@@ -241,6 +243,7 @@ export function BidDialog({
               >
                 <BidCheckoutForm
                   auctionId={auctionId}
+                  auctionTitle={auctionTitle}
                   bidAmount={Math.round(parseFloat(bidAmount) * 100)}
                   userId={userId}
                   onSuccess={handleSuccess}
