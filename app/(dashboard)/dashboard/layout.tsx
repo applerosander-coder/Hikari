@@ -78,7 +78,7 @@ export default async function DashboardLayout({
       </aside>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <Navbar userDetails={userDetails} navConfig={navConfig as NavItem[]} />
-        <main className="grid flex-1 items-start p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="flex-1 w-full overflow-x-hidden">
           {children}
         </main>
       </div>

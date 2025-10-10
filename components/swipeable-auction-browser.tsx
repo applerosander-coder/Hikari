@@ -68,12 +68,12 @@ export function SwipeableAuctionBrowser({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-4xl font-bold mb-2 text-black dark:text-white">
           Live Auctions
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
           Swipe through amazing items and services. Your bids are highlighted!
         </p>
       </div>
