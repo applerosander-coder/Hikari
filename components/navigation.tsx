@@ -101,17 +101,15 @@ export default function CircularNavigation({
       </nav>
       
       {/* Mobile Navigation Sheet */}
-      {items && (
-        <MobileNav 
-          items={items} 
-          user={user} 
-          userDetails={userDetails}
-          open={showMobileMenu}
-          onOpenChange={setShowMobileMenu}
-        >
-          {children}
-        </MobileNav>
-      )}
+      <MobileNav 
+        items={items || []} 
+        user={user} 
+        userDetails={userDetails}
+        open={showMobileMenu}
+        onOpenChange={setShowMobileMenu}
+      >
+        {children}
+      </MobileNav>
     </>
   );
 }
