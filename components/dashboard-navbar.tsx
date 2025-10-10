@@ -12,8 +12,10 @@ import {
 } from '@/components/ui/breadcrumb';
 import { UserAccountNav } from '@/components/user-account-nav';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Package2, Settings, Menu, LogOut } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 import { NavItem, iconComponents } from '@/config/dashboard';
 
@@ -26,6 +28,7 @@ export function Navbar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, resolvedTheme } = useTheme();
 
   const handleSignOut = async () => {
     const { createClient } = await import('@/utils/supabase/client');
@@ -33,6 +36,9 @@ export function Navbar({
     await supabase.auth.signOut();
     router.push('/signin');
   };
+
+  const currentTheme = resolvedTheme || theme;
+  const logoSrc = currentTheme === 'dark' ? '/logos/bidwin-white.png' : '/logos/bidwin-black.png';
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -87,7 +93,19 @@ export function Navbar({
           </nav>
         </SheetContent>
       </Sheet>
-      <Breadcrumb className="hidden md:flex">
+      
+      <Link href="/welcome" className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center" prefetch={false}>
+        <Image
+          src={logoSrc}
+          alt="BidWin"
+          width={120}
+          height={40}
+          className="h-8 w-auto"
+          priority
+        />
+      </Link>
+
+      <Breadcrumb className="hidden md:flex invisible">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
