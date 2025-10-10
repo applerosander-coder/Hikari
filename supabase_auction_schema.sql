@@ -1,4 +1,5 @@
 -- Auction Status Enum
+DROP TYPE IF EXISTS auction_status CASCADE;
 CREATE TYPE auction_status AS ENUM ('draft', 'upcoming', 'active', 'ended', 'cancelled');
 
 -- Auctions Table
