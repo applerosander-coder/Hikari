@@ -11,10 +11,10 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="max-w-3xl mx-auto p-6 mb-12">
+    <section className="max-w-3xl mx-auto p-4 sm:p-6 mb-12">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold">FAQ</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-2xl sm:text-3xl font-bold">FAQ</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
           You got questions? I got answers.
         </p>
       </div>

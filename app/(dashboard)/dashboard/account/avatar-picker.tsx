@@ -87,13 +87,13 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
       </div>
 
       {/* Avatar Options Grid */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 gap-3 sm:gap-4">
         {AVATAR_OPTIONS.map((avatarUrl) => (
           <button
             key={avatarUrl}
             type="button"
             onClick={() => handleAvatarSelect(avatarUrl)}
-            className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+            className={`relative w-full aspect-square max-w-[100px] rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
               selectedAvatar === avatarUrl
                 ? 'border-primary ring-2 ring-primary ring-offset-2'
                 : 'border-gray-300'
@@ -102,15 +102,15 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
           >
             <Image
               src={avatarUrl}
-              width={80}
-              height={80}
+              width={100}
+              height={100}
               alt="Avatar option"
               className="object-cover w-full h-full"
               unoptimized
             />
             {selectedAvatar === avatarUrl && (
               <div className="absolute top-1 right-1 bg-white rounded-full p-1 border border-black">
-                <Check className="w-4 h-4 text-black stroke-[3]" />
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-black stroke-[3]" />
               </div>
             )}
           </button>

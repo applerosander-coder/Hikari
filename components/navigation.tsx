@@ -99,7 +99,7 @@ export default function CircularNavigation({
       </div>
       {showMobileMenu && items && (
         <div className="absolute top-full left-0 right-0 w-full md:hidden mt-2">
-          <MobileNav items={items}>{children}</MobileNav>
+          <MobileNav items={items} user={user} userDetails={userDetails}>{children}</MobileNav>
         </div>
       )}
     </nav>
