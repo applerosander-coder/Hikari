@@ -27,7 +27,7 @@ export default async function IndexPage() {
           <div className="flex items-center justify-center gap-4 w-full mx-auto">
             <Link 
               href="/dashboard" 
-              className="px-6 py-3 rounded-full border-2 border-primary dark:border-white bg-primary text-white hover:bg-primary/90 transition-colors font-semibold"
+              className="px-6 py-3 rounded-full border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors font-semibold"
             >
               Start Bidding Now
             </Link>
