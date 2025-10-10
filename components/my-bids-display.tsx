@@ -310,14 +310,6 @@ export function MyBidsDisplay({
             </button>
           )}
         </div>
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-4xl font-bold mb-2 text-black dark:text-white">
-            My Bids
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            Track all your auction bids in one place
-          </p>
-        </div>
       </div>
 
       {/* Active Bids Section */}
