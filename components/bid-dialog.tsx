@@ -188,66 +188,68 @@ export function BidDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Place Your Bid</DialogTitle>
           <DialogDescription>{auctionTitle}</DialogDescription>
         </DialogHeader>
 
-        {!showPayment ? (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="bid-amount">Bid Amount (USD)</Label>
-              <Input
-                id="bid-amount"
-                type="number"
-                step="0.01"
-                min={minBid.toFixed(2)}
-                value={bidAmount}
-                onChange={(e) => setBidAmount(e.target.value)}
-                placeholder={`Minimum: $${minBid.toFixed(2)}`}
-                className="mt-1"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Current bid: ${(currentBid / 100).toFixed(2)}
-              </p>
+        <div className="overflow-y-auto flex-1 -mx-6 px-6">
+          {!showPayment ? (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="bid-amount">Bid Amount (USD)</Label>
+                <Input
+                  id="bid-amount"
+                  type="number"
+                  step="0.01"
+                  min={minBid.toFixed(2)}
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  placeholder={`Minimum: $${minBid.toFixed(2)}`}
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Current bid: ${(currentBid / 100).toFixed(2)}
+                </p>
+              </div>
+              <Button
+                onClick={handleCreatePaymentIntent}
+                disabled={isCreatingIntent}
+                className="w-full"
+              >
+                {isCreatingIntent ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Preparing...
+                  </>
+                ) : (
+                  'Continue to Payment'
+                )}
+              </Button>
             </div>
-            <Button
-              onClick={handleCreatePaymentIntent}
-              disabled={isCreatingIntent}
-              className="w-full"
-            >
-              {isCreatingIntent ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Preparing...
-                </>
-              ) : (
-                'Continue to Payment'
-              )}
-            </Button>
-          </div>
-        ) : (
-          clientSecret && (
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: {
-                  theme: 'stripe',
-                },
-              }}
-            >
-              <BidCheckoutForm
-                auctionId={auctionId}
-                bidAmount={Math.round(parseFloat(bidAmount) * 100)}
-                userId={userId}
-                onSuccess={handleSuccess}
-                onCancel={handleCancel}
-              />
-            </Elements>
-          )
-        )}
+          ) : (
+            clientSecret && (
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  appearance: {
+                    theme: 'stripe',
+                  },
+                }}
+              >
+                <BidCheckoutForm
+                  auctionId={auctionId}
+                  bidAmount={Math.round(parseFloat(bidAmount) * 100)}
+                  userId={userId}
+                  onSuccess={handleSuccess}
+                  onCancel={handleCancel}
+                />
+              </Elements>
+            )
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
