@@ -32,6 +32,117 @@ export interface Database {
           }
         ]
       }
+      auctions: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          starting_price: number
+          current_bid: number | null
+          reserve_price: number | null
+          image_url: string | null
+          image_urls: string[] | null
+          category: string | null
+          start_date: string
+          end_date: string
+          created_by: string
+          status: 'draft' | 'upcoming' | 'active' | 'ended' | 'cancelled'
+          winner_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          starting_price: number
+          current_bid?: number | null
+          reserve_price?: number | null
+          image_url?: string | null
+          image_urls?: string[] | null
+          category?: string | null
+          start_date: string
+          end_date: string
+          created_by: string
+          status?: 'draft' | 'upcoming' | 'active' | 'ended' | 'cancelled'
+          winner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          starting_price?: number
+          current_bid?: number | null
+          reserve_price?: number | null
+          image_url?: string | null
+          image_urls?: string[] | null
+          category?: string | null
+          start_date?: string
+          end_date?: string
+          created_by?: string
+          status?: 'draft' | 'upcoming' | 'active' | 'ended' | 'cancelled'
+          winner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auctions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auctions_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      bids: {
+        Row: {
+          id: string
+          auction_id: string
+          user_id: string
+          bid_amount: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          auction_id: string
+          user_id: string
+          bid_amount: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          auction_id?: string
+          user_id?: string
+          bid_amount?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       posts: {
         Row: {
           content: string | null

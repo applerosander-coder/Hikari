@@ -76,27 +76,25 @@ export default function HeroSection() {
           </Link>
 
           <h1 className="font-heading tracking-tight   font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl">
-            A Complete & Open Source Next.js 14 SaaS Template Using Supabase
+            Win Amazing Items Through Live Online Auctions
           </h1>
           <div className="max-w-[42rem] font-bold tracking-tight text-primary sm:text-xl sm:leading-8 rounded-full p-2">
-            I&apos;m building a modern web app with Next.js 14 & Supabase and open
-            sourcing everything. Follow along as we figure this out together.
+            Discover unique items, place your bids, and win incredible deals. 
+            Join thousands of bidders competing in real-time auctions with transparent pricing.
           </div>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/login" className={cn(buttonVariants({ size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-bold text-white')}>
-              Get Started
+            <Link href="/auctions" className={cn(buttonVariants({ size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-bold text-white')}>
+              Browse Auctions
             </Link>
             <Link
-              href={siteConfig.links.github}
-              target="_blank"
-              rel="noreferrer"
+              href="/signin"
               className={cn(buttonVariants({ variant: 'outline', size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-semibold')}
             >
-              GitHub <GitHubLogoIcon className="ml-2" />
+              Start Bidding Today
             </Link>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2 w-full">
-            <AvatarCircles numPeople={155} avatarUrls={avatarUrls} />
+            <AvatarCircles numPeople={1247} avatarUrls={avatarUrls} />
             <div className="flex flex-col mt-2">
               <div className="flex flex-row justify-center sm:justify-start">
                 {[...Array(5)].map((_, i) => (
@@ -107,7 +105,7 @@ export default function HeroSection() {
                 ))}
               </div>
               <span className="text-xs font-semibold">
-                Join 160+ developers
+                Join 1,200+ active bidders
               </span>
             </div>
           </div>
