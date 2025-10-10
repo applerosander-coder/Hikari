@@ -32,14 +32,30 @@ export async function signInWithOAuth(e: React.FormEvent<HTMLFormElement>) {
   const formData = new FormData(e.currentTarget);
   const provider = String(formData.get('provider')).trim() as Provider;
 
-
   // Create client-side supabase client and call signInWithOAuth
   const supabase = createClient();
   const redirectURL = getURL('/auth/callback');
-  await supabase.auth.signInWithOAuth({
+  
+  const { data, error } = await supabase.auth.signInWithOAuth({
     provider: provider,
     options: {
-      redirectTo: redirectURL
+      redirectTo: redirectURL,
+      skipBrowserRedirect: true
     }
   });
+
+  if (error) {
+    console.error('OAuth error:', error);
+    return;
+  }
+
+  if (data?.url) {
+    // Break out of iframe by redirecting the top window
+    // This ensures GitHub OAuth works even when app is in Replit's iframe
+    if (window.top) {
+      window.top.location.href = data.url;
+    } else {
+      window.location.href = data.url;
+    }
+  }
 }

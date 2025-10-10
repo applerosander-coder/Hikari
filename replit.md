@@ -60,7 +60,13 @@ Configured for Replit Autoscale deployment:
   - Updated scripts to use port 5000 with 0.0.0.0 binding
   - Configured deployment settings for Replit autoscale
   - Verified all environment variables are properly configured
+  - Fixed GitHub OAuth to work in Replit's iframe environment
   - Application running successfully on Replit
+
+### OAuth Configuration Notes
+- GitHub OAuth has been modified to break out of iframes for compatibility with Replit's webview
+- Supabase Site URL must be set to your Replit domain (not localhost or Codespaces URL)
+- Redirect URLs in Supabase must include: `https://[your-replit-domain]/auth/callback`
 
 ## Notes
 - Uses pnpm as package manager (specified in package.json)
