@@ -94,9 +94,10 @@ Transformed from SaaS subscription platform to live auction/bidding platform:
 - Responsive design for mobile and desktop
 
 **Navigation Updated:**
-- "Auctions" - Browse all active auctions
-- "How It Works" - Platform explanation
+- "Auctions" - Dashboard with carousel view (same as My Bids)
 - "My Bids" - Dashboard with carousel view and bid highlighting
+- "Pricing" - View pricing options
+- "How It Works" - Platform explanation
 - Brand changed from HIKARI to **BidWin**
 
 ### Vercel to Replit Migration - October 2025

@@ -4,19 +4,19 @@ export const marketingConfig: MarketingConfig = {
   mainNav: [
     {
       title: 'Auctions',
-      href: '/auctions'
+      href: '/dashboard'
     },
     {
-      title: 'How It Works',
-      href: '/#features'
+      title: 'My Bids',
+      href: '/dashboard'
     },
     {
       title: 'Pricing',
       href: '/#pricing'
     },
     {
-      title: 'My Bids',
-      href: '/dashboard'
+      title: 'How It Works',
+      href: '/#features'
     }
   ]
 };
