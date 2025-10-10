@@ -21,6 +21,11 @@ const config = {
         protocol: 'https',
         hostname: 'llmgwifgtszjgjlzlwjq.supabase.co',
         port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: ''
       }
     ]
   }
