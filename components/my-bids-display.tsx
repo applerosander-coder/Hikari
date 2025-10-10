@@ -189,13 +189,16 @@ export function MyBidsDisplay({
     }
   }, [outbidLength, outbidApi, outbidCurrent]);
 
-  const renderBidCard = (bidWithAuction: BidWithAuction, isActive: boolean) => {
+  const renderBidCard = (bidWithAuction: BidWithAuction, isActive: boolean, isCentered: boolean = false) => {
     const { bid, auction } = bidWithAuction;
     const currentPrice = auction.current_bid || auction.starting_price;
 
     return (
-      <CarouselItem key={auction.id} className="md:basis-1/2 lg:basis-1/3">
-        <div className="p-2 h-full">
+      <CarouselItem key={auction.id} className="basis-[85%] sm:basis-[70%] md:basis-[65%]">
+        <div className={cn(
+          "p-2 h-full transition-transform duration-500 ease-out",
+          isCentered ? "scale-105" : "scale-95 opacity-70"
+        )}>
           <Card
             className={cn(
               'overflow-hidden transition-all duration-300 hover:shadow-2xl h-full flex flex-col',
@@ -325,16 +328,20 @@ export function MyBidsDisplay({
           <Carousel
             setApi={setActiveApi}
             opts={{
-              align: 'start',
-              loop: false
+              align: 'center',
+              loop: true,
+              skipSnaps: false,
+              dragFree: false
             }}
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {filteredActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, true))}
+              {filteredActiveBids.map((bidWithAuction, index) => 
+                renderBidCard(bidWithAuction, true, index === activeCurrent)
+              )}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
+            <CarouselPrevious className="hidden md:flex -left-12" />
+            <CarouselNext className="hidden md:flex -right-12" />
           </Carousel>
           
           <div className="flex justify-center gap-2 mt-6">
@@ -374,16 +381,20 @@ export function MyBidsDisplay({
           <Carousel
             setApi={setOutbidApi}
             opts={{
-              align: 'start',
-              loop: false
+              align: 'center',
+              loop: true,
+              skipSnaps: false,
+              dragFree: false
             }}
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {filteredNonActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, false))}
+              {filteredNonActiveBids.map((bidWithAuction, index) => 
+                renderBidCard(bidWithAuction, false, index === outbidCurrent)
+              )}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
+            <CarouselPrevious className="hidden md:flex -left-12" />
+            <CarouselNext className="hidden md:flex -right-12" />
           </Carousel>
           
           <div className="flex justify-center gap-2 mt-6">
