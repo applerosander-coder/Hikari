@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { createBidPaymentIntent, confirmBidPlacement } from '@/app/actions/bid-actions';
+import { createBidPaymentIntent } from '@/app/actions/bid-actions';
 import { Loader2 } from 'lucide-react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
@@ -63,7 +63,7 @@ function BidCheckoutForm({
         return;
       }
 
-      const { error } = await stripe.confirmPayment({
+      const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/auctions/${auctionId}?bid_success=true`,
@@ -77,16 +77,14 @@ function BidCheckoutForm({
         return;
       }
 
-      const result = await confirmBidPlacement(auctionId, userId, bidAmount);
-
-      if (result.error) {
-        toast.error(result.error);
+      // Payment succeeded - the webhook will create the bid
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        toast.success('Payment successful! Your bid is being processed.');
+        onSuccess();
+      } else {
+        toast.error('Payment status unclear. Please check your bids.');
         setIsProcessing(false);
-        return;
       }
-
-      toast.success('Bid placed successfully!');
-      onSuccess();
     } catch (err: any) {
       console.error('Payment error:', err);
       toast.error('An error occurred during payment');
