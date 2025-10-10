@@ -4,7 +4,6 @@ import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Star } from 'lucide-react';
-import Particles from '@/components/magicui/particles';
 import Ripple from '@/components/magicui/ripple';
 import AnimatedGradientText from '@/components/magicui/animated-shiny-text';
 import { ArrowRightIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
@@ -42,13 +41,6 @@ export default function HeroSection() {
   return (
     <section className="relative z-0 w-full overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <Particles
-          className="absolute inset-0"
-          quantity={300}
-          ease={80}
-          color={theme === 'dark' ? '#FFFFFF' : '#000000'}
-          refresh
-        />
         <Ripple />
       </div>
       <div className="container mx-auto px-4 sm:px-6 py-12 md:py-16 lg:py-32">

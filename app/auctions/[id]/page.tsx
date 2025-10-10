@@ -72,7 +72,36 @@ export default function AuctionDetailPage() {
   };
 
   const handleBidPlaced = () => {
-    window.location.reload();
+    router.refresh();
+    const fetchData = async () => {
+      const supabase = createClient();
+      
+      const { data: auctionData } = await supabase
+        .from('auctions')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+
+      if (auctionData) {
+        setAuction(auctionData);
+      }
+
+      const { data: bidsData } = await supabase
+        .from('bids')
+        .select(`
+          *,
+          user:users(full_name, avatar_url)
+        `)
+        .eq('auction_id', params.id)
+        .order('bid_amount', { ascending: false })
+        .limit(10);
+
+      if (bidsData) {
+        setBids(bidsData);
+      }
+    };
+    
+    fetchData();
   };
 
   if (loading) {

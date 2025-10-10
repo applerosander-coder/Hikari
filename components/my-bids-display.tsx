@@ -101,42 +101,49 @@ export function MyBidsDisplay({
     const bidAmount = searchParams.get('bid_amount');
 
     if (bidSuccess === 'true' && auctionId && auctionTitle && bidAmount) {
-      const checkBidInterval = setInterval(async () => {
+      const checkBidWithRetry = async () => {
         const supabase = createClient();
+        const maxRetries = 5;
+        const delays = [0, 500, 1000, 1500, 2000]; // Total max: ~5 seconds
         
-        const { data: userBid } = await supabase
-          .from('bids')
-          .select('*')
-          .eq('auction_id', auctionId)
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-        
-        if (userBid) {
-          clearInterval(checkBidInterval);
-          
-          const { data: auctionData } = await supabase
-            .from('auctions')
-            .select('*')
-            .eq('id', auctionId)
-            .single();
-          
-          if (auctionData && auctionData.current_bid === userBid.bid_amount) {
-            setCelebrationBid({
-              amount: userBid.bid_amount,
-              title: auctionTitle
-            });
-            setShowCelebration(true);
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+          if (attempt > 0) {
+            await new Promise(resolve => setTimeout(resolve, delays[attempt]));
           }
           
-          router.replace('/dashboard/mybids');
+          const { data: userBid } = await supabase
+            .from('bids')
+            .select('*')
+            .eq('auction_id', auctionId)
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          
+          if (userBid) {
+            const { data: auctionData } = await supabase
+              .from('auctions')
+              .select('*')
+              .eq('id', auctionId)
+              .single();
+            
+            if (auctionData && auctionData.current_bid === userBid.bid_amount) {
+              setCelebrationBid({
+                amount: userBid.bid_amount,
+                title: auctionTitle
+              });
+              setShowCelebration(true);
+            }
+            
+            break; // Found the bid, exit retry loop
+          }
         }
-      }, 1000);
-
-      setTimeout(() => clearInterval(checkBidInterval), 10000);
+        
+        router.replace('/dashboard/mybids');
+        router.refresh();
+      };
       
-      return () => clearInterval(checkBidInterval);
+      checkBidWithRetry();
     }
   }, [searchParams, userId, router]);
 
