@@ -9,6 +9,22 @@ A complete Next.js 14 live auction/bidding platform built with Supabase for auth
 ## Replit Migration - October 2025
 Successfully migrated from Vercel to Replit environment.
 
+## Critical Setup
+
+### Supabase Database Schema (Required!)
+**IMPORTANT**: Before the app works correctly, you must set up the database schema in Supabase:
+
+1. Go to your Supabase Dashboard → SQL Editor
+2. Run the SQL from `schema.sql` (or follow `docs/SUPABASE_SCHEMA_SETUP.md`)
+3. This creates the `users` table and triggers for avatar/profile features
+
+**Without this setup:**
+- Avatar selection won't save (400 errors)
+- Full name won't display on account page
+- User profile features won't work
+
+See detailed instructions in `docs/SUPABASE_SCHEMA_SETUP.md`
+
 ## Configuration
 
 ### Port and Host Settings
@@ -59,6 +75,21 @@ Configured for Replit Autoscale deployment:
 - **State Management**: TanStack Query, tRPC
 
 ## Recent Changes
+
+### Avatar Library Implementation - October 10, 2025
+Added fully functional avatar selection system:
+- ✅ Created 6 professional avatar images + default SVG avatar in `/public/avatars/`
+- ✅ Built avatar picker UI on account page with visual selection feedback
+- ✅ Default avatar (`/avatars/default-avatar.svg`) automatically set for new users on signup
+- ✅ User's full name displays on account page from signup metadata
+- ✅ Avatar displays in dashboard navbar dropdown with user's name
+- ✅ Avatar persists to `users.avatar_url` via API endpoint
+- ⚠️ **Requires Supabase schema setup** - see `docs/SUPABASE_SCHEMA_SETUP.md`
+
+**Components:**
+- `app/(dashboard)/dashboard/account/avatar-picker.tsx` - Avatar selection grid UI
+- `/public/avatars/` - 7 avatar images (6 professional + 1 default)
+- Updated signup flow to include default avatar in user metadata
 
 ### Welcome Page Transformation - October 10, 2025
 Completed transformation of welcome page from tech stack to auction marketplace theme:

@@ -182,7 +182,8 @@ export async function signUp(formData: FormData) {
     options: {
       emailRedirectTo: callbackURL,
       data: {
-        full_name: fullName
+        full_name: fullName,
+        avatar_url: '/avatars/default-avatar.svg'
       }
     }
   });

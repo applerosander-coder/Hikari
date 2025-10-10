@@ -19,7 +19,7 @@ import {
   getSubscription
 } from '@/utils/supabase/queries';
 import { updateName, updateEmail } from '@/utils/auth-helpers/server';
-import { ImageUpload } from './image-upload'; 
+import { AvatarPicker } from './avatar-picker'; 
 import { redirect } from 'next/navigation';
 
 export default async function AccountPage() {
@@ -73,8 +73,11 @@ export default async function AccountPage() {
               </div>
               <Button type="submit">Update Email</Button>
             </form>
-            {/* Pass userDetails to ImageUpload */}
-            <ImageUpload user={userDetails} />
+            {/* Avatar Picker */}
+            <AvatarPicker 
+              currentAvatar={userDetails?.avatar_url || null} 
+              userId={user.id} 
+            />
           </CardContent>
         </Card>
         {isSubscribed ? (
