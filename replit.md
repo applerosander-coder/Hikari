@@ -8,14 +8,15 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 - Implemented secure Stripe payment processing for all bids
 - Created bid dialog with Stripe Elements for payment collection (now scrollable on mobile)
 - Moved bid creation to webhook to prevent forgery (bids only created after payment verification)
-- Added idempotency protection and race condition handling in webhook
+- Added idempotency protection using unique constraint on (auction_id, user_id, bid_amount)
+- Fixed webhook to work with existing bids schema (removed non-existent description field)
 - Fixed image configuration to allow Unsplash auction images
 - Fixed search field to use text input (removed browser-default search icons)
-- Dashboard highlighting for user bids remains functional
+- Dashboard highlighting for user bids with "Your Bid" badge and special styling
 - Added polling logic on auction detail page to wait for webhook processing (checks every 1s for 10s after payment)
 - Fixed dashboard caching issues with `force-dynamic` and `revalidate: 0`
-- **Webhook Setup Required:** For test/development mode, configure webhook endpoint in Stripe Dashboard: `https://YOUR_REPLIT_DOMAIN/api/webhook` with event type `payment_intent.succeeded`
-- **Note:** For production use, recommend adding `payment_intent_id VARCHAR UNIQUE` column to bids table for stronger idempotency guarantees
+- **Webhook configured and working:** Stripe webhook successfully creates bids after payment verification
+- **Complete payment flow:** Payment → Webhook → Bid creation → Auto-refresh → Dashboard highlight
 
 **October 10, 2025 - Mobile Responsiveness Improvements:**
 - Fixed horizontal overflow on dashboard page by removing redundant wrapper div

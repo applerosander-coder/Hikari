@@ -45,24 +45,18 @@ export async function POST(req: Request) {
         if (paymentIntent.status === 'succeeded') {
           const paymentIntentId = paymentIntent.id;
 
-          // IDEMPOTENCY CHECK: Use a unique marker for this specific payment
-          // Create a unique bid identifier string to store in description field
-          const uniqueBidMarker = `stripe_pi_${paymentIntentId}`;
-
-          // Check if bid with this payment intent already exists
-          const { data: existingBids } = await supabaseAdmin
+          // IDEMPOTENCY CHECK: Check if exact bid already exists
+          // Use auction_id, user_id, and bid_amount as unique identifier
+          const { data: existingBid } = await supabaseAdmin
             .from('bids')
-            .select('id, description')
+            .select('id')
             .eq('auction_id', auction_id)
-            .eq('user_id', user_id);
+            .eq('user_id', user_id)
+            .eq('bid_amount', bidAmountNum)
+            .maybeSingle();
 
-          // Check if any existing bid has our unique marker
-          const duplicateBid = existingBids?.find(bid => 
-            bid.description?.includes(uniqueBidMarker)
-          );
-
-          if (duplicateBid) {
-            console.log(`⚠️ Bid already processed for payment ${paymentIntentId} - skipping duplicate`);
+          if (existingBid) {
+            console.log(`⚠️ Bid already exists for payment ${paymentIntentId} - skipping duplicate`);
             return new Response(null, { status: 200 });
           }
 
@@ -91,12 +85,11 @@ export async function POST(req: Request) {
             return new Response(`Bid too low`, { status: 400 });
           }
 
-          // Insert bid with unique marker in description
+          // Insert bid into database
           const { error: bidError } = await supabaseAdmin.from('bids').insert({
             auction_id,
             user_id,
             bid_amount: bidAmountNum,
-            description: uniqueBidMarker, // Store payment intent ID for idempotency
           });
 
           if (bidError) {
