@@ -67,7 +67,7 @@ export default function HeroSection() {
                     `inline animate-gradient bg-gradient-to-r from-[#b76a24] via-[#6a24b7] to-[#b76a24] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent text-sm sm:text-base`,
                   )}
                 >
-                  Follow the progress on X
+                  Upcoming Auctions
                 </span>
                 <ArrowRightIcon className="ml-1 sm:ml-2 size-3 sm:size-4 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
               </AnimatedGradientText>
