@@ -19,26 +19,26 @@ export default function FeaturesHover() {
           discover amazing deals on items and services across all your favorite categories.
         </p>
       </div>
-      <div className="mx-auto grid w-full gap-6 sm:grid-cols-2 md:grid-cols-3 md:max-w-[64rem]">
+      <div className="mx-auto grid w-full gap-6 sm:grid-cols-2 md:grid-cols-3 md:max-w-[64rem] px-4">
         {features.map((feature) => (
           <motion.div
             whileHover={{ y: -8 }}
             transition={{ type: 'spring', bounce: 0.7 }}
             key={feature.title}
-            className="relative overflow-hidden rounded-lg border bg-background dark:bg-zinc-950 p-6"
+            className="relative overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-6"
           >
             <a target="_blank" rel="noopener noreferrer" href={feature.link}>
               <svg
                 viewBox="0 0 24 24"
-                className="h-12 w-12 fill-current mb-4"
-                fillRule={feature.fillRule}
+                className="h-12 w-12 fill-current text-black dark:text-white mb-4"
+                fillRule={feature.fillRule as "evenodd" | "inherit" | "nonzero" | undefined}
               >
                 <path d={feature.svgPath} />
               </svg>
-              <div className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+              <div className="mb-2 text-lg font-medium text-black dark:text-white">
                 {feature.title}
               </div>
-              <div className="text-sm font-normal text-gray-500 dark:text-gray-500">
+              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">
                 {feature.description}
               </div>
             </a>
