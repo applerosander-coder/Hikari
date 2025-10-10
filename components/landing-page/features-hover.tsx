@@ -31,7 +31,7 @@ export default function FeaturesHover() {
               <svg
                 viewBox="0 0 24 24"
                 className="h-12 w-12 fill-current mb-4"
-                fill-rule={feature.fillRule}
+                fillRule={feature.fillRule}
               >
                 <path d={feature.svgPath} />
               </svg>

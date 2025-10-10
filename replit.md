@@ -60,6 +60,18 @@ Configured for Replit Autoscale deployment:
 
 ## Recent Changes
 
+### Welcome Page Transformation - October 10, 2025
+Completed transformation of welcome page from tech stack to auction marketplace theme:
+- ✅ Updated hero "Browse Auctions" button to direct to /dashboard
+- ✅ Replaced tech features section with auction categories (Electronics, Fashion, Services, Collectibles, Home & Living, Sports)
+- ✅ Updated all testimonials to reflect bidder experiences and auction wins
+- ✅ Replaced FAQ with auction-specific questions (bidding process, fees, authenticity, tracking)
+- ✅ Updated community section with auction-focused CTAs
+- ✅ Transformed footer with auction-related links and newsletter for auction alerts
+- ✅ Changed branding from HIKARI to BidWin throughout footer
+- ✅ Fixed SVG fillRule attribute warning
+- ✅ Maintained strict monochrome color scheme (black, white, gray)
+
 ### Dashboard Styling Update - October 10, 2025
 Updated dashboard to use monochrome color scheme matching the welcome page:
 - ✅ Clean black, white, and gray color palette
