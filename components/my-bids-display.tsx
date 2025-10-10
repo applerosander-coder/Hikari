@@ -54,6 +54,40 @@ export function MyBidsDisplay({
 }: MyBidsDisplayProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeApi, setActiveApi] = useState<CarouselApi>();
+  const [activeCurrent, setActiveCurrent] = useState(0);
+  const [outbidApi, setOutbidApi] = useState<CarouselApi>();
+  const [outbidCurrent, setOutbidCurrent] = useState(0);
+
+  React.useEffect(() => {
+    if (!activeApi) return;
+    
+    const onSelect = () => {
+      setActiveCurrent(activeApi.selectedScrollSnap());
+    };
+    
+    setActiveCurrent(activeApi.selectedScrollSnap());
+    activeApi.on('select', onSelect);
+    
+    return () => {
+      activeApi.off('select', onSelect);
+    };
+  }, [activeApi]);
+
+  React.useEffect(() => {
+    if (!outbidApi) return;
+    
+    const onSelect = () => {
+      setOutbidCurrent(outbidApi.selectedScrollSnap());
+    };
+    
+    setOutbidCurrent(outbidApi.selectedScrollSnap());
+    outbidApi.on('select', onSelect);
+    
+    return () => {
+      outbidApi.off('select', onSelect);
+    };
+  }, [outbidApi]);
 
   const formatPrice = (priceInCents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -83,6 +117,26 @@ export function MyBidsDisplay({
 
   const filteredActiveBids = useMemo(() => filterBids(activeBids), [activeBids, searchQuery]);
   const filteredNonActiveBids = useMemo(() => filterBids(nonActiveBids), [nonActiveBids, searchQuery]);
+
+  const activeLength = filteredActiveBids.length;
+  const outbidLength = filteredNonActiveBids.length;
+
+  // Reset current indices when filtered data changes
+  React.useEffect(() => {
+    if (activeApi && activeCurrent >= activeLength && activeLength > 0) {
+      const newIndex = Math.max(0, activeLength - 1);
+      setActiveCurrent(newIndex);
+      activeApi.scrollTo(newIndex);
+    }
+  }, [activeLength, activeApi, activeCurrent]);
+
+  React.useEffect(() => {
+    if (outbidApi && outbidCurrent >= outbidLength && outbidLength > 0) {
+      const newIndex = Math.max(0, outbidLength - 1);
+      setOutbidCurrent(newIndex);
+      outbidApi.scrollTo(newIndex);
+    }
+  }, [outbidLength, outbidApi, outbidCurrent]);
 
   const renderBidCard = (bidWithAuction: BidWithAuction, isActive: boolean) => {
     const { bid, auction } = bidWithAuction;
@@ -222,6 +276,7 @@ export function MyBidsDisplay({
             You're currently the highest bidder on these auctions
           </p>
           <Carousel
+            setApi={setActiveApi}
             opts={{
               align: 'start',
               loop: false
@@ -234,6 +289,28 @@ export function MyBidsDisplay({
             <CarouselPrevious className="hidden md:flex" />
             <CarouselNext className="hidden md:flex" />
           </Carousel>
+          
+          <div className="flex justify-center gap-2 mt-6">
+            {filteredActiveBids.map((_, index) => (
+              <button
+                key={index}
+                className={cn(
+                  'h-2 rounded-full transition-all',
+                  activeCurrent === index ? 'w-8 bg-black dark:bg-white' : 'w-2 bg-gray-300 dark:bg-gray-600'
+                )}
+                onClick={() => activeApi?.scrollTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          {filteredActiveBids.length > 0 && (
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Showing {activeCurrent + 1} of {filteredActiveBids.length} active bids
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -248,6 +325,7 @@ export function MyBidsDisplay({
             Someone has placed a higher bid on these auctions
           </p>
           <Carousel
+            setApi={setOutbidApi}
             opts={{
               align: 'start',
               loop: false
@@ -260,6 +338,28 @@ export function MyBidsDisplay({
             <CarouselPrevious className="hidden md:flex" />
             <CarouselNext className="hidden md:flex" />
           </Carousel>
+          
+          <div className="flex justify-center gap-2 mt-6">
+            {filteredNonActiveBids.map((_, index) => (
+              <button
+                key={index}
+                className={cn(
+                  'h-2 rounded-full transition-all',
+                  outbidCurrent === index ? 'w-8 bg-black dark:bg-white' : 'w-2 bg-gray-300 dark:bg-gray-600'
+                )}
+                onClick={() => outbidApi?.scrollTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          {filteredNonActiveBids.length > 0 && (
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Showing {outbidCurrent + 1} of {filteredNonActiveBids.length} outbid bids
+              </p>
+            </div>
+          )}
         </div>
       )}
 

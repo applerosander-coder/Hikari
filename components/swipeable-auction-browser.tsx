@@ -142,10 +142,10 @@ export function SwipeableAuctionBrowser({
 
                 return (
                   <CarouselItem key={auction.id} className="md:basis-1/2 lg:basis-1/3">
-                    <div className="p-2">
+                    <div className="p-2 h-full">
                       <Card
                         className={cn(
-                          'overflow-hidden transition-all duration-300 hover:shadow-2xl',
+                          'overflow-hidden transition-all duration-300 hover:shadow-2xl h-full flex flex-col',
                           hasUserBid &&
                             'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl relative'
                         )}
@@ -179,17 +179,21 @@ export function SwipeableAuctionBrowser({
                           )}
                         </div>
 
-                        <CardContent className="p-6">
-                          <h3 className="text-xl font-bold mb-2 line-clamp-2">
+                        <CardContent className="p-6 flex-1 flex flex-col">
+                          <h3 className="text-xl font-bold mb-2 line-clamp-2 min-h-[3.5rem]">
                             {auction.title}
                           </h3>
                           
-                          {auction.description && (
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                              {auction.description}
-                            </p>
-                          )}
+                          <div className="min-h-[2.5rem] mb-4">
+                            {auction.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {auction.description}
+                              </p>
+                            )}
+                          </div>
 
+                          <div className="flex-1" />
+                          
                           <div className="flex items-center justify-between mb-4">
                             <div>
                               <p className="text-xs text-gray-500 dark:text-gray-400">Current Bid</p>
