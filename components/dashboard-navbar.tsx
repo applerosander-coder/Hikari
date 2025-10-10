@@ -94,13 +94,13 @@ export function Navbar({
         </SheetContent>
       </Sheet>
       
-      <Link href="/welcome" className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center" prefetch={false}>
+      <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center" prefetch={false}>
         <Image
           src={logoSrc}
           alt="BidWin"
-          width={200}
-          height={60}
-          className="h-10 md:h-12 w-auto"
+          width={300}
+          height={80}
+          className="h-14 md:h-16 w-auto"
           priority
         />
       </Link>

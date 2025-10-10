@@ -6,8 +6,9 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 ### Recent Changes
 **October 10, 2025 - Dashboard Logo Addition:**
 - Added BidWin logo to dashboard navbar, centered in the menu bar
-- Logo is clickable and navigates to the welcome page
+- Logo is clickable and navigates to the landing page (/)
 - Theme-aware display: black logo for light theme, white logo for dark theme
+- Large size (h-14 md:h-16) to match welcome page prominence
 - Logos stored in `/public/logos/` directory
 
 
