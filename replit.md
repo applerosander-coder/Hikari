@@ -15,6 +15,9 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 - Auto-closes after 3.5 seconds to allow confetti animations to complete
 - Only triggers when user becomes highest bidder (checks if bid matches current_bid)
 - Smooth fade-in/fade-out transitions with AnimatePresence
+- **Payment Flow:** After successful Stripe payment, user is redirected to My Bids page where celebration displays
+- Polls for bid creation (1s intervals, 10s timeout) before showing celebration
+- Handles special characters in auction titles correctly (no double URL decoding)
 
 **October 10, 2025 - UI Consistency & Icon Updates:**
 - Applied consistent card height styling to My Bids page cards to match dashboard
