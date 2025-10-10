@@ -1,0 +1,278 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi
+} from '@/components/ui/carousel';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { AuctionCountdown } from './auction-countdown';
+import { Heart, Clock, TrendingUp, Sparkles, Search, X, AlertCircle } from 'lucide-react';
+import { cn } from '@/utils/cn';
+
+interface Auction {
+  id: string;
+  title: string;
+  description: string | null;
+  starting_price: number;
+  current_bid: number | null;
+  image_url: string | null;
+  category: string | null;
+  end_date: string;
+  status: string;
+}
+
+interface BidWithAuction {
+  bid: {
+    id: string;
+    auction_id: string;
+    user_id: string;
+    bid_amount: number;
+    created_at: string;
+  };
+  auction: Auction;
+}
+
+interface MyBidsDisplayProps {
+  activeBids: BidWithAuction[];
+  nonActiveBids: BidWithAuction[];
+  userId: string;
+}
+
+export function MyBidsDisplay({
+  activeBids,
+  nonActiveBids,
+  userId
+}: MyBidsDisplayProps) {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const formatPrice = (priceInCents: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(priceInCents / 100);
+  };
+
+  const handleViewAuction = (auctionId: string) => {
+    router.push(`/auctions/${auctionId}`);
+  };
+
+  const filterBids = (bids: BidWithAuction[]) => {
+    if (!searchQuery.trim()) {
+      return bids;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return bids.filter(({ auction }) => {
+      return (
+        auction.title.toLowerCase().includes(query) ||
+        auction.description?.toLowerCase().includes(query) ||
+        auction.category?.toLowerCase().includes(query)
+      );
+    });
+  };
+
+  const filteredActiveBids = useMemo(() => filterBids(activeBids), [activeBids, searchQuery]);
+  const filteredNonActiveBids = useMemo(() => filterBids(nonActiveBids), [nonActiveBids, searchQuery]);
+
+  const renderBidCard = (bidWithAuction: BidWithAuction, isActive: boolean) => {
+    const { bid, auction } = bidWithAuction;
+    const currentPrice = auction.current_bid || auction.starting_price;
+
+    return (
+      <CarouselItem key={auction.id} className="md:basis-1/2 lg:basis-1/3">
+        <div className="p-2">
+          <Card
+            className={cn(
+              'overflow-hidden transition-all duration-300 hover:shadow-2xl',
+              isActive &&
+                'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl relative'
+            )}
+          >
+            {isActive && (
+              <div className="absolute top-4 right-4 z-10">
+                <Badge className="bg-black dark:bg-white text-white dark:text-black flex items-center gap-1 px-3 py-1">
+                  <Heart className="h-4 w-4 fill-current" />
+                  Your Bid
+                </Badge>
+              </div>
+            )}
+            {!isActive && (
+              <div className="absolute top-4 right-4 z-10">
+                <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 flex items-center gap-1 px-3 py-1">
+                  <AlertCircle className="h-4 w-4" />
+                  Outbid
+                </Badge>
+              </div>
+            )}
+            <div className="relative h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+              {auction.image_url ? (
+                <img
+                  src={auction.image_url}
+                  alt={auction.title}
+                  className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Sparkles className="h-16 w-16 text-gray-400" />
+                </div>
+              )}
+            </div>
+            <CardContent className="p-6">
+              <div className="mb-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-lg font-bold line-clamp-2 flex-1 text-black dark:text-white">
+                    {auction.title}
+                  </h3>
+                </div>
+                {auction.category && (
+                  <Badge variant="outline" className="text-xs">
+                    {auction.category}
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="mb-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Your Bid:</span>
+                  <span className="font-bold text-black dark:text-white">{formatPrice(bid.bid_amount)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Current Price:</span>
+                  <span className={cn(
+                    "font-bold",
+                    isActive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                  )}>
+                    {formatPrice(currentPrice)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  <Clock className="h-4 w-4" />
+                  <span>Ends in</span>
+                </div>
+                <AuctionCountdown endDate={auction.end_date} />
+              </div>
+
+              <Button
+                onClick={() => handleViewAuction(auction.id)}
+                className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+              >
+                <TrendingUp className="mr-2 h-4 w-4" />
+                View Auction
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </CarouselItem>
+    );
+  };
+
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search your bids..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-10 bg-background"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2 text-black dark:text-white">
+            My Bids
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+            Track all your auction bids in one place
+          </p>
+        </div>
+      </div>
+
+      {/* Active Bids Section */}
+      {filteredActiveBids.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 text-black dark:text-white flex items-center gap-2">
+            <Heart className="h-6 w-6 fill-current" />
+            Active Bids ({filteredActiveBids.length})
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            You're currently the highest bidder on these auctions
+          </p>
+          <Carousel
+            opts={{
+              align: 'start',
+              loop: false
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {filteredActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, true))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
+        </div>
+      )}
+
+      {/* Non-Active Bids Section */}
+      {filteredNonActiveBids.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 text-black dark:text-white flex items-center gap-2">
+            <AlertCircle className="h-6 w-6" />
+            Outbid ({filteredNonActiveBids.length})
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Someone has placed a higher bid on these auctions
+          </p>
+          <Carousel
+            opts={{
+              align: 'start',
+              loop: false
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {filteredNonActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, false))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
+        </div>
+      )}
+
+      {filteredActiveBids.length === 0 && filteredNonActiveBids.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-xl text-muted-foreground">
+            {searchQuery ? `No bids found for "${searchQuery}"` : 'No bids to display'}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {searchQuery ? 'Try a different search term' : 'Start bidding on auctions to see them here!'}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
