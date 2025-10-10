@@ -126,12 +126,29 @@ Transformed from SaaS subscription platform to live auction/bidding platform:
 - Fixed GitHub OAuth to work in Replit's iframe environment
 - Application running successfully on Replit
 
-### OAuth Configuration Notes
+### Authentication Flow - October 10, 2025
+**Email/Password Authentication:**
+- Sign-in page: `/signin` with email/password form
+- Sign-up page: `/signup` for new user registration
+- After successful sign-in, users are redirected to the welcome page (`/`) as authenticated users
+- Navigation bar automatically shows "Dashboard" instead of "Login" when user is signed in
+- Authentication state persists via Supabase session cookies
+
+**OAuth Authentication:**
 - GitHub OAuth uses popup window for authentication when running in Replit's iframe (cross-origin security restriction)
 - The OAuth flow opens in a new popup window, completes authentication, and redirects back
+- After OAuth authentication, users are redirected to the welcome page (`/`) as authenticated users
 - Supabase Site URL must be set to your Replit domain (not localhost or Codespaces URL)
 - Redirect URLs in Supabase must include: `https://[your-replit-domain]/auth/callback`
 - Make sure popup blockers are disabled for the Replit domain
+
+**Testing Authentication:**
+1. Go to `/signin` to access the sign-in page
+2. For new users: Click "Sign up" to create an account at `/signup`
+3. Enter email and password, then submit
+4. On success, you'll be redirected to `/` (welcome page) as a signed-in user
+5. The navigation bar will show "Dashboard" instead of "Login"
+6. You can also test GitHub OAuth (Google is disabled for testing)
 
 ## Notes
 - Uses pnpm as package manager (specified in package.json)
