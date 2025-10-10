@@ -37,16 +37,52 @@ export async function POST(req: Request) {
       // Check if this is a bid payment
       if (paymentIntent.metadata.auction_id && paymentIntent.metadata.user_id) {
         const { auction_id, user_id, bid_amount } = paymentIntent.metadata;
+        const bidAmountNum = Number(bid_amount);
         
-        console.log(`✅ Bid payment succeeded: $${Number(bid_amount) / 100} for auction ${auction_id}`);
+        console.log(`✅ Bid payment succeeded: $${bidAmountNum / 100} for auction ${auction_id}`);
         
         // Verify payment was fully captured
         if (paymentIntent.status === 'succeeded') {
+          // IDEMPOTENCY CHECK: Check if bid already exists for this payment intent
+          const { data: existingBid } = await supabaseAdmin
+            .from('bids')
+            .select('id')
+            .eq('auction_id', auction_id)
+            .eq('user_id', user_id)
+            .eq('bid_amount', bidAmountNum)
+            .limit(1)
+            .single();
+
+          if (existingBid) {
+            console.log(`⚠️ Bid already exists for payment intent - skipping duplicate`);
+            return new Response(null, { status: 200 });
+          }
+
+          // Fetch current auction to check latest bid
+          const { data: auction, error: auctionFetchError } = await supabaseAdmin
+            .from('auctions')
+            .select('current_bid')
+            .eq('id', auction_id)
+            .single();
+
+          if (auctionFetchError) {
+            console.error('❌ Error fetching auction:', auctionFetchError);
+            return new Response(`Error fetching auction: ${auctionFetchError.message}`, { status: 500 });
+          }
+
+          const currentHighestBid = auction?.current_bid || 0;
+
+          // Only accept bid if it's higher than current bid
+          if (bidAmountNum <= currentHighestBid) {
+            console.log(`⚠️ Bid amount $${bidAmountNum / 100} not higher than current $${currentHighestBid / 100} - rejecting`);
+            return new Response(`Bid too low`, { status: 400 });
+          }
+
           // Insert bid into database (using admin client to bypass RLS)
           const { error: bidError } = await supabaseAdmin.from('bids').insert({
             auction_id,
             user_id,
-            bid_amount: Number(bid_amount),
+            bid_amount: bidAmountNum,
           });
 
           if (bidError) {
@@ -54,14 +90,16 @@ export async function POST(req: Request) {
             return new Response(`Error recording bid: ${bidError.message}`, { status: 500 });
           }
 
-          // Update auction current_bid
+          // Update auction current_bid - use greater than check to prevent race conditions
           const { error: updateError } = await supabaseAdmin
             .from('auctions')
-            .update({ current_bid: Number(bid_amount) })
-            .eq('id', auction_id);
+            .update({ current_bid: bidAmountNum })
+            .eq('id', auction_id)
+            .lt('current_bid', bidAmountNum); // Only update if our bid is still higher
 
           if (updateError) {
-            console.error('⚠️ Error updating auction:', updateError);
+            console.error('❌ Error updating auction:', updateError);
+            return new Response(`Error updating auction: ${updateError.message}`, { status: 500 });
           }
 
           console.log(`✅ Bid recorded successfully for auction ${auction_id}`);
