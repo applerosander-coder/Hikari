@@ -10,11 +10,9 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage
 } from '@/components/ui/breadcrumb';
-import { Input } from '@/components/ui/input';
-
 import { UserAccountNav } from '@/components/user-account-nav';
 import Link from 'next/link';
-import { Package2, Search, Settings, Menu, LogOut } from 'lucide-react';
+import { Package2, Settings, Menu, LogOut } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { NavItem, iconComponents } from '@/config/dashboard';
@@ -120,14 +118,7 @@ export function Navbar({
             ))}
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="relative ml-auto flex-1 md:grow-0">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search..."
-          className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-        />
-      </div>
+      <div className="ml-auto" />
       <Button
         variant="outline"
         size="sm"
