@@ -76,6 +76,18 @@ Configured for Replit Autoscale deployment:
 
 ## Recent Changes
 
+### Logo Carousel Optimization - October 10, 2025
+Redesigned the "Trusted by" logo section to be more compact and responsive:
+- ✅ Replaced full-width marquee with Embla Carousel showing only 2-4 logos at a time
+- ✅ Added auto-scroll with 3-second intervals for smooth cycling
+- ✅ Implemented arrow navigation with monochrome styling (black/white borders)
+- ✅ Responsive breakpoints: 2 logos on mobile, 3 on tablet, 4 on desktop
+- ✅ Constrained to max-width 1280px to reduce page space usage
+- ✅ Updated embla-carousel packages: embla-carousel-react@8.6.0, embla-carousel-autoplay@8.6.0
+
+**Component Updated:**
+- `components/landing-page/logo-cloud-svg.tsx` - Now uses Embla Carousel with responsive layout
+
 ### Mobile Optimization - October 10, 2025
 Made the entire BidWin application fully responsive and mobile-friendly:
 - ✅ Updated mobile navigation with user avatar dropdown and proper authentication state
