@@ -164,6 +164,7 @@ export async function signUp(formData: FormData) {
 
   const email = String(formData.get('email')).trim();
   const password = String(formData.get('password')).trim();
+  const fullName = String(formData.get('name')).trim();
   let redirectPath: string;
 
   if (!isValidEmail(email)) {
@@ -179,7 +180,10 @@ export async function signUp(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: callbackURL
+      emailRedirectTo: callbackURL,
+      data: {
+        full_name: fullName
+      }
     }
   });
 

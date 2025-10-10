@@ -158,12 +158,24 @@ Transformed from SaaS subscription platform to live auction/bidding platform:
 
 ## Authentication Configuration
 
+### Email Confirmation Behavior
+**Important**: If users don't see the "Profile" button after signup, email confirmation is enabled in Supabase.
+
+**For Development (Immediate Login After Signup):**
+1. Go to Supabase Dashboard → Authentication → Email Templates
+2. **Disable** the "Confirm email" requirement
+3. Users will get an immediate session and see the "Profile" button
+
+**For Production (Better Security):**
+- Keep "Confirm email" enabled
+- Users must click the email confirmation link before logging in
+- After confirmation, they'll get a session and see the "Profile" button
+
 ### Preventing Duplicate Accounts
-**Important**: To prevent users from creating duplicate accounts with the same email using different auth methods (email/password vs. GitHub OAuth), you must enable automatic account linking in Supabase:
+**Important**: To prevent users from creating duplicate accounts with the same email using different auth methods (email/password vs. GitHub OAuth), enable automatic account linking in Supabase:
 
 1. Go to your Supabase Dashboard → Authentication → Settings
 2. Under "User Signups", enable **"Automatically link OAuth accounts"**
-3. Enable **"Confirm email"** for better security
 
 See `docs/AUTHENTICATION_SETUP.md` for detailed configuration instructions.
 

@@ -1,5 +1,42 @@
 # Authentication Setup Guide
 
+## Email Confirmation Setup
+
+### The Issue
+After signing up, users are redirected to the welcome page but the navigation still shows "Login" instead of "Profile". This happens because **email confirmation is enabled** in Supabase.
+
+### How Email Confirmation Works
+- **Enabled**: Users must click a confirmation link in their email before getting a session
+  - After signup: User created but NO session → Navigation shows "Login"
+  - After email confirmation: Session created → Navigation shows "Profile"
+  
+- **Disabled**: Users get an immediate session after signup
+  - After signup: User created AND session created → Navigation shows "Profile" immediately
+
+### Solution for Development
+
+To allow immediate login after signup (no email confirmation):
+
+1. **Go to Supabase Dashboard**
+   - Navigate to Authentication → Email Templates
+
+2. **Disable Email Confirmation**
+   - Find "Confirm signup" template
+   - Toggle OFF the "Confirm email" requirement
+   - Save changes
+
+3. **Test the Flow**
+   - Sign up with a new email
+   - You should immediately see the "Profile" button
+   - Welcome message displays your name
+
+### Solution for Production
+
+For production, keep email confirmation enabled for security:
+- Users will need to confirm their email before accessing the platform
+- This prevents fake signups and ensures valid email addresses
+- After clicking the confirmation link, users get a session and see "Profile"
+
 ## Preventing Duplicate Accounts
 
 ### Problem
