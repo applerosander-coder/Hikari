@@ -1,5 +1,10 @@
 'use client';
 
+import { useCallback } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+
 export default function LogoCloud() {
   const logos = [
     {
@@ -58,44 +63,65 @@ export default function LogoCloud() {
     }
   ];
 
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { 
+      loop: true,
+      align: 'start',
+      slidesToScroll: 1,
+    },
+    [Autoplay({ delay: 3000, stopOnInteraction: false })]
+  );
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
   return (
-    <div className="overflow-hidden w-full">
+    <div className="overflow-hidden w-full max-w-6xl mx-auto px-4 sm:px-6">
       <p className="mt-12 text-xs uppercase text-primary text-center font-bold tracking-[0.3em]">
         Trusted by
       </p>
-      <div className="relative mt-8 mb-12 flex overflow-hidden [--duration:40s] [--gap:2rem]">
-        <div className="flex gap-8 animate-marquee hover:animation-pause">
-          {logos.map((logo, index) => (
-            <div
-              key={`logo-1-${index}`}
-              className="flex-shrink-0 flex items-center justify-center min-w-[250px]"
-            >
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  {logo.icon}
+      
+      <div className="relative mt-6 mb-12">
+        {/* Carousel container */}
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-4 sm:gap-6">
+            {logos.map((logo, index) => (
+              <div
+                key={`logo-${index}`}
+                className="flex-[0_0_50%] sm:flex-[0_0_33.333%] lg:flex-[0_0_25%] min-w-0"
+              >
+                <div className="flex flex-col items-center justify-center text-center p-4">
+                  <div className="flex items-center justify-center mb-3">
+                    {logo.icon}
+                  </div>
+                  <div className="font-bold text-sm sm:text-base whitespace-nowrap">{logo.name}</div>
+                  <div className="text-xs text-muted-foreground">{logo.subtitle}</div>
                 </div>
-                <div className="font-bold text-base whitespace-nowrap">{logo.name}</div>
-                <div className="text-xs text-muted-foreground">{logo.subtitle}</div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        <div className="flex gap-8 animate-marquee hover:animation-pause" aria-hidden="true">
-          {logos.map((logo, index) => (
-            <div
-              key={`logo-2-${index}`}
-              className="flex-shrink-0 flex items-center justify-center min-w-[250px]"
-            >
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  {logo.icon}
-                </div>
-                <div className="font-bold text-base whitespace-nowrap">{logo.name}</div>
-                <div className="text-xs text-muted-foreground">{logo.subtitle}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+
+        {/* Navigation arrows */}
+        <button
+          onClick={scrollPrev}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 bg-white dark:bg-black border-2 border-black dark:border-white rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors z-10"
+          aria-label="Previous logos"
+        >
+          <ChevronLeftIcon className="w-5 h-5 text-black dark:text-white" />
+        </button>
+        <button
+          onClick={scrollNext}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 bg-white dark:bg-black border-2 border-black dark:border-white rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors z-10"
+          aria-label="Next logos"
+        >
+          <ChevronRightIcon className="w-5 h-5 text-black dark:text-white" />
+        </button>
       </div>
     </div>
   );
