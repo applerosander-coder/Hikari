@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Carousel,
@@ -13,8 +13,9 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { AuctionCountdown } from './auction-countdown';
-import { Heart, Clock, TrendingUp, Sparkles } from 'lucide-react';
+import { Heart, Clock, TrendingUp, Sparkles, Search, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 interface Auction {
@@ -43,6 +44,7 @@ export function SwipeableAuctionBrowser({
   const router = useRouter();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   React.useEffect(() => {
     if (!api) {
@@ -55,6 +57,21 @@ export function SwipeableAuctionBrowser({
       setCurrent(api.selectedScrollSnap());
     });
   }, [api]);
+
+  const filteredAuctions = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return auctions;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return auctions.filter((auction) => {
+      return (
+        auction.title.toLowerCase().includes(query) ||
+        auction.description?.toLowerCase().includes(query) ||
+        auction.category?.toLowerCase().includes(query)
+      );
+    });
+  }, [auctions, searchQuery]);
 
   const formatPrice = (priceInCents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -69,19 +86,43 @@ export function SwipeableAuctionBrowser({
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-      <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-4xl font-bold mb-2 text-black dark:text-white">
-          Live Auctions
-        </h1>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-          Swipe through amazing items and services. Your bids are highlighted!
-        </p>
+      <div className="mb-6 sm:mb-8">
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-10 bg-background"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2 text-black dark:text-white">
+            Live Auctions
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+            Swipe through amazing items and services. Your bids are highlighted!
+          </p>
+        </div>
       </div>
 
-      {auctions.length === 0 ? (
+      {filteredAuctions.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-xl text-muted-foreground">No active auctions at the moment.</p>
-          <p className="text-sm text-muted-foreground mt-2">Check back soon for new items!</p>
+          <p className="text-xl text-muted-foreground">
+            {searchQuery ? `No auctions found for "${searchQuery}"` : 'No active auctions at the moment.'}
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {searchQuery ? 'Try a different search term' : 'Check back soon for new items!'}
+          </p>
         </div>
       ) : (
         <>
@@ -94,7 +135,7 @@ export function SwipeableAuctionBrowser({
             }}
           >
             <CarouselContent>
-              {auctions.map((auction) => {
+              {filteredAuctions.map((auction) => {
                 const hasUserBid = userBidAuctionIds.includes(auction.id);
                 const currentPrice = auction.current_bid || auction.starting_price;
 
@@ -184,7 +225,7 @@ export function SwipeableAuctionBrowser({
           </Carousel>
 
           <div className="flex justify-center gap-2 mt-6">
-            {auctions.map((_, index) => (
+            {filteredAuctions.map((_, index) => (
               <button
                 key={index}
                 className={cn(
@@ -199,7 +240,7 @@ export function SwipeableAuctionBrowser({
 
           <div className="text-center mt-8">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Showing {current + 1} of {auctions.length} auctions
+              Showing {current + 1} of {filteredAuctions.length} auctions
             </p>
           </div>
         </>
