@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2 } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 const AVATAR_OPTIONS = [
   '/avatars/default-avatar.svg',
@@ -109,8 +109,8 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
               unoptimized
             />
             {selectedAvatar === avatarUrl && (
-              <div className="absolute top-1 right-1 bg-white rounded-full">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+              <div className="absolute top-1 right-1 bg-white rounded-full p-1 border border-black">
+                <Check className="w-4 h-4 text-black stroke-[3]" />
               </div>
             )}
           </button>

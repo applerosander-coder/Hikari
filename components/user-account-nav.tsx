@@ -19,7 +19,7 @@ import Image from "next/image"
 
 interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: {
-    full_name: string;
+    full_name: string | null;
     avatar_url: string | null; 
     email: string | null; 
   };
@@ -55,7 +55,11 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      <DropdownMenuLabel>{user?.full_name || "My Account"}</DropdownMenuLabel>
+      <DropdownMenuItem asChild>
+        <Link href="/dashboard/account" className="flex items-center w-full cursor-pointer font-semibold">
+          {user?.full_name || "My Account"}
+        </Link>
+      </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
         <Link href="/dashboard/settings" className="flex items-center w-full">
