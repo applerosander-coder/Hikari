@@ -113,21 +113,10 @@
   margin-top: 5px; /* Adjust spacing as needed */
 }
 
-/* Dropdown menu overlay pointer-events management - scoped to dropdown only */
-/* Prevent click-through on page content when dropdown is open */
-body.dropdown-open main,
-body.dropdown-open footer,
-body.dropdown-open .page-root {
+/* Mobile menu overlay pointer-events management */
+body.menu-open main,
+body.menu-open main *,
+body.menu-open footer,
+body.menu-open footer * {
   pointer-events: none;
-}
-
-/* Ensure dropdown and its children remain interactive */
-body.dropdown-open .nav-dropdown,
-body.dropdown-open .nav-dropdown * {
-  pointer-events: auto;
-}
-
-/* Hide hero section content when dropdown is open */
-body.dropdown-open main > section:first-child {
-  visibility: hidden;
 }
