@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
         )
       );
     }
-    // After successful exchange, redirect to dashboard
+    // After successful exchange, redirect to welcome page
     return NextResponse.redirect(
       getStatusRedirect(
-        getURL('/dashboard'),
+        getURL('/'),
         'Success!',
         'You are now signed in.'
       )
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   // If no code, just redirect
   return NextResponse.redirect(
     getStatusRedirect(
-      getURL('/dashboard'),
+      getURL('/'),
       'Success!',
       'You are now signed in.'
     )
