@@ -71,7 +71,6 @@ export default function HeroSection() {
                 </span>
                 <ArrowRightIcon className="ml-2 size-4 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
               </AnimatedGradientText>
-              <hr className="h-4 w-[1px] shrink-0 bg-gray-300 mx-2" />
             </div>
           </Link>
 
