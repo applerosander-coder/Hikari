@@ -18,16 +18,14 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { signUp } from '@/utils/auth-helpers/server';
 import { handleRequest, signInWithOAuth } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function SignUp() {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsSubmitting(true); // Disable the button while the request is being handled
-    await handleRequest(e, signUp, router);
+    await handleRequest(e, signUp);
     setIsSubmitting(false);
   };
 

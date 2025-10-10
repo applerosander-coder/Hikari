@@ -7,21 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { signInWithEmail } from '@/utils/auth-helpers/server';
 import { handleRequest } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function EmailSignIn() {
   const allowPassword = true;
-  const redirectMethod = 'client';
   const disableButton = false;
-  
-  const router = redirectMethod === 'client' ? useRouter() : null;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true); // Disable the button while the request is being handled
-    await handleRequest(e, signInWithEmail, router);
+    await handleRequest(e, signInWithEmail);
     setIsSubmitting(false);
   };
 

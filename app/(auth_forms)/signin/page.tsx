@@ -12,17 +12,15 @@ import {
 } from '@/utils/auth-helpers/server';
 import { signInWithOAuth } from '@/utils/auth-helpers/client';
 import { handleRequest } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Github, Chrome } from 'lucide-react';
 
 export default function SignIn() {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsSubmitting(true); // Disable the button while the request is being handled
-    await handleRequest(e, signInWithPassword, router);
+    await handleRequest(e, signInWithPassword);
     setIsSubmitting(false);
   };
 
