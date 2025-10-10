@@ -30,7 +30,8 @@ export default function LogoCloud() {
             alt="Latino Community Services"
             width={200}
             height={80}
-            className="object-contain h-full w-auto"
+            className="object-contain"
+            style={{ height: 'auto', width: 'auto', maxHeight: '80px', maxWidth: '200px' }}
           />
         </div>
 
@@ -41,7 +42,8 @@ export default function LogoCloud() {
             alt="Sigma Software"
             width={180}
             height={80}
-            className="object-contain h-full w-auto"
+            className="object-contain"
+            style={{ height: 'auto', width: 'auto', maxHeight: '80px', maxWidth: '180px' }}
           />
         </div>
 

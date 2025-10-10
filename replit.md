@@ -71,6 +71,13 @@ Completed transformation of welcome page from tech stack to auction marketplace 
 - ✅ Changed branding from HIKARI to BidWin throughout footer
 - ✅ Fixed SVG fillRule attribute warning
 - ✅ Maintained strict monochrome color scheme (black, white, gray)
+- ✅ Replaced tech stack logos with "developed for" partner section featuring:
+  - Latino Community Services
+  - Sigma Software
+  - Community Health Partners
+  - Youth Development Foundation
+  - Education Access Network
+  - Family Support Alliance
 
 ### Dashboard Styling Update - October 10, 2025
 Updated dashboard to use monochrome color scheme matching the welcome page:
