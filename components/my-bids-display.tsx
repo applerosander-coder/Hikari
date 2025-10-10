@@ -194,11 +194,12 @@ export function MyBidsDisplay({
     const currentPrice = auction.current_bid || auction.starting_price;
 
     return (
-      <CarouselItem key={auction.id} className="md:basis-1/2 lg:basis-1/3">
-        <div className="p-2 h-full">
+      <CarouselItem key={auction.id} className="basis-[85%] sm:basis-[70%] md:basis-[65%]">
+        <div className="p-2 h-full transition-all duration-500 ease-out">
           <Card
             className={cn(
-              'overflow-hidden transition-all duration-300 hover:shadow-2xl h-full flex flex-col',
+              'overflow-hidden transition-all duration-500 ease-out hover:shadow-2xl h-full flex flex-col scale-95 opacity-60',
+              '[.embla__slide--in-view_&]:scale-105 [.embla__slide--in-view_&]:opacity-100',
               isActive &&
                 'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl relative'
             )}
@@ -322,42 +323,38 @@ export function MyBidsDisplay({
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             You're currently the highest bidder on these auctions
           </p>
-          <Carousel
-            setApi={setActiveApi}
-            opts={{
-              align: 'start',
-              loop: false
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {filteredActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, true))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
-          
-          <div className="flex justify-center gap-2 mt-6">
-            {filteredActiveBids.map((_, index) => (
-              <button
-                key={index}
-                className={cn(
-                  'h-2 rounded-full transition-all',
-                  activeCurrent === index ? 'w-8 bg-black dark:bg-white' : 'w-2 bg-gray-300 dark:bg-gray-600'
-                )}
-                onClick={() => activeApi?.scrollTo(index)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          {filteredActiveBids.length > 0 && (
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Showing {activeCurrent + 1} of {filteredActiveBids.length} active bids
-              </p>
+          <div className="py-12">
+            <Carousel
+              setApi={setActiveApi}
+              opts={{
+                align: 'start',
+                loop: true,
+                duration: 25,
+                skipSnaps: false
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {filteredActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, true))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+            </Carousel>
+            
+            <div className="flex justify-center gap-2 mt-6">
+              {filteredActiveBids.map((_, index) => (
+                <button
+                  key={index}
+                  className={cn(
+                    'h-2 rounded-full transition-all',
+                    activeCurrent === index ? 'w-8 bg-black dark:bg-white' : 'w-2 bg-gray-300 dark:bg-gray-600'
+                  )}
+                  onClick={() => activeApi?.scrollTo(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -371,42 +368,38 @@ export function MyBidsDisplay({
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Someone has placed a higher bid on these auctions
           </p>
-          <Carousel
-            setApi={setOutbidApi}
-            opts={{
-              align: 'start',
-              loop: false
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {filteredNonActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, false))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
-          
-          <div className="flex justify-center gap-2 mt-6">
-            {filteredNonActiveBids.map((_, index) => (
-              <button
-                key={index}
-                className={cn(
-                  'h-2 rounded-full transition-all',
-                  outbidCurrent === index ? 'w-8 bg-black dark:bg-white' : 'w-2 bg-gray-300 dark:bg-gray-600'
-                )}
-                onClick={() => outbidApi?.scrollTo(index)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          {filteredNonActiveBids.length > 0 && (
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Showing {outbidCurrent + 1} of {filteredNonActiveBids.length} outbid bids
-              </p>
+          <div className="py-12">
+            <Carousel
+              setApi={setOutbidApi}
+              opts={{
+                align: 'start',
+                loop: true,
+                duration: 25,
+                skipSnaps: false
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {filteredNonActiveBids.map((bidWithAuction) => renderBidCard(bidWithAuction, false))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+            </Carousel>
+            
+            <div className="flex justify-center gap-2 mt-6">
+              {filteredNonActiveBids.map((_, index) => (
+                <button
+                  key={index}
+                  className={cn(
+                    'h-2 rounded-full transition-all',
+                    outbidCurrent === index ? 'w-8 bg-black dark:bg-white' : 'w-2 bg-gray-300 dark:bg-gray-600'
+                  )}
+                  onClick={() => outbidApi?.scrollTo(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                  />
+              ))}
             </div>
-          )}
+          </div>
         </div>
       )}
 
