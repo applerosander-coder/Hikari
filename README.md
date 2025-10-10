@@ -1,183 +1,174 @@
-# Supabase CLI
+# 🎯 BidWin - Live Auction Platform
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+A complete Next.js 14 live auction/bidding platform with real-time updates, swipeable interface, and countdown timers.
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+![BidWin Platform](https://img.shields.io/badge/Next.js-14-black) ![Supabase](https://img.shields.io/badge/Supabase-Database-green) ![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)
 
-This repository contains all the functionality for Supabase CLI.
+## ✨ Features
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+### 🎪 Swipeable Auction Browser
+- **Carousel Interface**: Browse auctions with smooth swipe gestures
+- **Visual Bid Tracking**: Your bids are highlighted with blue rings and badges
+- **Real-time Countdowns**: Live countdown timers for all auctions
+- **Responsive Design**: Works seamlessly on mobile, tablet, and desktop
 
-## Getting started
+### 🔨 Auction Functionality
+- **Live Bidding**: Place bids on active auctions in real-time
+- **Bid History**: View complete bidding history for each auction
+- **Categories**: Browse by Services, Electronics, Fashion, and more
+- **Status Tracking**: Draft, Upcoming, Active, Ended, and Cancelled states
 
-### Install the CLI
+### 🔐 Authentication & Security
+- **Supabase Auth**: Email/password and OAuth (GitHub, Google)
+- **Row Level Security**: Secure data access policies
+- **Real-time Updates**: Live auction and bid updates via Supabase subscriptions
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+## 🚀 Quick Start
 
-```bash
-npm i supabase --save-dev
+### Prerequisites
+- Node.js 18+ 
+- pnpm (recommended) or npm
+- Supabase account
+
+### Installation
+
+1. **Clone and Install**
+   ```bash
+   pnpm install
+   ```
+
+2. **Set Up Database**
+   
+   Go to your [Supabase Dashboard](https://supabase.com/dashboard) → SQL Editor and run:
+   ```bash
+   # Create tables and policies
+   Run: supabase_auction_schema.sql
+   
+   # Add sample data (optional)
+   Run: supabase_mock_auctions.sql
+   ```
+
+3. **Configure Environment Variables**
+   
+   Set the following in Replit Secrets (or `.env.local`):
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_pk
+   STRIPE_SECRET_KEY=your_stripe_sk
+   STRIPE_WEBHOOK_SECRET=your_webhook_secret
+   ```
+
+4. **Run Development Server**
+   ```bash
+   pnpm run dev
+   ```
+
+5. **Visit the App**
+   - Homepage: `http://localhost:5000`
+   - Auctions: `http://localhost:5000/auctions`
+   - Dashboard: `http://localhost:5000/dashboard` (after signing in)
+
+## 📁 Project Structure
+
+```
+├── app/
+│   ├── auctions/          # Auction listing and detail pages
+│   ├── (dashboard)/       # Protected dashboard routes
+│   └── (auth)/           # Authentication pages
+├── components/
+│   ├── swipeable-auction-browser.tsx  # Main carousel component
+│   ├── auction-countdown.tsx          # Countdown timer
+│   └── ui/                            # Reusable UI components
+├── utils/
+│   └── supabase/         # Supabase client and queries
+├── types/
+│   └── db.ts             # Database types
+└── supabase_*.sql        # Database setup scripts
 ```
 
-To install the beta release channel:
+## 🎨 Key Components
 
-```bash
-npm i supabase@beta --save-dev
-```
+### Swipeable Auction Browser
+Location: `/dashboard`
+- Carousel-based auction browsing
+- Highlights user's active bids
+- Real-time countdown timers
+- Quick bid access
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+### Auction Detail Page
+Location: `/auctions/[id]`
+- Full auction information
+- Bid placement form
+- Bid history
+- Live countdown timer
 
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
+### Auction Listing
+Location: `/auctions`
+- Grid view of all active auctions
+- Filter by category
+- Sort by ending time
 
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+## 🗄️ Database Schema
 
-<details>
-  <summary><b>macOS</b></summary>
+### Auctions Table
+- `id` - UUID primary key
+- `title` - Auction name
+- `description` - Details
+- `starting_price` - Initial price (cents)
+- `current_bid` - Latest bid (cents)
+- `reserve_price` - Minimum sale price (cents)
+- `image_url` - Primary image
+- `category` - Item category
+- `start_date` - Auction start time
+- `end_date` - Auction end time
+- `status` - draft | upcoming | active | ended | cancelled
+- `created_by` - Owner user ID
+- `winner_id` - Winning bidder ID
 
-  Available via [Homebrew](https://brew.sh). To install:
+### Bids Table
+- `id` - UUID primary key
+- `auction_id` - Reference to auction
+- `user_id` - Bidder user ID
+- `bid_amount` - Bid amount (cents)
+- `created_at` - Timestamp
 
-  ```sh
-  brew install supabase/tap/supabase
-  ```
+## 🔧 Tech Stack
 
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
+- **Framework**: Next.js 14 (App Router)
+- **Database**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth
+- **Payments**: Stripe
+- **UI**: Radix UI, Tailwind CSS, Framer Motion
+- **State**: TanStack Query, tRPC
+- **Carousel**: Embla Carousel
 
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
+## 📝 Documentation
 
-<details>
-  <summary><b>Windows</b></summary>
+For detailed setup instructions and troubleshooting, see [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md)
 
-  Available via [Scoop](https://scoop.sh). To install:
+## 🚢 Deployment
 
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
+This project is optimized for Replit deployment:
 
-  To upgrade:
+1. **Build Command**: `pnpm run build`
+2. **Run Command**: `pnpm run start`
+3. **Port**: 5000
 
-  ```powershell
-  scoop update supabase
-  ```
-</details>
+Deploy to other platforms:
+- Vercel
+- Netlify
+- Railway
+- Any Node.js hosting
 
-<details>
-  <summary><b>Linux</b></summary>
+## 📄 License
 
-  Available via [Homebrew](https://brew.sh) and Linux packages.
+MIT License - see LICENSE file for details
 
-  #### via Homebrew
+## 🙏 Acknowledgments
 
-  To install:
+Originally based on HIKARI SaaS Template, transformed into BidWin Auction Platform.
 
-  ```sh
-  brew install supabase/tap/supabase
-  ```
+---
 
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
-
-```bash
-supabase bootstrap
-```
-
-Or using npx:
-
-```bash
-npx supabase bootstrap
-```
-
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
-
-## Docs
-
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
-```
+**Happy Bidding! 🎉**

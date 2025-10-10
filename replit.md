@@ -1,7 +1,10 @@
-# HIKARI - Next.js 14 SaaS Template
+# BidWin - Live Auction Platform
 
 ## Project Overview
-A complete and open-source Next.js 14 SaaS template built with Supabase for authentication and database, Stripe for payments, and modern UI components.
+A complete Next.js 14 live auction/bidding platform built with Supabase for authentication and database, featuring real-time bidding, countdown timers, and a swipeable carousel interface for browsing auction items and services.
+
+**Originally**: HIKARI SaaS Template  
+**Transformed to**: BidWin Auction Platform (October 2025)
 
 ## Replit Migration - October 2025
 Successfully migrated from Vercel to Replit environment.
@@ -56,12 +59,45 @@ Configured for Replit Autoscale deployment:
 - **State Management**: TanStack Query, tRPC
 
 ## Recent Changes
-- 2025-10-10: Migrated from Vercel to Replit
-  - Updated scripts to use port 5000 with 0.0.0.0 binding
-  - Configured deployment settings for Replit autoscale
-  - Verified all environment variables are properly configured
-  - Fixed GitHub OAuth to work in Replit's iframe environment
-  - Application running successfully on Replit
+
+### Platform Transformation - October 10, 2025
+Transformed from SaaS subscription platform to live auction/bidding platform:
+
+**New Features:**
+- ✅ Swipeable auction carousel browser on `/dashboard` (My Bids page)
+- ✅ Real-time countdown timers for all auctions
+- ✅ Visual highlighting for auctions user has bid on (blue ring + badge)
+- ✅ Auction listing page at `/auctions` with grid view
+- ✅ Individual auction detail pages with bidding functionality
+- ✅ Complete database schema for auctions and bids
+- ✅ Mock auction data script with 10 sample items
+- ✅ Row Level Security policies for data protection
+- ✅ Real-time subscriptions for live auction updates
+
+**Database Schema Added:**
+- `auctions` table - Items/services for auction with status tracking
+- `bids` table - User bid history with automatic current_bid updates
+- Auction statuses: draft, upcoming, active, ended, cancelled
+- Categories: Services, Electronics, Fashion, etc.
+
+**UI Components:**
+- `components/swipeable-auction-browser.tsx` - Main carousel component
+- `components/auction-countdown.tsx` - Real-time countdown timer
+- Integrated Embla Carousel for swipe gestures
+- Responsive design for mobile and desktop
+
+**Navigation Updated:**
+- "Auctions" - Browse all active auctions
+- "How It Works" - Platform explanation
+- "My Bids" - Dashboard with carousel view and bid highlighting
+- Brand changed from HIKARI to **BidWin**
+
+### Vercel to Replit Migration - October 2025
+- Updated scripts to use port 5000 with 0.0.0.0 binding
+- Configured deployment settings for Replit autoscale
+- Verified all environment variables are properly configured
+- Fixed GitHub OAuth to work in Replit's iframe environment
+- Application running successfully on Replit
 
 ### OAuth Configuration Notes
 - GitHub OAuth has been modified to break out of iframes for compatibility with Replit's webview
