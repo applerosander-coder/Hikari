@@ -43,25 +43,33 @@ export async function POST(req: Request) {
         
         // Verify payment was fully captured
         if (paymentIntent.status === 'succeeded') {
-          // IDEMPOTENCY CHECK: Check if bid already exists for this payment intent
-          const { data: existingBid } = await supabaseAdmin
-            .from('bids')
-            .select('id')
-            .eq('auction_id', auction_id)
-            .eq('user_id', user_id)
-            .eq('bid_amount', bidAmountNum)
-            .limit(1)
-            .single();
+          const paymentIntentId = paymentIntent.id;
 
-          if (existingBid) {
-            console.log(`⚠️ Bid already exists for payment intent - skipping duplicate`);
+          // IDEMPOTENCY CHECK: Use a unique marker for this specific payment
+          // Create a unique bid identifier string to store in description field
+          const uniqueBidMarker = `stripe_pi_${paymentIntentId}`;
+
+          // Check if bid with this payment intent already exists
+          const { data: existingBids } = await supabaseAdmin
+            .from('bids')
+            .select('id, description')
+            .eq('auction_id', auction_id)
+            .eq('user_id', user_id);
+
+          // Check if any existing bid has our unique marker
+          const duplicateBid = existingBids?.find(bid => 
+            bid.description?.includes(uniqueBidMarker)
+          );
+
+          if (duplicateBid) {
+            console.log(`⚠️ Bid already processed for payment ${paymentIntentId} - skipping duplicate`);
             return new Response(null, { status: 200 });
           }
 
-          // Fetch current auction to check latest bid
+          // Fetch and lock current auction state
           const { data: auction, error: auctionFetchError } = await supabaseAdmin
             .from('auctions')
-            .select('current_bid')
+            .select('current_bid, status')
             .eq('id', auction_id)
             .single();
 
@@ -70,19 +78,25 @@ export async function POST(req: Request) {
             return new Response(`Error fetching auction: ${auctionFetchError.message}`, { status: 500 });
           }
 
+          if (auction.status !== 'active') {
+            console.log(`⚠️ Auction ${auction_id} is not active - rejecting bid`);
+            return new Response(`Auction not active`, { status: 400 });
+          }
+
           const currentHighestBid = auction?.current_bid || 0;
 
           // Only accept bid if it's higher than current bid
           if (bidAmountNum <= currentHighestBid) {
-            console.log(`⚠️ Bid amount $${bidAmountNum / 100} not higher than current $${currentHighestBid / 100} - rejecting`);
+            console.log(`⚠️ Bid $${bidAmountNum / 100} not higher than current $${currentHighestBid / 100} - rejecting`);
             return new Response(`Bid too low`, { status: 400 });
           }
 
-          // Insert bid into database (using admin client to bypass RLS)
+          // Insert bid with unique marker in description
           const { error: bidError } = await supabaseAdmin.from('bids').insert({
             auction_id,
             user_id,
             bid_amount: bidAmountNum,
+            description: uniqueBidMarker, // Store payment intent ID for idempotency
           });
 
           if (bidError) {
@@ -90,16 +104,23 @@ export async function POST(req: Request) {
             return new Response(`Error recording bid: ${bidError.message}`, { status: 500 });
           }
 
-          // Update auction current_bid - use greater than check to prevent race conditions
-          const { error: updateError } = await supabaseAdmin
+          // Update auction current_bid - handle NULL case with proper filter
+          const { data: updateResult, error: updateError } = await supabaseAdmin
             .from('auctions')
             .update({ current_bid: bidAmountNum })
             .eq('id', auction_id)
-            .lt('current_bid', bidAmountNum); // Only update if our bid is still higher
+            .or(`current_bid.is.null,current_bid.lt.${bidAmountNum}`)
+            .select();
 
           if (updateError) {
             console.error('❌ Error updating auction:', updateError);
             return new Response(`Error updating auction: ${updateError.message}`, { status: 500 });
+          }
+
+          // Verify the update actually happened
+          if (!updateResult || updateResult.length === 0) {
+            console.error('❌ Auction update touched zero rows - concurrent bid may have won');
+            return new Response(`Bid overtaken by higher concurrent bid`, { status: 400 });
           }
 
           console.log(`✅ Bid recorded successfully for auction ${auction_id}`);

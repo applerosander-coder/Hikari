@@ -4,6 +4,16 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
 ### Recent Changes
+**October 10, 2025 - Stripe Payment Integration for Bidding:**
+- Implemented secure Stripe payment processing for all bids
+- Created bid dialog with Stripe Elements for payment collection
+- Moved bid creation to webhook to prevent forgery (bids only created after payment verification)
+- Added idempotency protection and race condition handling in webhook
+- Fixed image configuration to allow Unsplash auction images
+- Fixed search field to use text input (removed browser-default search icons)
+- Dashboard highlighting for user bids remains functional
+- **Note:** For production use, recommend adding `payment_intent_id VARCHAR UNIQUE` column to bids table for stronger idempotency guarantees
+
 **October 10, 2025 - Mobile Responsiveness Improvements:**
 - Fixed horizontal overflow on dashboard page by removing redundant wrapper div
 - Updated dashboard layout to use `flex-1 w-full overflow-x-hidden` instead of grid layout for better mobile compatibility
