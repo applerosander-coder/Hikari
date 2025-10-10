@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   const userBidAuctionIds = userBids?.map((bid) => bid.auction_id) || [];
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+    <div className="flex min-h-screen w-full flex-col bg-white dark:bg-black">
       <SwipeableAuctionBrowser
         auctions={auctions || []}
         userBidAuctionIds={userBidAuctionIds}

@@ -70,10 +70,10 @@ export function SwipeableAuctionBrowser({
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">
           Live Auctions
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-gray-600 dark:text-gray-400">
           Swipe through amazing items and services. Your bids are highlighted!
         </p>
       </div>
@@ -105,12 +105,12 @@ export function SwipeableAuctionBrowser({
                         className={cn(
                           'overflow-hidden transition-all duration-300 hover:shadow-2xl',
                           hasUserBid &&
-                            'ring-4 ring-blue-500 ring-offset-2 shadow-xl relative'
+                            'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl relative'
                         )}
                       >
                         {hasUserBid && (
                           <div className="absolute top-4 right-4 z-10">
-                            <Badge className="bg-blue-600 text-white flex items-center gap-1 px-3 py-1">
+                            <Badge className="bg-black dark:bg-white text-white dark:text-black flex items-center gap-1 px-3 py-1">
                               <Heart className="h-4 w-4 fill-current" />
                               Your Bid
                             </Badge>
@@ -150,13 +150,13 @@ export function SwipeableAuctionBrowser({
 
                           <div className="flex items-center justify-between mb-4">
                             <div>
-                              <p className="text-xs text-muted-foreground">Current Bid</p>
-                              <p className="text-2xl font-bold text-green-600">
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Current Bid</p>
+                              <p className="text-2xl font-bold text-black dark:text-white">
                                 {formatPrice(currentPrice)}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs text-muted-foreground mb-1">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                                 <Clock className="inline h-3 w-3 mr-1" />
                                 Ends In
                               </p>
@@ -166,7 +166,7 @@ export function SwipeableAuctionBrowser({
 
                           <Button
                             onClick={() => handleBidNow(auction.id)}
-                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all"
+                            className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
                             size="lg"
                           >
                             <TrendingUp className="mr-2 h-4 w-4" />
@@ -189,7 +189,7 @@ export function SwipeableAuctionBrowser({
                 key={index}
                 className={cn(
                   'h-2 rounded-full transition-all',
-                  current === index ? 'w-8 bg-blue-600' : 'w-2 bg-gray-300'
+                  current === index ? 'w-8 bg-black dark:bg-white' : 'w-2 bg-gray-300 dark:bg-gray-600'
                 )}
                 onClick={() => api?.scrollTo(index)}
                 aria-label={`Go to slide ${index + 1}`}
@@ -198,7 +198,7 @@ export function SwipeableAuctionBrowser({
           </div>
 
           <div className="text-center mt-8">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Showing {current + 1} of {auctions.length} auctions
             </p>
           </div>

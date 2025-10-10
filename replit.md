@@ -60,6 +60,13 @@ Configured for Replit Autoscale deployment:
 
 ## Recent Changes
 
+### Dashboard Styling Update - October 10, 2025
+Updated dashboard to use monochrome color scheme matching the welcome page:
+- ✅ Clean black, white, and gray color palette
+- ✅ Black/white highlighting for user bids (replacing blue)
+- ✅ Monochrome buttons and UI elements
+- ✅ Fixed subscription table error in logs
+
 ### Platform Transformation - October 10, 2025
 Transformed from SaaS subscription platform to live auction/bidding platform:
 
