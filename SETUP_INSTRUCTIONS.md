@@ -151,6 +151,12 @@ All data is accessed via Supabase:
 **Issue**: Subscription errors in logs
 - **Solution**: This is expected - we've removed the subscriptions table since this is now an auction platform, not a SaaS. The errors are harmless.
 
+**Issue**: GitHub OAuth opens in popup window
+- **Solution**: This is expected behavior when running in Replit. Make sure popup blockers are disabled for your Replit domain. The popup will complete OAuth and redirect back to your app.
+
+**Issue**: "Popup blocked" message when signing in with GitHub
+- **Solution**: Allow popups for your Replit domain in your browser settings. This is necessary for OAuth to work in Replit's iframe environment.
+
 ## 📝 Files Reference
 
 - `supabase_auction_schema.sql` - Database table definitions

@@ -50,11 +50,28 @@ export async function signInWithOAuth(e: React.FormEvent<HTMLFormElement>) {
   }
 
   if (data?.url) {
-    // Break out of iframe by redirecting the top window
-    // This ensures GitHub OAuth works even when app is in Replit's iframe
-    if (window.top) {
-      window.top.location.href = data.url;
+    // Check if we're in an iframe
+    const inIframe = window.self !== window.top;
+    
+    if (inIframe) {
+      // In Replit's cross-origin iframe, we can't navigate top window
+      // Open OAuth in a popup window instead
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      
+      const popup = window.open(
+        data.url,
+        'BidWin OAuth',
+        `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`
+      );
+      
+      if (!popup) {
+        alert('Please allow popups for OAuth authentication to work.');
+      }
     } else {
+      // Not in iframe, redirect normally
       window.location.href = data.url;
     }
   }

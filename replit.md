@@ -100,9 +100,11 @@ Transformed from SaaS subscription platform to live auction/bidding platform:
 - Application running successfully on Replit
 
 ### OAuth Configuration Notes
-- GitHub OAuth has been modified to break out of iframes for compatibility with Replit's webview
+- GitHub OAuth uses popup window for authentication when running in Replit's iframe (cross-origin security restriction)
+- The OAuth flow opens in a new popup window, completes authentication, and redirects back
 - Supabase Site URL must be set to your Replit domain (not localhost or Codespaces URL)
 - Redirect URLs in Supabase must include: `https://[your-replit-domain]/auth/callback`
+- Make sure popup blockers are disabled for the Replit domain
 
 ## Notes
 - Uses pnpm as package manager (specified in package.json)
