@@ -76,6 +76,24 @@ Configured for Replit Autoscale deployment:
 
 ## Recent Changes
 
+### Mobile Overflow Fix - October 10, 2025
+Fixed horizontal scrolling issues on mobile devices:
+- ✅ Hero section: Reduced text sizes for mobile (text-xl base, scales up to xl:text-6xl)
+- ✅ "Follow the progress on X" badge made smaller on mobile with responsive padding
+- ✅ Explore Auction Categories: Progressive text scaling (text-xl → 6xl across breakpoints)
+- ✅ Category cards: Single column on mobile, 2 columns on tablet, 3 on desktop
+- ✅ Pricing section: Responsive heading and description sizing
+- ✅ Added overflow-x-hidden to layout wrappers to prevent any horizontal scroll
+- ✅ All sections have proper responsive padding (px-4 sm:px-6)
+- ✅ Fixed TypeScript fillRule type assertion
+
+**Components Updated:**
+- `components/landing-page/hero.tsx` - Responsive text and padding
+- `components/landing-page/features-hover.tsx` - Mobile-first grid and sizing
+- `components/pricing/pricing-rounded.tsx` - Responsive text sizing
+- `app/(marketing)/layout.tsx` - Overflow prevention
+- `app/(marketing)/page.tsx` - Overflow prevention wrapper
+
 ### Logo Carousel Optimization - October 10, 2025
 Redesigned the "Trusted by" logo section to be more compact and responsive:
 - ✅ Replaced full-width marquee with Embla Carousel showing only 2-4 logos at a time
