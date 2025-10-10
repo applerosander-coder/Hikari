@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import Stripe from "stripe";
+import { createClient } from '@/utils/supabase/server';
 
 // Initialize Stripe using your secret key (stored securely in Replit Secrets)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -21,6 +22,21 @@ export async function POST(req: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
       console.log("✅ Payment succeeded for session:", session.id);
       // Here you could update your database or send an email, etc.
+    }
+
+    // Handle bid payment completion
+    if (event.type === "payment_intent.succeeded") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      
+      // Check if this is a bid payment
+      if (paymentIntent.metadata.auction_id && paymentIntent.metadata.user_id) {
+        const { auction_id, user_id, bid_amount } = paymentIntent.metadata;
+        
+        console.log(`✅ Bid payment succeeded: ${bid_amount} for auction ${auction_id}`);
+        
+        // The bid has already been recorded in the database by confirmBidPlacement
+        // This webhook is just for logging/confirmation
+      }
     }
 
     return new Response(null, { status: 200 });

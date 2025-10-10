@@ -5,8 +5,7 @@ import { AuctionCountdown } from '@/components/auction-countdown';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { BidDialog } from '@/components/bid-dialog';
 import { Hammer, TrendingUp, User } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -19,9 +18,8 @@ export default function AuctionDetailPage() {
   const [auction, setAuction] = useState<any>(null);
   const [bids, setBids] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bidAmount, setBidAmount] = useState('');
-  const [placingBid, setPlacingBid] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [bidDialogOpen, setBidDialogOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -64,51 +62,17 @@ export default function AuctionDetailPage() {
     fetchData();
   }, [params.id]);
 
-  const handlePlaceBid = async () => {
+  const handleOpenBidDialog = () => {
     if (!user) {
       toast.error('Please sign in to place a bid');
       router.push('/signin');
       return;
     }
+    setBidDialogOpen(true);
+  };
 
-    const bidValue = parseFloat(bidAmount);
-    if (isNaN(bidValue) || bidValue <= 0) {
-      toast.error('Please enter a valid bid amount');
-      return;
-    }
-
-    const currentBid = auction.current_bid || auction.starting_price;
-    const minBid = currentBid + 100; // Minimum increment of $1.00
-
-    if (bidValue * 100 < minBid) {
-      toast.error(`Bid must be at least $${(minBid / 100).toFixed(2)}`);
-      return;
-    }
-
-    setPlacingBid(true);
-
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.from('bids').insert({
-        auction_id: auction.id,
-        user_id: user.id,
-        bid_amount: Math.round(bidValue * 100)
-      });
-
-      if (error) throw error;
-
-      toast.success('Bid placed successfully!');
-      
-      setAuction({ ...auction, current_bid: Math.round(bidValue * 100) });
-      setBidAmount('');
-      
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Error placing bid:', error);
-      toast.error('Failed to place bid');
-    } finally {
-      setPlacingBid(false);
-    }
+  const handleBidPlaced = () => {
+    window.location.reload();
   };
 
   if (loading) {
@@ -208,28 +172,16 @@ export default function AuctionDetailPage() {
                 <h3 className="font-semibold">Place Your Bid</h3>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="bid-amount">Your Bid Amount (USD)</Label>
-                    <Input
-                      id="bid-amount"
-                      type="number"
-                      step="0.01"
-                      min={(currentBid / 100 + 1).toFixed(2)}
-                      value={bidAmount}
-                      onChange={(e) => setBidAmount(e.target.value)}
-                      placeholder={`Minimum: $${((currentBid + 100) / 100).toFixed(2)}`}
-                    />
-                  </div>
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    onClick={handlePlaceBid}
-                    disabled={placingBid}
-                  >
-                    {placingBid ? 'Placing Bid...' : 'Place Bid'}
-                  </Button>
-                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Minimum bid: ${((currentBid + 100) / 100).toFixed(2)}
+                </p>
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={handleOpenBidDialog}
+                >
+                  Bid Now
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -274,6 +226,18 @@ export default function AuctionDetailPage() {
           )}
         </div>
       </div>
+
+      {user && auction && (
+        <BidDialog
+          open={bidDialogOpen}
+          onOpenChange={setBidDialogOpen}
+          auctionId={auction.id}
+          auctionTitle={auction.title}
+          currentBid={currentBid}
+          userId={user.id}
+          onBidPlaced={handleBidPlaced}
+        />
+      )}
     </div>
   );
 }
