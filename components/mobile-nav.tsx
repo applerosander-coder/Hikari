@@ -26,11 +26,11 @@ export function MobileNav({ items, children, user, userDetails }: MobileNavProps
   return (
     <div
       className={cn(
-        'fixed inset-0 top-16 z-50 h-[calc(100vh-4rem)] bg-background md:hidden'
+        'fixed inset-0 top-16 z-[100] h-[calc(100vh-4rem)] bg-background/90 backdrop-blur-sm md:hidden'
       )}
     >
       <div className="container h-full overflow-auto py-6">
-        <div className="relative grid gap-6 rounded-lg border-2 border-border bg-card p-6 shadow-lg">
+        <div className="relative z-[101] grid gap-6 rounded-lg border-2 border-border bg-card/95 backdrop-blur p-6 shadow-2xl">
           <Link href="/" className="flex items-center space-x-2 pb-4 border-b border-border">
             <SunIcon className="size-6" />
             <span className="text-xl font-bold">BidWin</span>
