@@ -4,6 +4,13 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
 ### Recent Changes
+**October 10, 2025 - Dashboard Logo Fix:**
+- Restored original BidWin logo design (SunIcon + text) on dashboard and mybids pages
+- Removed broken PNG logo files and replaced with icon-based implementation from landing page
+- Logo now uses SunIcon from @heroicons/react/24/solid with "BidWin" text
+- Reduced dashboard header height from h-32 md:h-36 to h-20 for better proportions
+- Removed theme-switching logic for logo (no longer needed with icon implementation)
+
 **October 10, 2025 - My Bids Page UI Improvements:**
 - Made top menu more compact with reduced padding (py-2 sm:py-4) for cleaner interface
 - Removed card scaling animation - all cards now maintain consistent size
@@ -64,13 +71,6 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 
 **October 10, 2025 - Landing Page Button Update:**
 - Changed hero section CTA button text from "Follow the progress on X" to "Upcoming Auctions"
-
-**October 10, 2025 - Dashboard Logo Addition:**
-- Added BidWin logo to dashboard navbar, centered in the menu bar
-- Logo is clickable and navigates to the landing page (/)
-- Theme-aware display: black logo for light theme, white logo for dark theme
-- Large size with responsive constraints: max-h-28 md:max-h-32, max-w-[60%] sm:max-w-md
-- Logos stored in `/public/logos/` directory
 
 
 **October 10, 2025 - Stripe Payment Integration for Bidding:**

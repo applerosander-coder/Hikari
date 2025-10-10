@@ -12,10 +12,9 @@ import {
 } from '@/components/ui/breadcrumb';
 import { UserAccountNav } from '@/components/user-account-nav';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Package2, Settings, Menu, LogOut } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
+import { SunIcon } from '@heroicons/react/24/solid';
 
 import { NavItem, iconComponents } from '@/config/dashboard';
 
@@ -28,7 +27,6 @@ export function Navbar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, resolvedTheme } = useTheme();
 
   const handleSignOut = async () => {
     const { createClient } = await import('@/utils/supabase/client');
@@ -37,11 +35,8 @@ export function Navbar({
     router.push('/signin');
   };
 
-  const currentTheme = resolvedTheme || theme;
-  const logoSrc = currentTheme === 'dark' ? '/logos/bidwin-white.png' : '/logos/bidwin-black.png';
-
   return (
-    <header className="sticky top-0 z-30 flex h-32 md:h-36 items-center gap-4 border-b bg-background px-4 sm:static sm:h-32 md:h-36 sm:border-0 sm:bg-transparent sm:px-6">
+    <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background px-4 sm:static sm:h-20 sm:border-0 sm:bg-transparent sm:px-6">
       <Sheet>
         <SheetTrigger asChild>
           <Button size="icon" variant="outline" className="sm:hidden">
@@ -94,15 +89,11 @@ export function Navbar({
         </SheetContent>
       </Sheet>
       
-      <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center max-w-[60%] sm:max-w-md" prefetch={false}>
-        <Image
-          src={logoSrc}
-          alt="BidWin"
-          width={600}
-          height={160}
-          className="w-full h-auto max-h-28 md:max-h-32"
-          priority
-        />
+      <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2" prefetch={false}>
+        <div className="bg-slate-50 dark:bg-slate-900 p-1 rounded-full">
+          <SunIcon className="size-8 transition-transform duration-300 ease-in-out hover:scale-110" />
+        </div>
+        <span className="text-lg md:text-xl font-extrabold tracking-tightest">BidWin</span>
       </Link>
 
       <Breadcrumb className="hidden md:flex invisible">
