@@ -41,7 +41,7 @@ export function Navbar({
   const logoSrc = currentTheme === 'dark' ? '/logos/bidwin-white.png' : '/logos/bidwin-black.png';
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+    <header className="sticky top-0 z-30 flex h-32 md:h-36 items-center gap-4 border-b bg-background px-4 sm:static sm:h-32 md:h-36 sm:border-0 sm:bg-transparent sm:px-6">
       <Sheet>
         <SheetTrigger asChild>
           <Button size="icon" variant="outline" className="sm:hidden">
@@ -94,13 +94,13 @@ export function Navbar({
         </SheetContent>
       </Sheet>
       
-      <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center" prefetch={false}>
+      <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center max-w-[60%] sm:max-w-md" prefetch={false}>
         <Image
           src={logoSrc}
           alt="BidWin"
-          width={300}
-          height={80}
-          className="h-14 md:h-16 w-auto"
+          width={600}
+          height={160}
+          className="w-full h-auto max-h-28 md:max-h-32"
           priority
         />
       </Link>
