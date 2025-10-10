@@ -189,17 +189,18 @@ export function MyBidsDisplay({
     }
   }, [outbidLength, outbidApi, outbidCurrent]);
 
-  const renderBidCard = (bidWithAuction: BidWithAuction, isActive: boolean) => {
+  const renderBidCard = (bidWithAuction: BidWithAuction, isActive: boolean, index: number, currentIndex: number) => {
     const { bid, auction } = bidWithAuction;
     const currentPrice = auction.current_bid || auction.starting_price;
+    const isCentered = index === currentIndex;
 
     return (
       <CarouselItem key={auction.id} className="basis-[85%] sm:basis-[70%] md:basis-[65%]">
         <div className="p-2 h-full transition-all duration-500 ease-out">
           <Card
             className={cn(
-              'overflow-hidden transition-all duration-500 ease-out hover:shadow-2xl h-full flex flex-col scale-95 opacity-60',
-              '[.embla__slide--in-view_&]:scale-105 [.embla__slide--in-view_&]:opacity-100',
+              'overflow-hidden transition-all duration-500 ease-out hover:shadow-2xl h-full flex flex-col',
+              isCentered ? 'scale-105 opacity-100' : 'scale-95 opacity-60',
               isActive &&
                 'ring-4 ring-black dark:ring-white ring-offset-2 shadow-xl relative'
             )}
