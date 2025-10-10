@@ -1,16 +1,19 @@
-// components/mobile-nav.tsx
-
 'use client';
 
 import * as React from 'react';
 import Link from 'next/link';
 import { MainNavItem } from 'types';
 import { cn } from '@/lib/utils';
-import { Icons } from '@/components/icons';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { SunIcon } from '@heroicons/react/24/solid';
 import { UserAccountNav } from '@/components/user-account-nav';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 
 interface MobileNavProps {
   items: MainNavItem[];
@@ -20,73 +23,76 @@ interface MobileNavProps {
     avatar_url: string | null;
     full_name: string | null;
   } | null;
-  onClose?: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function MobileNav({ items, children, user, userDetails, onClose }: MobileNavProps) {
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && onClose) {
-      onClose();
-    }
-  };
-
+export function MobileNav({ 
+  items, 
+  children, 
+  user, 
+  userDetails, 
+  open, 
+  onOpenChange 
+}: MobileNavProps) {
   return (
-    <div className="nav-dropdown">
-      <div 
-        className={cn(
-          'nav-dropdown__backdrop fixed inset-0 z-[999] bg-black/25 backdrop-blur-sm md:hidden'
-        )} 
-        onClick={handleBackdropClick}
-      />
-      <div
-        className={cn(
-          'fixed inset-0 top-16 z-[1000] h-[calc(100vh-4rem)] pointer-events-auto md:hidden'
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="container h-full overflow-auto py-6">
-          <div className="relative grid gap-6 rounded-lg border-2 border-border bg-card/95 backdrop-blur p-6 shadow-2xl">
-            <Link href="/" className="flex items-center space-x-2 pb-4 border-b border-border">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+        <SheetHeader>
+          <SheetTitle className="flex items-center space-x-2 text-left">
+            <div className="bg-slate-50 dark:bg-slate-900 p-1 rounded-full">
               <SunIcon className="size-6" />
-              <span className="text-xl font-bold">BidWin</span>
-            </Link>
-            <nav className="grid grid-flow-row auto-rows-max text-base gap-2">
-              {items.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.disabled ? '#' : item.href}
-                  className={cn(
-                    'flex w-full items-center rounded-md p-3 text-base font-medium hover:bg-muted transition-colors',
-                    item.disabled && 'cursor-not-allowed opacity-60'
-                  )}
-                >
-                  {item.title}
-                </Link>
-              ))}
-            </nav>
-            <div className="flex items-center justify-between gap-4 pt-4 border-t border-border">
-              <ModeToggle />
-              {user && userDetails ? (
-                <UserAccountNav user={{
-                  ...userDetails,
-                  email: user.email || null
-                }} />
-              ) : (
-                <Link
-                  href="/signin"
-                  className={cn(
-                    buttonVariants({ variant: 'default', size: 'default' }),
-                    'px-6 rounded-full'
-                  )}
-                >
-                  Login
-                </Link>
-              )}
             </div>
-            {children}
+            <span className="text-xl font-extrabold">BidWin</span>
+          </SheetTitle>
+        </SheetHeader>
+        
+        <div className="mt-6 flex flex-col space-y-4">
+          {/* Navigation Links */}
+          <nav className="flex flex-col space-y-3">
+            {items.map((item, index) => (
+              <Link
+                key={index}
+                href={item.disabled ? '#' : item.href}
+                onClick={() => onOpenChange(false)}
+                className={cn(
+                  'text-base font-medium transition-colors hover:text-foreground/80 py-2 px-3 rounded-md hover:bg-muted',
+                  item.disabled && 'cursor-not-allowed opacity-60'
+                )}
+              >
+                {item.title}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Divider */}
+          <div className="border-t border-border my-4" />
+
+          {/* Bottom Section: Theme Toggle & User */}
+          <div className="flex items-center justify-between">
+            <ModeToggle />
+            {user && userDetails ? (
+              <UserAccountNav user={{
+                ...userDetails,
+                email: user.email || null
+              }} />
+            ) : (
+              <Link
+                href="/signin"
+                onClick={() => onOpenChange(false)}
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'sm' }),
+                  'rounded-full px-6'
+                )}
+              >
+                Login
+              </Link>
+            )}
           </div>
+
+          {children}
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
