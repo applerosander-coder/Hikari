@@ -56,15 +56,18 @@ export function BidDialog({
         Math.round(bidValue * 100)
       );
 
+      console.log('📥 Bid placement result:', result);
       setIsPlacingBid(false);
 
-      if (result.error) {
+      if (result?.error) {
+        console.log('❌ Error from server:', result.error);
         toast.error(result.error);
         return;
       }
 
       // Success - redirect to My Bids with celebration
-      if (result.success) {
+      if (result?.success) {
+        console.log('✅ Bid placed successfully, redirecting...');
         toast.success('Bid placed successfully!');
         onOpenChange(false);
         setBidAmount('');
@@ -75,10 +78,11 @@ export function BidDialog({
           `/dashboard/mybids?bid_success=true&auction_id=${auctionId}&auction_title=${encodeURIComponent(auctionTitle)}&bid_amount=${Math.round(bidValue * 100)}`
         );
       } else {
+        console.log('⚠️ Unexpected result:', result);
         toast.error('Failed to place bid. Please try again.');
       }
     } catch (error) {
-      console.error('Error placing bid:', error);
+      console.error('💥 Exception during bid placement:', error);
       setIsPlacingBid(false);
       toast.error('An unexpected error occurred. Please try again.');
     }
