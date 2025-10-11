@@ -8,7 +8,7 @@ export const marketingConfig: MarketingConfig = {
     },
     {
       title: 'My Bids',
-      href: '/dashboard'
+      href: '/mybids'
     },
     {
       title: 'Pricing',
