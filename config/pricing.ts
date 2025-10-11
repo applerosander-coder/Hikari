@@ -8,50 +8,39 @@ interface Plan {
 
 const pricingPlans: Plan[] = [
   {
-    name: 'Starter',
-    description: 'Kickstart your journey with essential templates and community access.',
+    name: 'Participant Plan',
+    description: 'Perfect for users who just want to bid and buy',
     features: [
-      'Access to basic template library',
-      'Monthly community newsletter',
-      "Entry to our 'Template Exchange' forum",
-      'Random template suggestions',
-      'Template of the month'
+      'Join any auction',
+      'Bid, win, and track your items',
+      'No credit card required'
     ],
-    monthlyPrice: 900,
-    yearlyPrice: 9000
+    monthlyPrice: 0,
+    yearlyPrice: 0
   },
   {
-    name: 'Pro',
-    description: 'For those who need advanced templates and enhanced community engagement.',
+    name: 'Host Plan',
+    description: 'Perfect for individuals or small creators who want to host their own events',
     features: [
-      'Access to premium template library',
-      'Weekly community digest',
-      "Priority access to 'Template Exchange' forum",
-      'Personalized template recommendations',
-      'Monthly expert webinar',
-      "Access to exclusive templates with 20% more features!",
-      'Custom template requests'
+      'Create and manage your own auctions',
+      'Up to 10 active listings',
+      'Integrated payments & messaging',
+      'Basic analytics dashboard'
     ],
-    monthlyPrice: 9900,
-    yearlyPrice: 99000
+    monthlyPrice: 1999,
+    yearlyPrice: 19990
   },
   {
-    name: 'Enterprise',
-    description: 'For organizations that require comprehensive templates and dedicated support.',
+    name: 'Business Plan',
+    description: 'Perfect for companies and organizations running multiple events or branded marketplaces',
     features: [
-      'Unlimited access to all templates',
-      'Daily template updates',
-      "VIP access to 'Template Exchange' forum",
-      'Personalized consulting sessions',
-      'Weekly live Q&A sessions',
-      "Access to the complete template library (unlimited!)",
-      'Templates on demand',
-      "Remove 'Powered by Template Generator'",
-      'Free membership to exclusive community events',
-      'Dedicated support h2otline'
+      'Unlimited auctions and listings',
+      'Multi-user team access',
+      'Advanced reporting & custom branding',
+      'Priority support'
     ],
-    monthlyPrice: 99900,
-    yearlyPrice: 999000
+    monthlyPrice: 9999,
+    yearlyPrice: 99990
   }
 ];
 
@@ -67,33 +56,33 @@ interface ProductWithPrices extends Product {
 
 export const dummyPricing: ProductWithPrices[] = [
   {
-    id: 'dummy-basic',
-    name: 'Basic Plan',
-    description: 'For individuals just getting started',
+    id: 'dummy-participant',
+    name: 'Participant Plan',
+    description: 'Perfect for users who just want to bid and buy',
     prices: [
       {
-        id: 'dummy-basic-price-month',
+        id: 'dummy-participant-price-month',
         currency: 'USD',
-        unit_amount: 999,
+        unit_amount: 0,
         interval: 'month',
         interval_count: 1,
         trial_period_days: null,
         type: 'recurring',
         active: true,
-        product_id: 'dummy-basic',
+        product_id: 'dummy-participant',
         description: null,
         metadata: null
       },
       {
-        id: 'dummy-basic-price-year',
+        id: 'dummy-participant-price-year',
         currency: 'USD',
-        unit_amount: 9990,
+        unit_amount: 0,
         interval: 'year',
         interval_count: 1,
         trial_period_days: null,
         type: 'recurring',
         active: true,
-        product_id: 'dummy-basic',
+        product_id: 'dummy-participant',
         description: null,
         metadata: null
       }
@@ -103,33 +92,33 @@ export const dummyPricing: ProductWithPrices[] = [
     active: null
   },
   {
-    id: 'dummy-pro',
-    name: 'Pro Plan',
-    description: 'For growing businesses',
+    id: 'dummy-host',
+    name: 'Host Plan',
+    description: 'Perfect for individuals or small creators who want to host their own events',
     prices: [
       {
-        id: 'dummy-pro-price-month',
+        id: 'dummy-host-price-month',
         currency: 'USD',
-        unit_amount: 2999,
+        unit_amount: 1999,
         interval: 'month',
         interval_count: 1,
         trial_period_days: null,
         type: 'recurring',
         active: true,
-        product_id: 'dummy-pro',
+        product_id: 'dummy-host',
         description: null,
         metadata: null
       },
       {
-        id: 'dummy-pro-price-year',
+        id: 'dummy-host-price-year',
         currency: 'USD',
-        unit_amount: 29990,
+        unit_amount: 19990,
         interval: 'year',
         interval_count: 1,
         trial_period_days: null,
         type: 'recurring',
         active: true,
-        product_id: 'dummy-pro',
+        product_id: 'dummy-host',
         description: null,
         metadata: null
       }
@@ -139,12 +128,12 @@ export const dummyPricing: ProductWithPrices[] = [
     active: null
   },
   {
-    id: 'dummy-enterprise',
-    name: 'Enterprise Plan',
-    description: 'For large organizations',
+    id: 'dummy-business',
+    name: 'Business Plan',
+    description: 'Perfect for companies and organizations running multiple events or branded marketplaces',
     prices: [
       {
-        id: 'dummy-enterprise-price-month',
+        id: 'dummy-business-price-month',
         currency: 'USD',
         unit_amount: 9999,
         interval: 'month',
@@ -152,12 +141,12 @@ export const dummyPricing: ProductWithPrices[] = [
         trial_period_days: null,
         type: 'recurring',
         active: true,
-        product_id: 'dummy-enterprise',
+        product_id: 'dummy-business',
         description: null,
         metadata: null
       },
       {
-        id: 'dummy-enterprise-price-year',
+        id: 'dummy-business-price-year',
         currency: 'USD',
         unit_amount: 99990,
         interval: 'year',
@@ -165,7 +154,7 @@ export const dummyPricing: ProductWithPrices[] = [
         trial_period_days: null,
         type: 'recurring',
         active: true,
-        product_id: 'dummy-enterprise',
+        product_id: 'dummy-business',
         description: null,
         metadata: null
       }
