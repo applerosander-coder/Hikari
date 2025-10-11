@@ -4,6 +4,17 @@
 Auctions is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### Recent Changes
+**October 11, 2025 - My Bids Page Restructure with Watchlist:**
+- **Active Bids Tab**: Shows high bids and outbid items with visual status indicators
+- **Ending Soon Tab**: Displays auctions ending within 24 hours for quick action
+- **Won Auctions Tab**: Lists won items with payment status, shipping status, and support contact options
+- **Watchlist Tab**: User-curated list of auction items they want to track
+- **Watchlist Database**: Created `watchlist` table with user_id and auction_id relationships
+- **Watchlist Button**: Added eye icon button to all auction cards for quick add/remove from watchlist
+- **Tabbed Interface**: Clean navigation between Active, Ending Soon, Won, and Watchlist sections
+- **Payment & Shipping Tracking**: Added `shipping_status` and `tracking_number` fields to payments table
+- **Auto-charge Integration**: Won auctions display payment status (pending/paid/failed) and shipping updates
+
 **October 11, 2025 - Netflix-Style Dashboard Categorization:**
 - **Hot Auctions Section**: Created "🔥 Hot Auctions" row at top showing 10 most popular items sorted by bid count
 - **Category Rows**: Grouped auctions by category (Electronics, Fashion & Accessories, Services & Experiences, Collectibles & Art, Home & Living, Sports & Hobbies)
@@ -13,6 +24,7 @@ Auctions is a comprehensive live auction and bidding platform built with Next.js
 - **Search Integration**: Search bar filters across all categories while maintaining layout structure
 - **Performance**: Created Postgres RPC function `get_auction_bid_counts()` for efficient database-level aggregation instead of N+1 queries
 - **Monochrome Design**: All badges use black/white with dark mode support (no colored accents), maintaining strict design aesthetic
+- **Watchlist Integration**: All auction cards now include watchlist toggle button for easy tracking
 
 **October 11, 2025 - Sidebar Enhancements:**
 - **Sign Out Button**: Added sign out button at bottom of dashboard sidebar for easy logout

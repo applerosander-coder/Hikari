@@ -39,11 +39,19 @@ export default async function DashboardPage() {
     bid_count: bidCountMap.get(auction.id) || 0
   }));
 
+  const { data: watchlistData } = await supabase
+    .from('watchlist')
+    .select('auction_id')
+    .eq('user_id', user.id);
+
+  const watchlistAuctionIds = watchlistData?.map((item) => item.auction_id) || [];
+
   return (
     <CategorizedAuctionBrowser
       auctions={auctionsWithBidCounts}
       userBidAuctionIds={userBidAuctionIds}
       userId={user.id}
+      watchlistAuctionIds={watchlistAuctionIds}
     />
   );
 }

@@ -9,6 +9,7 @@ import { AuctionCountdown } from './auction-countdown';
 import { Heart, Clock, TrendingUp, Flame, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import Image from 'next/image';
+import { WatchlistButton } from './watchlist-button';
 
 interface Auction {
   id: string;
@@ -27,6 +28,7 @@ interface CategorizedAuctionBrowserProps {
   auctions: Auction[];
   userBidAuctionIds: string[];
   userId: string;
+  watchlistAuctionIds: string[];
 }
 
 const CATEGORIES = [
@@ -41,7 +43,8 @@ const CATEGORIES = [
 export function CategorizedAuctionBrowser({
   auctions,
   userBidAuctionIds,
-  userId
+  userId,
+  watchlistAuctionIds
 }: CategorizedAuctionBrowserProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -139,6 +142,7 @@ export function CategorizedAuctionBrowser({
               subtitle="Most popular items right now"
               auctions={hotAuctions}
               userBidAuctionIds={userBidAuctionIds}
+              watchlistAuctionIds={watchlistAuctionIds}
               formatPrice={formatPrice}
               handleBidNow={handleBidNow}
               highlight
@@ -152,6 +156,7 @@ export function CategorizedAuctionBrowser({
                 title={category}
                 auctions={categoryAuctions}
                 userBidAuctionIds={userBidAuctionIds}
+                watchlistAuctionIds={watchlistAuctionIds}
                 formatPrice={formatPrice}
                 handleBidNow={handleBidNow}
               />
@@ -168,6 +173,7 @@ interface AuctionRowProps {
   subtitle?: string;
   auctions: Auction[];
   userBidAuctionIds: string[];
+  watchlistAuctionIds: string[];
   formatPrice: (price: number) => string;
   handleBidNow: (id: string) => void;
   highlight?: boolean;
@@ -178,6 +184,7 @@ function AuctionRow({
   subtitle,
   auctions,
   userBidAuctionIds,
+  watchlistAuctionIds,
   formatPrice,
   handleBidNow,
   highlight = false
@@ -251,6 +258,7 @@ function AuctionRow({
               key={auction.id}
               auction={auction}
               userHasBid={userBidAuctionIds.includes(auction.id)}
+              isInWatchlist={watchlistAuctionIds.includes(auction.id)}
               formatPrice={formatPrice}
               handleBidNow={handleBidNow}
               highlight={highlight}
@@ -275,6 +283,7 @@ function AuctionRow({
 interface AuctionCardProps {
   auction: Auction;
   userHasBid: boolean;
+  isInWatchlist: boolean;
   formatPrice: (price: number) => string;
   handleBidNow: (id: string) => void;
   highlight?: boolean;
@@ -283,6 +292,7 @@ interface AuctionCardProps {
 function AuctionCard({
   auction,
   userHasBid,
+  isInWatchlist,
   formatPrice,
   handleBidNow,
   highlight = false
@@ -317,11 +327,18 @@ function AuctionCard({
           </Badge>
         )}
 
-        {userHasBid && (
-          <div className="absolute top-2 right-2 bg-black dark:bg-white text-white dark:text-black p-1.5 rounded-full">
-            <Heart className="h-3 w-3 fill-current" />
-          </div>
-        )}
+        <div className="absolute top-2 right-2 flex gap-2 items-center z-20">
+          {userHasBid && (
+            <div className="bg-black dark:bg-white text-white dark:text-black p-1.5 rounded-full">
+              <Heart className="h-3 w-3 fill-current" />
+            </div>
+          )}
+          <WatchlistButton
+            auctionId={auction.id}
+            isInWatchlist={isInWatchlist}
+            variant="icon"
+          />
+        </div>
 
         {highlight && auction.bid_count && auction.bid_count > 0 && (
           <Badge className="absolute top-2 left-2 bg-black dark:bg-white text-white dark:text-black font-bold">
