@@ -117,11 +117,14 @@ export async function confirmBidPlacement(
     // Atomic bid placement: only update if our bid is higher than current
     // This prevents race conditions where lower bids overwrite higher ones
     console.log('🔄 Attempting to update auction with bid:', bidAmount);
+    console.log('🔍 Update conditions: id =', auctionId, ', current_bid <', bidAmount);
+    
+    // Update only if current_bid < new bid (or current_bid is null for first bid)
     const { data: updatedAuction, error: updateError } = await supabase
       .from('auctions')
       .update({ current_bid: bidAmount })
       .eq('id', auctionId)
-      .or(`current_bid.lt.${bidAmount},current_bid.is.null`)
+      .filter('current_bid', 'lt', bidAmount)
       .select()
       .single();
 
