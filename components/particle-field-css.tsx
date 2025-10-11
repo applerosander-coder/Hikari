@@ -29,14 +29,13 @@ export default function ParticleFieldCSS() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const glitterCount = 80;
+    const glitterCount = 40;
     const glitterColors = [
       '#FFD700', // Gold
       '#E5E4E2', // Platinum
       '#C0C0C0', // Silver
       '#FFFFFF', // White
       '#D4AF37', // Metallic gold
-      '#B8860B', // Dark goldenrod
     ];
 
     // Create glitter confetti elements once with spread-out distribution
@@ -118,15 +117,15 @@ export default function ParticleFieldCSS() {
         // Calculate depth-based scale and twinkling
         const scale = 1 + g.z / 250;
         const twinkle = (Math.sin(g.twinklePhase) + 1) / 2; // 0 to 1
-        const opacity = 0.5 + twinkle * 0.5; // More visible
-        const size = (3 + twinkle * 3) * scale; // Larger particles
+        const opacity = 0.4 + twinkle * 0.4;
+        const size = (2 + twinkle * 2) * scale;
 
         // Apply parallax offset based on depth
         const parallaxX = mousePos.current.x * (g.z / 500);
         const parallaxY = mousePos.current.y * (g.z / 500);
 
         // Create sparkle effect with box-shadow
-        const sparkleIntensity = twinkle * 8;
+        const sparkleIntensity = twinkle * 6;
         
         // Update glitter appearance with rotation, twinkle, and sparkle
         g.element.style.width = `${size}px`;
