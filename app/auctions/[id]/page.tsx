@@ -62,25 +62,12 @@ export default function AuctionDetailPage() {
     fetchData();
   }, [params.id]);
 
-  const handleOpenBidDialog = async () => {
+  const handleOpenBidDialog = () => {
     if (!user) {
       toast.error('Please sign in to place a bid');
       router.push('/signin');
       return;
     }
-    
-    // Refresh auction data to get latest current_bid before opening dialog
-    const supabase = createClient();
-    const { data: freshAuction } = await supabase
-      .from('auctions')
-      .select('*')
-      .eq('id', params.id)
-      .single();
-    
-    if (freshAuction) {
-      setAuction(freshAuction);
-    }
-    
     setBidDialogOpen(true);
   };
 

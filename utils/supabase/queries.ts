@@ -9,19 +9,7 @@ export const getUser = cache(async (supabase: SupabaseClient<Database>) => {
   return user;
 });
 
-type Subscription = {
-  status: string;
-  current_period_end: string;
-  prices: {
-    unit_amount: number;
-    interval: string;
-    products: {
-      name: string;
-    };
-  };
-} | null;
-
-export const getSubscription = cache(async (supabase: SupabaseClient<Database>, userId: string): Promise<Subscription> => {
+export const getSubscription = cache(async (supabase: SupabaseClient<Database>, userId: string) => {
   // Subscriptions table removed - this is now an auction platform
   // Return null to maintain compatibility with existing code
   return null;
