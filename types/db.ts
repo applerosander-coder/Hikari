@@ -143,6 +143,35 @@ export interface Database {
           }
         ]
       }
+      watchlist: {
+        Row: {
+          id: string
+          user_id: string
+          auction_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          auction_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          auction_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_watchlist_auction"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       posts: {
         Row: {
           content: string | null
