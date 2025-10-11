@@ -147,9 +147,11 @@ function CardSetupForm({ onSuccess, onCancel }: { onSuccess: () => void; onCance
 export function AddCardModal({ open, onOpenChange, onSuccess }: AddCardModalProps) {
   const [clientSecret, setClientSecret] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
-    if (open && !clientSecret) {
+    // Only create new SetupIntent if modal is opening fresh (not after success)
+    if (open && !clientSecret && !isSuccess) {
       setIsLoading(true);
       fetch('/api/payments/setup-intent', {
         method: 'POST',
@@ -171,9 +173,10 @@ export function AddCardModal({ open, onOpenChange, onSuccess }: AddCardModalProp
         })
         .finally(() => setIsLoading(false));
     }
-  }, [open, clientSecret, onOpenChange]);
+  }, [open, clientSecret, isSuccess, onOpenChange]);
 
   const handleSuccess = () => {
+    setIsSuccess(true); // Mark as success to prevent new SetupIntent
     setClientSecret('');
     onOpenChange(false);
     onSuccess?.();
@@ -186,7 +189,9 @@ export function AddCardModal({ open, onOpenChange, onSuccess }: AddCardModalProp
 
   useEffect(() => {
     if (!open) {
+      // Reset everything when modal closes
       setClientSecret('');
+      setIsSuccess(false);
     }
   }, [open]);
 
