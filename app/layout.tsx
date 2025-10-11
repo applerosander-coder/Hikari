@@ -4,6 +4,7 @@ import { getURL } from '@/utils/helpers';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Inter as FontSans } from 'next/font/google';
@@ -93,6 +94,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </RootProvider>
           <Toaster />
+          <Sonner />
           {/* <TailwindIndicator /> */}
         </ThemeProvider>
       </body>
