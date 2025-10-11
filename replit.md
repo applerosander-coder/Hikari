@@ -4,6 +4,12 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
 ### Recent Changes
+**October 11, 2025 - Mobile Search Field Fix:**
+- Fixed search field visibility on My Bids page mobile view
+- Added proper top padding (pt-24 = 96px) to clear sticky navbar (h-20 = 80px)
+- Search field now fully visible with 16px breathing room below navbar on mobile
+- Desktop view unchanged (maintains sm:py-4 responsive padding)
+
 **October 10, 2025 - Interactive Particle Background:**
 - Added interactive particle background to hero section using @tsparticles/react and @tsparticles/slim
 - 80 lightweight particles with smooth movement (speed: 1)
