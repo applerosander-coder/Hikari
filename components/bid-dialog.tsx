@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { createBidPaymentIntent } from '@/app/actions/bid-actions';
 import { Loader2 } from 'lucide-react';
+import { AddCardModal } from '@/components/add-card-modal';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -139,6 +140,7 @@ export function BidDialog({
   const [clientSecret, setClientSecret] = useState('');
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+  const [showAddCard, setShowAddCard] = useState(false);
 
   const minBid = (currentBid + 100) / 100;
 
@@ -154,6 +156,12 @@ export function BidDialog({
     const result = await createBidPaymentIntent(auctionId, Math.round(bidValue * 100));
 
     if (result.error) {
+      // Check if error is about missing payment method
+      if (result.error.includes('add a payment method')) {
+        setIsCreatingIntent(false);
+        setShowAddCard(true);
+        return;
+      }
       toast.error(result.error);
       setIsCreatingIntent(false);
       return;
@@ -165,6 +173,12 @@ export function BidDialog({
     }
 
     setIsCreatingIntent(false);
+  };
+
+  const handleCardAdded = async () => {
+    setShowAddCard(false);
+    // Retry creating payment intent after card is added
+    await handleCreatePaymentIntent();
   };
 
   const handleSuccess = () => {
@@ -254,6 +268,11 @@ export function BidDialog({
           )}
         </div>
       </DialogContent>
+      <AddCardModal
+        open={showAddCard}
+        onOpenChange={setShowAddCard}
+        onSuccess={handleCardAdded}
+      />
     </Dialog>
   );
 }
