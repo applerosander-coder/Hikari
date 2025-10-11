@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
   await supabase
     .from('customers')
-    .update({ payment_method: summary })
+    .update({ payment_method: summary as any })
     .eq('id', user.id);
 
   return NextResponse.json({ ok: true });

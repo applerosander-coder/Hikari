@@ -4,6 +4,89 @@ import { stripe } from '@/utils/stripe/config';
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+export async function placeBidWithSavedCard(auctionId: string, bidAmount: number) {
+  try {
+    const supabase = createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { error: 'You must be signed in to place a bid' };
+    }
+
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('stripe_customer_id, payment_method')
+      .eq('id', user.id)
+      .single();
+
+    const paymentMethod = customer?.payment_method as { id: string; brand?: string; last4?: string } | null;
+    
+    if (!paymentMethod?.id) {
+      return { error: 'no_payment_method' };
+    }
+
+    const { data: auction, error: auctionError } = await supabase
+      .from('auctions')
+      .select('*')
+      .eq('id', auctionId)
+      .single();
+
+    if (auctionError || !auction) {
+      return { error: 'Auction not found' };
+    }
+
+    if (auction.status !== 'active') {
+      return { error: 'This auction is not currently active' };
+    }
+
+    const currentBid = auction.current_bid || auction.starting_price;
+    const minBid = currentBid + 100;
+
+    if (bidAmount < minBid) {
+      return { error: `Bid must be at least $${(minBid / 100).toFixed(2)}` };
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: bidAmount,
+      currency: 'usd',
+      customer: customer?.stripe_customer_id || undefined,
+      payment_method: paymentMethod.id,
+      off_session: true,
+      confirm: true,
+      metadata: {
+        auction_id: auctionId,
+        user_id: user.id,
+        bid_amount: bidAmount.toString(),
+        type: 'bid',
+      },
+    });
+
+    if (paymentIntent.status === 'succeeded') {
+      return { success: true, paymentIntentId: paymentIntent.id };
+    } else if (paymentIntent.status === 'requires_action') {
+      return { error: 'Card requires authentication' };
+    } else {
+      return { error: 'Payment could not be processed' };
+    }
+  } catch (error: any) {
+    console.error('Error placing bid with saved card:', error);
+    
+    // Handle specific Stripe error types
+    if (error.type === 'StripeCardError') {
+      if (error.code === 'card_declined') {
+        return { error: 'Card declined' };
+      } else if (error.code === 'insufficient_funds') {
+        return { error: 'Insufficient funds' };
+      } else if (error.code === 'authentication_required') {
+        return { error: 'Card requires authentication' };
+      }
+      return { error: error.message || 'Card payment failed' };
+    }
+    
+    return { error: 'Failed to process payment' };
+  }
+}
+
 export async function createBidPaymentIntent(auctionId: string, bidAmount: number) {
   try {
     const supabase = createClient();
@@ -20,7 +103,9 @@ export async function createBidPaymentIntent(auctionId: string, bidAmount: numbe
       .eq('id', user.id)
       .single();
 
-    if (!customer?.payment_method?.id) {
+    const savedPaymentMethod = customer?.payment_method as { id?: string } | null;
+    
+    if (!savedPaymentMethod?.id) {
       return { error: 'Please add a payment method before bidding.' };
     }
 

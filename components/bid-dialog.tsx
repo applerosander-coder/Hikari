@@ -14,7 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { createBidPaymentIntent } from '@/app/actions/bid-actions';
+import { createBidPaymentIntent, placeBidWithSavedCard } from '@/app/actions/bid-actions';
+import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { AddCardModal } from '@/components/add-card-modal';
 
@@ -136,6 +137,7 @@ export function BidDialog({
   userId,
   onBidPlaced,
 }: BidDialogProps) {
+  const router = useRouter();
   const [bidAmount, setBidAmount] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
@@ -153,23 +155,54 @@ export function BidDialog({
 
     setIsCreatingIntent(true);
 
-    const result = await createBidPaymentIntent(auctionId, Math.round(bidValue * 100));
+    // First, try to place bid with saved card
+    const savedCardResult = await placeBidWithSavedCard(auctionId, Math.round(bidValue * 100));
 
-    if (result.error) {
-      // Check if error is about missing payment method
-      if (result.error.includes('add a payment method')) {
-        setIsCreatingIntent(false);
-        setShowAddCard(true);
-        return;
-      }
-      toast.error(result.error);
+    if (savedCardResult.success) {
+      // Payment succeeded with saved card - redirect to mybids with celebration
+      toast.success('Bid placed successfully!', { id: 'bid-success' });
       setIsCreatingIntent(false);
+      onOpenChange(false);
+      
+      // Redirect to mybids with celebration params
+      router.push(
+        `/dashboard/mybids?bid_success=true&auction_id=${auctionId}&auction_title=${encodeURIComponent(auctionTitle)}&bid_amount=${Math.round(bidValue * 100)}`
+      );
       return;
     }
 
-    if (result.clientSecret) {
-      setClientSecret(result.clientSecret);
-      setShowPayment(true);
+    // If no saved card, show add card modal
+    if (savedCardResult.error === 'no_payment_method') {
+      setIsCreatingIntent(false);
+      setShowAddCard(true);
+      return;
+    }
+
+    // If saved card payment failed, fall back to manual payment flow
+    if (savedCardResult.error) {
+      toast.error(`${savedCardResult.error}. Falling back to manual payment...`, { duration: 3000 });
+      
+      // Fall back to creating payment intent for manual authentication
+      const result = await createBidPaymentIntent(auctionId, Math.round(bidValue * 100));
+
+      if (result.error) {
+        if (result.error.includes('add a payment method')) {
+          setIsCreatingIntent(false);
+          setShowAddCard(true);
+          return;
+        }
+        toast.error(result.error);
+        setIsCreatingIntent(false);
+        return;
+      }
+
+      if (result.clientSecret) {
+        setClientSecret(result.clientSecret);
+        setShowPayment(true);
+      }
+      
+      setIsCreatingIntent(false);
+      return;
     }
 
     setIsCreatingIntent(false);
@@ -178,26 +211,54 @@ export function BidDialog({
   const handleCardAdded = async () => {
     setShowAddCard(false);
     
-    // Give user visual confirmation with a visible duration
-    toast.success('✓ Card saved successfully! Continuing with your bid...', { 
+    // Give user visual confirmation
+    toast.success('✓ Card saved successfully! Placing your bid...', { 
       duration: 2000,
       id: 'card-saved'
     });
     
-    // Wait to ensure database is updated and user sees message
+    // Wait to ensure database is updated
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Dismiss success message and show preparing message
     toast.dismiss('card-saved');
-    toast.loading('Preparing payment...', { id: 'preparing-bid' });
+    toast.loading('Processing bid...', { id: 'processing-bid' });
     
-    // Small delay then retry creating payment intent
+    // Small delay then retry with saved card
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Retry creating payment intent after card is added
-    await handleCreatePaymentIntent();
+    const bidValue = parseFloat(bidAmount);
+    const savedCardResult = await placeBidWithSavedCard(auctionId, Math.round(bidValue * 100));
     
-    toast.dismiss('preparing-bid');
+    toast.dismiss('processing-bid');
+    
+    if (savedCardResult.success) {
+      toast.success('Bid placed successfully!', { id: 'bid-success' });
+      onOpenChange(false);
+      
+      // Redirect to mybids with celebration
+      router.push(
+        `/dashboard/mybids?bid_success=true&auction_id=${auctionId}&auction_title=${encodeURIComponent(auctionTitle)}&bid_amount=${Math.round(bidValue * 100)}`
+      );
+      return;
+    }
+    
+    // If automatic charge failed, fall back to manual payment
+    if (savedCardResult.error) {
+      toast.error(`${savedCardResult.error}. Please complete payment manually.`, { duration: 3000 });
+      
+      // Fall back to manual payment flow
+      const result = await createBidPaymentIntent(auctionId, Math.round(bidValue * 100));
+
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      if (result.clientSecret) {
+        setClientSecret(result.clientSecret);
+        setShowPayment(true);
+      }
+    }
   };
 
   const handleSuccess = () => {
