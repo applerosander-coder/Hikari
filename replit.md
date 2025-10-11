@@ -8,13 +8,16 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 - Implemented saved card infrastructure with customers and payments database tables
 - Created API routes for SetupIntent, payment method attachment, and auction closing
 - Enhanced bid actions to enforce saved payment method requirement before bidding
-- Built AddCardModal component with Stripe Elements for card saving
+- Built AddCardModal component with Stripe Elements for card saving (scrollable interface)
 - Integrated modal into bidding flow with automatic retry after card is saved
 - Updated webhook handlers to sync payment status (succeeded/failed) for winner charges
 - Added idempotency protection to prevent double charges on auction close
 - Proper error handling and rollback logic to keep auction/payment state consistent
 - Off-session payment charging for auction winners using saved payment methods
 - Payment metadata distinguishes between bid payments (type: bid) and winner charges (type: winner_charge)
+- Enhanced error messages with specific guidance for card validation issues (incomplete number, expiry, CVC, ZIP)
+- Added clear success confirmation: "✓ Card saved successfully! Continuing with your bid..."
+- Smooth transition from card saving to bid payment with loading feedback
 
 **October 11, 2025 - Updated Pricing Plans:**
 - Updated pricing module with 3 new auction-focused plans

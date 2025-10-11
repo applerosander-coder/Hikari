@@ -177,6 +177,10 @@ export function BidDialog({
 
   const handleCardAdded = async () => {
     setShowAddCard(false);
+    toast.loading('Preparing your bid payment...', { id: 'preparing-bid' });
+    // Small delay to ensure card is fully attached
+    await new Promise(resolve => setTimeout(resolve, 500));
+    toast.dismiss('preparing-bid');
     // Retry creating payment intent after card is added
     await handleCreatePaymentIntent();
   };

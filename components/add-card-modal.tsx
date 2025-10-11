@@ -39,7 +39,18 @@ function CardSetupForm({ onSuccess, onCancel }: { onSuccess: () => void; onCance
     try {
       const { error: submitError } = await elements.submit();
       if (submitError) {
-        toast.error(submitError.message || 'Card validation failed');
+        // Provide specific error guidance
+        let errorMessage = submitError.message || 'Card validation failed';
+        if (submitError.code === 'incomplete_number') {
+          errorMessage = 'Please enter a valid card number';
+        } else if (submitError.code === 'incomplete_expiry') {
+          errorMessage = 'Please enter a valid expiration date';
+        } else if (submitError.code === 'incomplete_cvc') {
+          errorMessage = 'Please enter a valid security code';
+        } else if (submitError.code === 'incomplete_zip') {
+          errorMessage = 'Please enter a valid ZIP code';
+        }
+        toast.error(errorMessage);
         setIsProcessing(false);
         return;
       }
@@ -53,7 +64,18 @@ function CardSetupForm({ onSuccess, onCancel }: { onSuccess: () => void; onCance
       });
 
       if (error) {
-        toast.error(error.message || 'Failed to save card');
+        // Provide specific error guidance
+        let errorMessage = error.message || 'Failed to save card';
+        if (error.code === 'card_declined') {
+          errorMessage = 'Your card was declined. Please try a different card.';
+        } else if (error.code === 'expired_card') {
+          errorMessage = 'Your card has expired. Please use a different card.';
+        } else if (error.code === 'incorrect_cvc') {
+          errorMessage = 'Incorrect security code. Please check and try again.';
+        } else if (error.code === 'processing_error') {
+          errorMessage = 'An error occurred processing your card. Please try again.';
+        }
+        toast.error(errorMessage);
         setIsProcessing(false);
         return;
       }
@@ -68,15 +90,18 @@ function CardSetupForm({ onSuccess, onCancel }: { onSuccess: () => void; onCance
 
         if (!res.ok) {
           const data = await res.json();
-          toast.error(data.error || 'Failed to attach card');
+          toast.error(data.error || 'Failed to save card. Please try again.');
           setIsProcessing(false);
           return;
         }
 
-        toast.success('Card saved successfully!');
-        onSuccess();
+        toast.success('✓ Card saved successfully! Continuing with your bid...');
+        // Small delay to let user see the success message
+        setTimeout(() => {
+          onSuccess();
+        }, 500);
       } else {
-        toast.error('Setup status unclear. Please try again.');
+        toast.error('Card setup incomplete. Please try again.');
         setIsProcessing(false);
       }
     } catch (err: any) {
