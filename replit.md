@@ -12,7 +12,7 @@ The application is built on **Next.js 14 with the App Router** for routing and s
 **UI/UX Decisions:**
 - **Color Scheme:** Strict monochrome palette (black, white, gray) is consistently applied across all UI elements.
 - **Responsive Design:** Optimized layouts for various screen sizes, ensuring mobile-friendliness with responsive text, image scaling, and adaptive components.
-- **Interactive Elements:** Utilizes **Embla Carousel** for swipeable browsing and **Framer Motion** for animations, including a celebratory animation for successful bids. An interactive particle background is used in the hero section.
+- **Interactive Elements:** Utilizes **Embla Carousel** for swipeable browsing and **Framer Motion** for animations, including a celebratory animation for successful bids. A floating bubbles background with soft pulse effect (40 translucent bubbles floating upward) is used in the hero section for a clean, modern "live" feeling.
 - **Component Library:** Built with **Radix UI** primitives and styled using **Tailwind CSS**.
 - **User Flow:** Includes email/password and GitHub OAuth authentication, a dashboard with personalized content (My Bids), and dedicated pages for auction browsing and bidding. Bid processing incorporates a payment flow with webhook verification and idempotency protection.
 
@@ -42,5 +42,5 @@ The application is built on **Next.js 14 with the App Router** for routing and s
 - **TanStack Query:** Data fetching and state management.
 - **tRPC:** End-to-end type-safe APIs.
 - **Fumadocs:** Documentation generation.
-- **@tsparticles/react, @tsparticles/slim:** For interactive particle backgrounds.
+- **@tsparticles/react, @tsparticles/slim:** For floating bubble backgrounds.
 - **canvas-confetti:** For celebration animations.
