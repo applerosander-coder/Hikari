@@ -1,0 +1,44 @@
+GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+(anonymous) @ injected.js:27
+zzqvgmkrsxedarxpfelu.supabase.co/rest/v1/bids?select=*%2Cuser%3Ausers%28full_name%2Cavatar_url%29&auction_id=eq.fa309365-f695-447d-a450-de4b966bd35e&order=bid_amount.desc&limit=10:1   Failed to load resource: the server responded with a status of 400 ()
+zzqvgmkrsxedarxpfelu.supabase.co/rest/v1/bids?select=*%2Cuser%3Ausers%28full_name%2Cavatar_url%29&auction_id=eq.fa309365-f695-447d-a450-de4b966bd35e&order=bid_amount.desc&limit=10:1   Failed to load resource: the server responded with a status of 400 ()
+injected.js:27  Failed to parse cookie string: SyntaxError: Unexpected token 'b', "base64-eyJ"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at parseSupabaseCookie (index.mjs:180:1)
+    at BrowserCookieAuthStorageAdapter.getItem (index.mjs:286:1)
+    at getItemAsync (helpers.js:100:1)
+    at SupabaseAuthClient.__loadSession (GoTrueClient.js:795:52)
+    at SupabaseAuthClient._useSession (GoTrueClient.js:776:1)
+    at eval (GoTrueClient.js:1649:1)
+    at eval (GoTrueClient.js:738:1)
+    at eval (locks.js:80:1)
+(anonymous) @ injected.js:27
+controller-with-preconnect-1d4b1b3a6e3cace32d7130866abf1f1d.js:1  [Stripe.js] It looks like you are using Payment Element in an iframe.
+      Avoid placing the Payment Element within another iframe because some payment methods require redirecting to another page for payment confirmation.
+warn @ controller-with-preconnect-1d4b1b3a6e3cace32d7130866abf1f1d.js:1
+[Violation] Potential permissions policy violation: publickey-credentials-get is not allowed in this document.
+controller-with-preconnect-1d4b1b3a6e3cace32d7130866abf1f1d.js:1  [Stripe.js] You have not registered or verified the domain, so the following payment methods are not enabled in the Payment Element: 
+
+- apple_pay
+
+Please follow https://stripe.com/docs/payments/payment-methods/pmd-registration to register and verify the domain.
+warn @ controller-with-preconnect-1d4b1b3a6e3cace32d7130866abf1f1d.js:1
+[Violation] Potential permissions policy violation: publickey-credentials-get is not allowed in this document.
+api.stripe.com/v1/setup_intents/seti_1SH5qaRTU2eTjVzszebW6gDO/confirm:1   Failed to load resource: the server responded with a status of 402 ()
+api.stripe.com/v1/setup_intents/seti_1SH5qaRTU2eTjVzszebW6gDO/confirm:1   Failed to load resource: the server responded with a status of 402 ()
+api.stripe.com/v1/setup_intents/seti_1SH5qaRTU2eTjVzszebW6gDO/confirm:1   Failed to load resource: the server responded with a status of 402 ()
+api.stripe.com/v1/setup_intents/seti_1SH5qaRTU2eTjVzszebW6gDO/confirm:1   Failed to load resource: the server responded with a status of 402 ()
+api.stripe.com/v1/setup_intents/seti_1SH5qaRTU2eTjVzszebW6gDO/confirm:1   Failed to load resource: the server responded with a status of 402 ()
+api.stripe.com/v1/setup_intents/seti_1SH5qaRTU2eTjVzszebW6gDO/confirm:1   Failed to load resource: the server responded with a status of 402 ()
+api.stripe.com/v1/setup_intents/seti_1SH5qaRTU2eTjVzszebW6gDO/confirm:1   Failed to load resource: the server responded with a status of 402 ()
+fa309365-f695-447d-a450-de4b966bd35e:1  Access to internal resource at 'https://hikari.antoineross.com/site.webmanifest' from origin 'https://d19107bf-0d53-4d87-9abc-d33bd2c95a58-00-26gncwjlmzcv9.riker.replit.dev' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
+3injected.js:27  Failed to parse cookie string: SyntaxError: Unexpected token 'b', "base64-eyJ"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at parseSupabaseCookie (index.mjs:180:1)
+    at BrowserCookieAuthStorageAdapter.getItem (index.mjs:286:1)
+    at getItemAsync (helpers.js:100:1)
+    at SupabaseAuthClient.__loadSession (GoTrueClient.js:795:52)
+    at SupabaseAuthClient._useSession (GoTrueClient.js:776:1)
+    at eval (GoTrueClient.js:1649:1)
+    at eval (GoTrueClient.js:738:1)
+    at eval (locks.js:80:1)
