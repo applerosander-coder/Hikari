@@ -4,16 +4,18 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### Recent Changes
-**October 11, 2025 - Firefly Effect with CSS:**
-- Replaced particles with glowing fireflies for magical, enchanting hero section
-- **Pulsing Glow**: Each firefly pulses independently with warm golden light (sine wave animation)
-- **Organic Movement**: Fireflies float with sinusoidal sway for natural, lifelike motion
-- **Depth-Based Scale**: 3D perspective with fireflies closer appearing larger and brighter
+**October 11, 2025 - Glitter Confetti Effect with CSS:**
+- Transformed particles into sparkling glitter confetti for celebratory hero section
+- **Twinkling Sparkle**: Each particle twinkles independently with box-shadow glow effect (sine wave animation)
+- **Mixed Shapes**: Random circles and squares for authentic confetti variety
+- **Multi-Color Palette**: Gold, platinum, silver, white, and metallic gold particles
+- **Rotating Motion**: Particles tumble and rotate as they float with gentle downward drift
+- **Depth-Based Scale**: 3D perspective with closer particles appearing larger and brighter
 - **Mouse-Responsive Parallax**: Smooth lerped mouse tracking creates depth-based parallax effect
-- **Performance Optimized**: Pre-creates 50 firefly elements once, updates only transform/opacity/box-shadow per frame
+- **Performance Optimized**: Pre-creates 80 glitter elements once, updates only transform/opacity/box-shadow per frame
 - **GPU Accelerated**: Uses willChange for hardware acceleration
-- **Golden Glow Effect**: Box-shadow creates authentic firefly luminescence (#FFD700)
-- **Spread Distribution**: Fireflies concentrated toward edges using quadratic distribution
+- **Sparkle Glow**: Dynamic box-shadow creates authentic glitter shimmer effect
+- **Continuous Flow**: Particles wrap around for endless confetti celebration
 - **No WebGL Required**: Pure CSS 3D transforms work in all environments
 
 **October 11, 2025 - Auto-Charge Saved Cards with Manual Fallback:**
@@ -33,7 +35,7 @@ The application is built on **Next.js 14 with the App Router** for routing and s
 **UI/UX Decisions:**
 - **Color Scheme:** Strict monochrome palette (black, white, gray) is consistently applied across all UI elements.
 - **Responsive Design:** Optimized layouts for various screen sizes, ensuring mobile-friendliness with responsive text, image scaling, and adaptive components.
-- **Interactive Elements:** Utilizes **Embla Carousel** for swipeable browsing and **Framer Motion** for animations, including a celebratory animation for successful bids. Glowing fireflies with pulsing golden light, organic floating movement, and mouse-responsive parallax create a magical, enchanting aesthetic in the hero section.
+- **Interactive Elements:** Utilizes **Embla Carousel** for swipeable browsing and **Framer Motion** for animations, including a celebratory animation for successful bids. Sparkling glitter confetti with twinkling multi-color particles, rotating motion, and mouse-responsive parallax create a festive, celebratory aesthetic in the hero section.
 - **Component Library:** Built with **Radix UI** primitives and styled using **Tailwind CSS**.
 - **User Flow:** Includes email/password and GitHub OAuth authentication, a dashboard with personalized content (My Bids), and dedicated pages for auction browsing and bidding. Bid processing incorporates a payment flow with webhook verification and idempotency protection.
 
