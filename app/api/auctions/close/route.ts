@@ -40,7 +40,12 @@ export async function POST(req: Request) {
   }
 
   const winnerId = topBid.user_id;
-  const amountCents = Math.trunc(Number(topBid.bid_amount));
+  // bid_amount is already stored in cents
+  const amountCents = Number(topBid.bid_amount);
+
+  if (!amountCents || amountCents <= 0) {
+    return NextResponse.json({ error: 'invalid_bid_amount' }, { status: 400 });
+  }
 
   // lookup Stripe customer + default PM
   const { data: customerRec } = await supabase
@@ -53,39 +58,97 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'no_payment_method' }, { status: 400 });
   }
 
-  const intent = await stripe.paymentIntents.create({
-    amount: amountCents,
-    currency: 'usd',
-    customer: customerRec.stripe_customer_id,
-    payment_method: customerRec.payment_method.id,
-    off_session: true,
-    confirm: true,
-    description: `Auction ${auctionId} – winning bid`,
-    metadata: { 
-      auction_id: auctionId, 
-      user_id: winnerId, 
-      bid_id: topBid.id.toString() 
+  // Check for existing payment (idempotency)
+  const { data: existingPayment } = await supabase
+    .from('payments')
+    .select('id, status, payment_intent_id')
+    .eq('auction_id', auctionId)
+    .eq('user_id', winnerId)
+    .maybeSingle();
+
+  if (existingPayment) {
+    // Already charged or attempted
+    if (existingPayment.status === 'succeeded') {
+      return NextResponse.json({ 
+        status: 'already_charged', 
+        paymentIntentId: existingPayment.payment_intent_id 
+      });
     }
-  });
+    // Previous attempt failed or processing - could retry, for now just return
+    return NextResponse.json({ 
+      status: existingPayment.status, 
+      paymentIntentId: existingPayment.payment_intent_id 
+    });
+  }
 
-  // write to payments ledger
-  await supabase.from('payments').insert({
-    user_id: winnerId,
-    auction_id: auctionId,
-    amount_cents: amountCents,
-    currency: 'usd',
-    payment_intent_id: intent.id,
-    status: intent.status,
-  });
+  try {
+    // Create off-session payment intent with metadata for auto-charge
+    // Use idempotency key to prevent duplicate charges on retries
+    const idempotencyKey = `auction_${auctionId}_winner_${winnerId}`;
+    
+    const intent = await stripe.paymentIntents.create({
+      amount: amountCents,
+      currency: 'usd',
+      customer: customerRec.stripe_customer_id,
+      payment_method: customerRec.payment_method.id,
+      off_session: true,
+      confirm: true,
+      description: `Auction ${auction.title} – winning bid`,
+      metadata: { 
+        auction_id: auctionId, 
+        user_id: winnerId, 
+        type: 'winner_charge'
+      }
+    }, {
+      idempotencyKey
+    });
 
-  // mark auction ended & set winner
-  await supabase
-    .from('auctions')
-    .update({ status: 'ended', winner_id: winnerId })
-    .eq('id', auctionId);
+    // Insert payment record
+    const { error: insertError } = await supabase.from('payments').insert({
+      user_id: winnerId,
+      auction_id: auctionId,
+      amount_cents: amountCents,
+      currency: 'usd',
+      payment_intent_id: intent.id,
+      status: intent.status,
+    });
 
-  return NextResponse.json({ 
-    status: intent.status, 
-    paymentIntentId: intent.id 
-  });
+    if (insertError) {
+      console.error('Failed to insert payment record:', insertError);
+      // Don't mark auction ended if we can't track payment
+      return NextResponse.json({ error: 'payment_tracking_failed' }, { status: 500 });
+    }
+
+    // Only mark auction ended if payment succeeded or is processing
+    if (intent.status === 'succeeded' || intent.status === 'processing') {
+      await supabase
+        .from('auctions')
+        .update({ status: 'ended', winner_id: winnerId })
+        .eq('id', auctionId);
+    }
+
+    return NextResponse.json({ 
+      status: intent.status, 
+      paymentIntentId: intent.id 
+    });
+  } catch (err: any) {
+    console.error('Error charging winner:', err);
+    
+    // If payment failed, record it
+    if (err.payment_intent) {
+      await supabase.from('payments').insert({
+        user_id: winnerId,
+        auction_id: auctionId,
+        amount_cents: amountCents,
+        currency: 'usd',
+        payment_intent_id: err.payment_intent.id,
+        status: 'failed',
+      });
+    }
+    
+    return NextResponse.json({ 
+      error: 'charge_failed', 
+      message: err.message 
+    }, { status: 500 });
+  }
 }

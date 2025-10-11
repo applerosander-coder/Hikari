@@ -4,6 +4,18 @@
 BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
 
 ### Recent Changes
+**October 11, 2025 - Saved Payment Method & Auto-Charge Winner:**
+- Implemented saved card infrastructure with customers and payments database tables
+- Created API routes for SetupIntent, payment method attachment, and auction closing
+- Enhanced bid actions to enforce saved payment method requirement before bidding
+- Built AddCardModal component with Stripe Elements for card saving
+- Integrated modal into bidding flow with automatic retry after card is saved
+- Updated webhook handlers to sync payment status (succeeded/failed) for winner charges
+- Added idempotency protection to prevent double charges on auction close
+- Proper error handling and rollback logic to keep auction/payment state consistent
+- Off-session payment charging for auction winners using saved payment methods
+- Payment metadata distinguishes between bid payments (type: bid) and winner charges (type: winner_charge)
+
 **October 11, 2025 - Updated Pricing Plans:**
 - Updated pricing module with 3 new auction-focused plans
 - Participant Plan (Free): Join auctions, bid, win, and track items

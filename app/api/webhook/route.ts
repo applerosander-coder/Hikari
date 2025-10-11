@@ -30,30 +30,21 @@ export async function POST(req: Request) {
       // Here you could update your database or send an email, etc.
     }
 
-    // Update payments table status for off-session charges
-    if (event.type === "payment_intent.succeeded") {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      await supabaseAdmin
-        .from('payments')
-        .update({ status: 'succeeded' })
-        .eq('payment_intent_id', pi.id);
-    }
-
-    if (event.type === "payment_intent.payment_failed") {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      await supabaseAdmin
-        .from('payments')
-        .update({ status: 'failed' })
-        .eq('payment_intent_id', pi.id);
-      // TODO: notify user to update card
-    }
-
     // Handle bid payment completion - CREATE BID ONLY AFTER PAYMENT SUCCESS
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       
-      // Check if this is a bid payment
-      if (paymentIntent.metadata.auction_id && paymentIntent.metadata.user_id) {
+      // Update payments table for winner charges (identified by type metadata)
+      if (paymentIntent.metadata.type === 'winner_charge') {
+        await supabaseAdmin
+          .from('payments')
+          .update({ status: 'succeeded' })
+          .eq('payment_intent_id', paymentIntent.id);
+        return new Response(null, { status: 200 });
+      }
+      
+      // Check if this is a bid payment (has bid_amount in metadata)
+      if (paymentIntent.metadata.auction_id && paymentIntent.metadata.user_id && paymentIntent.metadata.bid_amount) {
         const { auction_id, user_id, bid_amount } = paymentIntent.metadata;
         const bidAmountNum = Number(bid_amount);
         
@@ -136,6 +127,20 @@ export async function POST(req: Request) {
 
           console.log(`✅ Bid recorded successfully for auction ${auction_id}`);
         }
+      }
+    }
+
+    // Handle payment failures
+    if (event.type === "payment_intent.payment_failed") {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      
+      // Update payments table for winner charges
+      if (pi.metadata.type === 'winner_charge') {
+        await supabaseAdmin
+          .from('payments')
+          .update({ status: 'failed' })
+          .eq('payment_intent_id', pi.id);
+        // TODO: notify user to update card and retry auction
       }
     }
 
