@@ -61,6 +61,8 @@ export async function confirmBidPlacement(
   auctionId: string,
   bidAmount: number
 ) {
+  console.log('🎯 confirmBidPlacement called:', { auctionId, bidAmount });
+  
   try {
     const supabase = createClient();
     
@@ -68,8 +70,11 @@ export async function confirmBidPlacement(
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
+      console.log('❌ User not authenticated:', userError);
       return { error: 'You must be signed in to place a bid' };
     }
+    
+    console.log('✅ User authenticated:', user.id);
 
     // Validate auction exists and is active
     const { data: auction, error: auctionError } = await supabase
@@ -96,6 +101,7 @@ export async function confirmBidPlacement(
 
     // Atomic bid placement: only update if our bid is higher than current
     // This prevents race conditions where lower bids overwrite higher ones
+    console.log('🔄 Attempting to update auction with bid:', bidAmount);
     const { data: updatedAuction, error: updateError } = await supabase
       .from('auctions')
       .update({ current_bid: bidAmount })
@@ -105,11 +111,14 @@ export async function confirmBidPlacement(
       .single();
 
     if (updateError || !updatedAuction) {
-      // Auction wasn't updated - someone placed a higher bid first
+      console.log('❌ Auction update failed:', updateError);
       return { error: 'A higher bid was placed. Please try again.' };
     }
 
+    console.log('✅ Auction updated successfully');
+
     // Insert bid record only if auction update succeeded
+    console.log('💾 Inserting bid record...');
     const { error: bidError } = await supabase.from('bids').insert({
       auction_id: auctionId,
       user_id: user.id,
@@ -117,7 +126,7 @@ export async function confirmBidPlacement(
     });
 
     if (bidError) {
-      console.error('Error inserting bid:', bidError);
+      console.error('❌ Error inserting bid:', bidError);
       // Rollback auction update by reverting to previous highest bid
       const { data: previousBid } = await supabase
         .from('bids')
@@ -137,9 +146,12 @@ export async function confirmBidPlacement(
       return { error: 'Failed to record bid' };
     }
 
+    console.log('✅ Bid record inserted successfully');
+    
     revalidatePath('/dashboard');
     revalidatePath(`/auctions/${auctionId}`);
 
+    console.log('🎉 Bid placement complete - returning success');
     return { success: true };
   } catch (error: any) {
     console.error('Error confirming bid:', error);
