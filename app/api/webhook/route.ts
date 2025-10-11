@@ -30,6 +30,24 @@ export async function POST(req: Request) {
       // Here you could update your database or send an email, etc.
     }
 
+    // Update payments table status for off-session charges
+    if (event.type === "payment_intent.succeeded") {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      await supabaseAdmin
+        .from('payments')
+        .update({ status: 'succeeded' })
+        .eq('payment_intent_id', pi.id);
+    }
+
+    if (event.type === "payment_intent.payment_failed") {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      await supabaseAdmin
+        .from('payments')
+        .update({ status: 'failed' })
+        .eq('payment_intent_id', pi.id);
+      // TODO: notify user to update card
+    }
+
     // Handle bid payment completion - CREATE BID ONLY AFTER PAYMENT SUCCESS
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
