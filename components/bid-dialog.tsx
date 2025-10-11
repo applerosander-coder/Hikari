@@ -50,30 +50,37 @@ export function BidDialog({
 
     setIsPlacingBid(true);
 
-    const result = await confirmBidPlacement(
-      auctionId,
-      Math.round(bidValue * 100)
-    );
-
-    setIsPlacingBid(false);
-
-    if (result.error) {
-      toast.error(result.error);
-      return;
-    }
-
-    // Success - redirect to My Bids with celebration
-    if (result.success) {
-      onOpenChange(false);
-      setBidAmount('');
-      onBidPlaced?.();
-      
-      // Redirect to My Bids page with celebration parameters
-      router.push(
-        `/dashboard/mybids?bid_success=true&auction_id=${auctionId}&auction_title=${encodeURIComponent(auctionTitle)}&bid_amount=${Math.round(bidValue * 100)}`
+    try {
+      const result = await confirmBidPlacement(
+        auctionId,
+        Math.round(bidValue * 100)
       );
-    } else {
-      toast.error('Failed to place bid. Please try again.');
+
+      setIsPlacingBid(false);
+
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      // Success - redirect to My Bids with celebration
+      if (result.success) {
+        toast.success('Bid placed successfully!');
+        onOpenChange(false);
+        setBidAmount('');
+        onBidPlaced?.();
+        
+        // Redirect to My Bids page with celebration parameters
+        router.push(
+          `/dashboard/mybids?bid_success=true&auction_id=${auctionId}&auction_title=${encodeURIComponent(auctionTitle)}&bid_amount=${Math.round(bidValue * 100)}`
+        );
+      } else {
+        toast.error('Failed to place bid. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error placing bid:', error);
+      setIsPlacingBid(false);
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 
