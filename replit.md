@@ -11,6 +11,8 @@ Auctions is a comprehensive live auction and bidding platform built with Next.js
 - **Responsive Cards**: Auction cards are uniform width and swipeable within each category
 - **Visual Hierarchy**: Hot auctions use larger cards with flame icon and bid count badges
 - **Search Integration**: Search bar filters across all categories while maintaining layout structure
+- **Performance**: Created Postgres RPC function `get_auction_bid_counts()` for efficient database-level aggregation instead of N+1 queries
+- **Monochrome Design**: All badges use black/white with dark mode support (no colored accents), maintaining strict design aesthetic
 
 **October 11, 2025 - Sidebar Enhancements:**
 - **Sign Out Button**: Added sign out button at bottom of dashboard sidebar for easy logout
