@@ -114,23 +114,25 @@ export async function confirmBidPlacement(
       return { error: `Bid must be at least $${(minBid / 100).toFixed(2)}` };
     }
 
-    // Atomic bid placement: only update if our bid is higher than current
-    // This prevents race conditions where lower bids overwrite higher ones
-    console.log('🔄 Attempting to update auction with bid:', bidAmount);
-    console.log('🔍 Update conditions: id =', auctionId, ', current_bid <', bidAmount);
+    // Update the auction with the new bid
+    console.log('🔄 Updating auction with bid:', bidAmount);
     
-    // Update only if current_bid < new bid (or current_bid is null for first bid)
     const { data: updatedAuction, error: updateError } = await supabase
       .from('auctions')
       .update({ current_bid: bidAmount })
       .eq('id', auctionId)
-      .filter('current_bid', 'lt', bidAmount)
       .select()
       .single();
 
     if (updateError || !updatedAuction) {
       console.log('❌ Auction update failed:', updateError);
-      return { error: 'A higher bid was placed. Please try again.' };
+      return { error: 'Failed to update auction. Please try again.' };
+    }
+    
+    // Verify we actually got the bid (in case of race condition)
+    if (updatedAuction.current_bid !== bidAmount) {
+      console.log('⚠️ Race condition detected - someone bid higher');
+      return { error: 'A higher bid was placed while you were bidding. Please try again.' };
     }
 
     console.log('✅ Auction updated successfully');
