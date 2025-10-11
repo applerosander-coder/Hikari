@@ -84,8 +84,16 @@ export async function confirmBidPlacement(
       .single();
 
     if (auctionError || !auction) {
+      console.log('❌ Auction not found');
       return { error: 'Auction not found' };
     }
+
+    console.log('📊 Auction data:', { 
+      id: auction.id, 
+      current_bid: auction.current_bid, 
+      starting_price: auction.starting_price,
+      status: auction.status 
+    });
 
     if (auction.status !== 'active') {
       return { error: 'This auction is not currently active' };
@@ -94,6 +102,13 @@ export async function confirmBidPlacement(
     // Validate minimum bid
     const currentBid = auction.current_bid || auction.starting_price;
     const minBid = currentBid + 100;
+
+    console.log('💰 Bid validation:', { 
+      currentBid, 
+      minBid, 
+      newBid: bidAmount,
+      isValid: bidAmount >= minBid 
+    });
 
     if (bidAmount < minBid) {
       return { error: `Bid must be at least $${(minBid / 100).toFixed(2)}` };
