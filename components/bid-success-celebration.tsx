@@ -187,7 +187,7 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
 
   const handleViewMyBids = () => {
     onClose();
-    router.push('/dashboard/mybids');
+    router.push('/mybids');
   };
 
   const currentVariant = celebrationVariants[variant];

@@ -24,7 +24,7 @@ Auctions is a comprehensive live auction and bidding platform built with Next.js
 - **Smart Fallback**: If auto-charge fails (authentication required, card declined), falls back to manual PaymentElement
 - **Enhanced Error Handling**: Detects specific Stripe errors (requires_action, card_declined, insufficient_funds, authentication_required)
 - **Seamless UX**: Try auto-charge → Show actionable toast → Fall back to manual payment if needed
-- **Success Flow**: After successful payment, redirects to /dashboard/mybids with celebration parameters
+- **Success Flow**: After successful payment, redirects to /mybids with celebration parameters
 
 ### User Preferences
 I prefer the agent to be concise and to the point. When suggesting code changes, provide a brief explanation of the "why" behind the change, not just the "what." I value iterative development and prefer to review smaller, focused pull requests or changes rather than large, monolithic ones. Please ensure all modifications align with the existing monochrome design aesthetic (black, white, gray). Do not make changes to the `docs/` folder.

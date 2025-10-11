@@ -139,7 +139,7 @@ export function MyBidsDisplay({
           }
         }
         
-        router.replace('/dashboard/mybids');
+        router.replace('/mybids');
         router.refresh();
       };
       

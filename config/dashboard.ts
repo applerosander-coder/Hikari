@@ -30,8 +30,8 @@ export const iconComponents = {
 };
 
 export const navConfig = [
-  { href: '/dashboard', icon: 'LayoutDashboard', label: 'Dashboard' },
-  { href: '/dashboard/mybids', icon: 'Heart', label: 'My Bids' },
+  { href: '/dashboard', icon: 'LayoutDashboard', label: 'Auctions' },
+  { href: '/mybids', icon: 'Heart', label: 'My Bids' },
   // { href: '/dashboard/posts', icon: 'FileText', label: 'Posts' },
   {
     href: '/dashboard/customer',
