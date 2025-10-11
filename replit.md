@@ -6,9 +6,10 @@ BidWin is a comprehensive live auction and bidding platform built with Next.js 1
 ### Recent Changes
 **October 11, 2025 - Mobile Search Field Fix:**
 - Fixed search field visibility on My Bids page mobile view
-- Added proper top padding (pt-24 = 96px) to clear sticky navbar (h-20 = 80px)
-- Search field now fully visible with 16px breathing room below navbar on mobile
-- Desktop view unchanged (maintains sm:py-4 responsive padding)
+- Removed sticky positioning from dashboard navbar on mobile (was preventing scroll to top)
+- Navbar now scrolls naturally with page content on all devices
+- Search field fully accessible by scrolling to top
+- Simplified My Bids padding to uniform py-4 across all breakpoints
 
 **October 10, 2025 - Interactive Particle Background:**
 - Added interactive particle background to hero section using @tsparticles/react and @tsparticles/slim
