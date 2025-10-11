@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { createClient } from '@supabase/supabase-js'
 import { useToast } from "@/components/ui/use-toast"
 import { CoolMode } from "@/components/magicui/cool-mode";
+import { Gavel } from 'lucide-react';
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
@@ -82,7 +83,7 @@ export default function FooterPrimary() {
             <ul className="space-y-2">
               <li>
                 <AnimatedUnderline href="#" className="text-primary">
-                  About BidWin
+                  About Auctions
                 </AnimatedUnderline>
               </li>
               <li>
@@ -156,10 +157,10 @@ export default function FooterPrimary() {
         </div>
         <div className="border-t mt-10 pt-6 flex flex-col items-center md:flex-row justify-between">
           <div className="flex items-center space-x-2">
-            <LogInIcon className="h-6 w-6" />
-            <span className="text-xl font-bold">BidWin.</span>
+            <Gavel className="h-6 w-6" />
+            <span className="text-xl font-bold">Auctions.</span>
           </div>
-          <p className="text-gray-500 mt-4 md:mt-0">© BidWin Inc. 2025</p>
+          <p className="text-gray-500 mt-4 md:mt-0">© Auctions Inc. 2025</p>
         </div>
       </div>
     </footer>
@@ -186,23 +187,3 @@ function ArrowRightIcon(props: any) {
   );
 }
 
-function LogInIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-      <polyline points="10 17 15 12 10 7" />
-      <line x1="15" x2="3" y1="12" y2="12" />
-    </svg>
-  );
-}

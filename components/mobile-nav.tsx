@@ -6,7 +6,7 @@ import { MainNavItem } from 'types';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
-import { SunIcon } from '@heroicons/react/24/solid';
+import { Gavel } from 'lucide-react';
 import { UserAccountNav } from '@/components/user-account-nav';
 import {
   Sheet,
@@ -40,10 +40,10 @@ export function MobileNav({
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
           <SheetTitle className="flex items-center space-x-2 text-left">
-            <div className="bg-slate-50 dark:bg-slate-900 p-1 rounded-full">
-              <SunIcon className="size-6" />
+            <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded-full">
+              <Gavel className="size-5" />
             </div>
-            <span className="text-xl font-extrabold">BidWin</span>
+            <span className="text-xl font-extrabold">Auctions</span>
           </SheetTitle>
         </SheetHeader>
         

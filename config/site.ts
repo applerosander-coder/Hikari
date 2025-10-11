@@ -1,7 +1,7 @@
 import { SiteConfig } from 'types';
 
 export const siteConfig: SiteConfig = {
-  name: 'BidWin',
+  name: 'Auctions',
   description:
     'Discover unique items and win incredible deals through live online auctions. Place your bids and compete in real-time.',
   url: 'https://hikari.antoineross.com',

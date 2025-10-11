@@ -12,9 +12,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import { UserAccountNav } from '@/components/user-account-nav';
 import Link from 'next/link';
-import { Package2, Settings, Menu, LogOut } from 'lucide-react';
+import { Package2, Settings, Menu, LogOut, Gavel } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { SunIcon } from '@heroicons/react/24/solid';
 
 import { NavItem, iconComponents } from '@/config/dashboard';
 
@@ -51,8 +50,8 @@ export function Navbar({
               className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
               prefetch={false}
             >
-              <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-              <span className="sr-only">Acme Inc</span>
+              <Gavel className="h-5 w-5 transition-all group-hover:scale-110" />
+              <span className="sr-only">Auctions</span>
             </Link>
             {navConfig.map(
               (
@@ -90,10 +89,10 @@ export function Navbar({
       </Sheet>
       
       <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2" prefetch={false}>
-        <div className="bg-slate-50 dark:bg-slate-900 p-1 rounded-full">
-          <SunIcon className="size-8 transition-transform duration-300 ease-in-out hover:scale-110" />
+        <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded-full">
+          <Gavel className="size-6 transition-transform duration-300 ease-in-out hover:scale-110" />
         </div>
-        <span className="text-lg md:text-xl font-extrabold tracking-tightest">BidWin</span>
+        <span className="text-lg md:text-xl font-extrabold tracking-tightest">Auctions</span>
       </Link>
 
       <Breadcrumb className="hidden md:flex invisible">
