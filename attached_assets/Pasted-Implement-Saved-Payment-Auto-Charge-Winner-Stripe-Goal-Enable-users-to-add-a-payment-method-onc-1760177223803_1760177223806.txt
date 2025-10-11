@@ -1,0 +1,376 @@
+Implement Saved Payment + Auto-Charge Winner (Stripe)
+Goal
+
+Enable users to add a payment method once (via Stripe SetupIntent), then automatically charge the winner at auction close (via PaymentIntent using the saved method). No card entry during bidding.
+
+Stack & Constraints
+
+Runtime: Replit (Node/TypeScript or JavaScript)
+
+Framework: Next.js or simple Express (pick one and be consistent)
+
+Database: Use existing DB (e.g., Supabase/Postgres) or a lightweight Prisma/SQLite if none
+
+Payments: Stripe (latest API version)
+
+Authentication: assume we have user.id available in API (e.g., Supabase auth or session)
+
+Environment & Secrets (create in Replit → Secrets)
+
+STRIPE_SECRET_KEY = sk_live_… (use test key first: sk_test_…)
+
+STRIPE_WEBHOOK_SECRET = from Stripe webhook endpoint
+
+APP_URL = public Replit URL (https://…repl.co)
+
+If using Supabase: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+
+Minimal Data Model (create if not present)
+
+Tables (adjust to your ORM):
+
+users: id (pk), email, stripe_customer_id
+
+payment_methods: id (pk), user_id (fk), stripe_payment_method_id, is_default (bool)
+
+auctions: id (pk), title, ends_at, status (open|closed), winning_bid_id (nullable)
+
+bids: id (pk), auction_id (fk), user_id (fk), amount_cents (int), created_at
+
+charges: id (pk), auction_id (fk), user_id (fk), payment_intent_id, status, amount_cents, created_at
+
+UX Flow (must implement)
+
+Add payment method (one time)
+
+Page/Modal: “Verify payment method”
+
+Use Stripe SetupIntent + Stripe Elements (Payment Element)
+
+On success, store payment_method.id + attach to Customer
+
+Set as default for the user
+
+Bidding
+
+Before placing a bid: check user has a default payment method; if not, prompt step #1
+
+Auction close → auto-charge winner
+
+On close (cron or admin action), compute winner
+
+Create PaymentIntent with customer + payment_method + amount
+
+Confirm immediately (confirm: true)
+
+Record result to charges and update auction status
+
+Receipts & status
+
+Show “Payment processing…” then “Paid” or “Failed—update card” on user’s “My Bids”
+
+Email receipt handled by Stripe; show transaction status in UI via webhook updates
+
+Endpoints to Build
+
+Use /api/* routes (Next.js API routes or Express). Return JSON. Validate auth.
+
+POST /api/payments/setup-intent
+
+Input: none
+
+Logic: ensure stripe_customer_id exists (create if missing), create SetupIntent with usage: 'off_session'
+
+Output: { clientSecret }
+
+POST /api/payments/attach-default
+
+Input: { paymentMethodId }
+
+Logic: Attach to customer, set as default, upsert into payment_methods with is_default=true (unset others)
+
+Output: { ok: true }
+
+POST /api/bids/place
+
+Input: { auctionId, amountCents }
+
+Checks:
+
+auction open, ends_at in future
+
+user has default payment method
+
+amount > current highest
+
+Write bid; return updated high bid
+
+POST /api/auctions/close
+
+Admin or scheduled job
+
+Input: { auctionId }
+
+Logic:
+
+Determine winning bid & user
+
+Create PaymentIntent:
+
+amount = winning amount
+
+currency = 'usd'
+
+customer = user.stripe_customer_id
+
+payment_method = user.default Stripe PM
+
+off_session: true
+
+confirm: true
+
+automatic_payment_methods: { enabled: true } (optional)
+
+Persist to charges
+
+Update auction → status='closed', set winning_bid_id
+
+Output: { status: 'charged' | 'requires_action' | 'failed', paymentIntentId }
+
+POST /api/stripe/webhook
+
+Verify signature with STRIPE_WEBHOOK_SECRET
+
+Handle:
+
+payment_intent.succeeded → mark charge status='succeeded'
+
+payment_intent.payment_failed → mark failed, notify user to update card
+
+(Optional) setup_intent.succeeded → confirm PM saved in DB
+
+Frontend Tasks
+
+Add Card Modal/Page
+
+Call /api/payments/setup-intent → init Stripe + Elements → confirm setup
+
+On success, get setupIntent.payment_method and call /api/payments/attach-default
+
+UI: success state + default card last4/brand
+
+Bid Button
+
+If no default card: open Add Card modal; else place bid
+
+My Bids / Receipts
+
+Show auction statuses and last payment state from charges
+
+Optional: Pre-Authorization (Deposit)
+
+When user places first bid on an auction, optionally create a PaymentIntent for a small deposit (e.g., $1) with capture_method='manual' to hold, and void it at auction close or capture a portion toward final payment.
+
+Only implement if time allows.
+
+Error Handling & Idempotency
+
+Use Idempotency-Key header (UUID) on payment-creating calls
+
+Gracefully handle authentication_required (rare for off-session); if occurs, notify user to re-confirm card (Stripe Link helps)
+
+Retry transient Stripe errors with backoff
+
+Security
+
+Never pass secret keys to client
+
+Verify webhook signatures
+
+Server-side check: user owns any entity they act upon
+
+Sanitize amounts (integers cents, min/max)
+
+Testing Checklist (Stripe Test Mode)
+
+Add card 4242 4242 4242 4242 → SetupIntent succeeds
+
+Place bids without further card prompts
+
+Close auction → auto charge succeeds
+
+Use 4000 0000 0000 9995 to simulate failure; verify UI shows “update card”
+
+Webhook events toggle charge status in DB
+
+Code Stubs (TypeScript, Next.js API Routes)
+
+/api/payments/setup-intent.ts
+
+import Stripe from 'stripe';
+import { getSessionUser, db } from '@/lib/server';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' });
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+  const user = await getSessionUser(req, res);
+  if (!user) return res.status(401).json({ error: 'unauthenticated' });
+
+  let customerId = user.stripe_customer_id;
+  if (!customerId) {
+    const customer = await stripe.customers.create({ email: user.email, metadata: { appUserId: user.id } });
+    customerId = customer.id;
+    await db.user.update({ where: { id: user.id }, data: { stripe_customer_id: customerId }});
+  }
+
+  const si = await stripe.setupIntents.create({
+    customer: customerId,
+    usage: 'off_session',
+    payment_method_types: ['card'], // Apple/Google Pay included via Payment Element if available
+  });
+
+  res.json({ clientSecret: si.client_secret });
+}
+
+
+/api/payments/attach-default.ts
+
+import Stripe from 'stripe';
+import { getSessionUser, db } from '@/lib/server';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' });
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+  const user = await getSessionUser(req, res);
+  const { paymentMethodId } = req.body;
+  if (!user || !paymentMethodId) return res.status(400).json({ error: 'bad_request' });
+
+  await stripe.paymentMethods.attach(paymentMethodId, { customer: user.stripe_customer_id });
+  await stripe.customers.update(user.stripe_customer_id, { invoice_settings: { default_payment_method: paymentMethodId } });
+
+  // persist
+  await db.$transaction([
+    db.paymentMethod.updateMany({ where: { user_id: user.id }, data: { is_default: false } }),
+    db.paymentMethod.upsert({
+      where: { user_id_stripe_pm: { user_id: user.id, stripe_payment_method_id: paymentMethodId }},
+      create: { user_id: user.id, stripe_payment_method_id: paymentMethodId, is_default: true },
+      update: { is_default: true }
+    })
+  ]);
+
+  res.json({ ok: true });
+}
+
+
+/api/auctions/close.ts
+
+import Stripe from 'stripe';
+import { adminOnly, db } from '@/lib/server';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' });
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+  await adminOnly(req, res);
+  const { auctionId } = req.body;
+
+  const auction = await db.auction.findUnique({ where: { id: auctionId }, include: {
+    bids: { orderBy: { amount_cents: 'desc' }, take: 1 }, winner: true
+  }});
+  if (!auction || auction.status !== 'open') return res.status(400).json({ error: 'invalid_auction' });
+
+  const winningBid = auction.bids[0];
+  if (!winningBid) {
+    await db.auction.update({ where: { id: auctionId }, data: { status: 'closed' }});
+    return res.json({ status: 'no_bids' });
+  }
+
+  const user = await db.user.findUnique({ where: { id: winningBid.user_id }});
+  if (!user?.stripe_customer_id) return res.status(400).json({ error: 'no_customer' });
+
+  // Optional: fetch default PM (or rely on customer default)
+  const customer = await stripe.customers.retrieve(user.stripe_customer_id) as Stripe.Customer;
+
+  const intent = await stripe.paymentIntents.create({
+    amount: winningBid.amount_cents,
+    currency: 'usd',
+    customer: user.stripe_customer_id,
+    payment_method: (customer.invoice_settings?.default_payment_method as string | null) ?? undefined,
+    off_session: true,
+    confirm: true,
+    description: `Auction ${auction.id} – winning bid`,
+    metadata: { auctionId: String(auction.id), userId: String(user.id), bidId: String(winningBid.id) },
+  });
+
+  await db.$transaction([
+    db.charge.create({
+      data: {
+        auction_id: auction.id,
+        user_id: user.id,
+        payment_intent_id: intent.id,
+        status: intent.status,
+        amount_cents: winningBid.amount_cents,
+      }
+    }),
+    db.auction.update({
+      where: { id: auction.id },
+      data: { status: 'closed', winning_bid_id: winningBid.id }
+    })
+  ]);
+
+  res.json({ status: intent.status, paymentIntentId: intent.id });
+}
+
+
+/api/stripe/webhook.ts
+
+import Stripe from 'stripe';
+import { buffer } from 'micro';
+import { db } from '@/lib/server';
+
+export const config = { api: { bodyParser: false } };
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' });
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+  const sig = req.headers['stripe-signature'] as string;
+  const buf = await buffer(req);
+
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+  } catch (e) {
+    return res.status(400).send(`Webhook Error: ${(e as Error).message}`);
+  }
+
+  if (event.type === 'payment_intent.succeeded') {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    await db.charge.update({ where: { payment_intent_id: pi.id }, data: { status: 'succeeded' } });
+  }
+
+  if (event.type === 'payment_intent.payment_failed') {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    await db.charge.update({ where: { payment_intent_id: pi.id }, data: { status: 'failed' } });
+    // TODO: notify user to update card
+  }
+
+  if (event.type === 'setup_intent.succeeded') {
+    // Optionally reconcile saved PMs if needed
+  }
+
+  res.json({ received: true });
+}
+
+Final Acceptance Criteria
+
+User can add a card once; it’s saved as default
+
+Users cannot bid without a saved card
+
+Closing an auction charges the winner automatically
+
+Webhooks keep DB charge status in sync
+
+All secrets in Replit; no card data stored in our DB
+
+Happy path + failure path both verified in Stripe test mode

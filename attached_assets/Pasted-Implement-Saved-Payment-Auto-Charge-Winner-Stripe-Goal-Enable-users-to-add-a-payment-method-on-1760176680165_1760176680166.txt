@@ -1,0 +1,133 @@
+Implement Saved Payment + Auto-Charge Winner (Stripe)
+
+Goal
+
+Enable users to add a payment method once (via Stripe SetupIntent), then automatically charge the winner at auction close (via PaymentIntent using the saved method). No card entry during bidding.
+
+Stack & Constraints
+	•	Runtime: Replit (Node/TypeScript or JavaScript)
+	•	Framework: Next.js or simple Express (pick one and be consistent)
+	•	Database: Use existing DB (e.g., Supabase/Postgres) or a lightweight Prisma/SQLite if none
+	•	Payments: Stripe (latest API version)
+	•	Authentication: assume we have user.id available in API (e.g., Supabase auth or session)
+
+Environment & Secrets (create in Replit → Secrets)
+	•	STRIPE_SECRET_KEY = sk_live_… (use test key first: sk_test_…)
+	•	STRIPE_WEBHOOK_SECRET = from Stripe webhook endpoint
+	•	APP_URL = public Replit URL (https://…repl.co)
+	•	If using Supabase: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+
+Minimal Data Model (create if not present)
+
+Tables (adjust to your ORM):
+	•	users: id (pk), email, stripe_customer_id
+	•	payment_methods: id (pk), user_id (fk), stripe_payment_method_id, is_default (bool)
+	•	auctions: id (pk), title, ends_at, status (open|closed), winning_bid_id (nullable)
+	•	bids: id (pk), auction_id (fk), user_id (fk), amount_cents (int), created_at
+	•	charges: id (pk), auction_id (fk), user_id (fk), payment_intent_id, status, amount_cents, created_at
+
+UX Flow (must implement)
+	1.	Add payment method (one time)
+	•	Page/Modal: “Verify payment method”
+	•	Use Stripe SetupIntent + Stripe Elements (Payment Element)
+	•	On success, store payment_method.id + attach to Customer
+	•	Set as default for the user
+	2.	Bidding
+	•	Before placing a bid: check user has a default payment method; if not, prompt step #1
+	3.	Auction close → auto-charge winner
+	•	On close (cron or admin action), compute winner
+	•	Create PaymentIntent with customer + payment_method + amount
+	•	Confirm immediately (confirm: true)
+	•	Record result to charges and update auction status
+	4.	Receipts & status
+	•	Show “Payment processing…” then “Paid” or “Failed—update card” on user’s “My Bids”
+	•	Email receipt handled by Stripe; show transaction status in UI via webhook updates
+
+Endpoints to Build
+
+Use /api/* routes (Next.js API routes or Express). Return JSON. Validate auth.
+
+	1.	POST /api/payments/setup-intent
+
+	•	Input: none
+	•	Logic: ensure stripe_customer_id exists (create if missing), create SetupIntent with usage: 'off_session'
+	•	Output: { clientSecret }
+
+	2.	POST /api/payments/attach-default
+
+	•	Input: { paymentMethodId }
+	•	Logic: Attach to customer, set as default, upsert into payment_methods with is_default=true (unset others)
+	•	Output: { ok: true }
+
+	3.	POST /api/bids/place
+
+	•	Input: { auctionId, amountCents }
+	•	Checks:
+	•	auction open, ends_at in future
+	•	user has default payment method
+	•	amount > current highest
+	•	Write bid; return updated high bid
+
+	4.	POST /api/auctions/close
+
+	•	Admin or scheduled job
+	•	Input: { auctionId }
+	•	Logic:
+	•	Determine winning bid & user
+	•	Create PaymentIntent:
+	•	amount = winning amount
+	•	currency = 'usd'
+	•	customer = user.stripe_customer_id
+	•	payment_method = user.default Stripe PM
+	•	off_session: true
+	•	confirm: true
+	•	automatic_payment_methods: { enabled: true } (optional)
+	•	Persist to charges
+	•	Update auction → status='closed', set winning_bid_id
+	•	Output: { status: 'charged' | 'requires_action' | 'failed', paymentIntentId }
+
+	5.	POST /api/stripe/webhook
+
+	•	Verify signature with STRIPE_WEBHOOK_SECRET
+	•	Handle:
+	•	payment_intent.succeeded → mark charge status='succeeded'
+	•	payment_intent.payment_failed → mark failed, notify user to update card
+	•	(Optional) setup_intent.succeeded → confirm PM saved in DB
+
+Frontend Tasks
+	•	Add Card Modal/Page
+	•	Call /api/payments/setup-intent → init Stripe + Elements → confirm setup
+	•	On success, get setupIntent.payment_method and call /api/payments/attach-default
+	•	UI: success state + default card last4/brand
+	•	Bid Button
+	•	If no default card: open Add Card modal; else place bid
+	•	My Bids / Receipts
+	•	Show auction statuses and last payment state from charges
+
+Optional: Pre-Authorization (Deposit)
+	•	When user places first bid on an auction, optionally create a PaymentIntent for a small deposit (e.g., $1) with capture_method='manual' to hold, and void it at auction close or capture a portion toward final payment.
+	•	Only implement if time allows.
+
+Error Handling & Idempotency
+	•	Use Idempotency-Key header (UUID) on payment-creating calls
+	•	Gracefully handle authentication_required (rare for off-session); if occurs, notify user to re-confirm card (Stripe Link helps)
+	•	Retry transient Stripe errors with backoff
+
+Security
+	•	Never pass secret keys to client
+	•	Verify webhook signatures
+	•	Server-side check: user owns any entity they act upon
+	•	Sanitize amounts (integers cents, min/max)
+
+Testing Checklist (Stripe Test Mode)
+	•	Add card 4242 4242 4242 4242 → SetupIntent succeeds
+	•	Place bids without further card prompts
+	•	Close auction → auto charge succeeds
+	•	Use 4000 0000 0000 9995 to simulate failure; verify UI shows “update card”
+	•	Webhook events toggle charge status in DB
+
+⸻
+
+Code Stubs (TypeScript, Next.js API Routes)
+
+/api/payments/setup-intent.ts

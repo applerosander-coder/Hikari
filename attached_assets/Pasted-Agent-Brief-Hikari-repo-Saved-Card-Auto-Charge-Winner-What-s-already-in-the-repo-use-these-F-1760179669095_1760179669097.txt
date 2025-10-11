@@ -1,0 +1,443 @@
+Agent Brief (Hikari repo): Saved Card + Auto-Charge Winner
+What’s already in the repo (use these)
+
+Framework: Next.js App Router (/app)
+
+DB: Supabase with tables: auctions, bids, users, customers (has stripe_customer_id)
+
+Stripe utils: utils/stripe/config.ts (client + server config), utils/stripe/server.ts
+
+Webhook: app/api/webhook/route.ts (⚠️ route name mismatch vs package script, fix below)
+
+Auth helpers: utils/supabase/*
+
+We will:
+
+Add saved payment method via SetupIntent
+
+Enforce “card on file” before bidding
+
+Auto-charge winner off-session at auction close
+
+Keep payment status in a new payments table (simple ledger)
+
+0) Environment (Replit → Secrets)
+
+Set/confirm these (you already use most of them):
+
+STRIPE_SECRET_KEY (test first)
+
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+NEXT_PUBLIC_SUPABASE_URL
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+SUPABASE_SERVICE_ROLE_KEY
+
+APP_URL (your public Replit URL, e.g., https://<your>.repl.co)
+
+You can leave the *_LIVE variants empty in dev; utils/stripe/config.ts falls back correctly.
+
+1) Fix the webhook dev script
+
+package.json has:
+
+"stripe:listen": "stripe listen --forward-to=localhost:3000/api/webhooks"
+
+
+Your route is /api/webhook (singular).
+Change it to:
+
+"stripe:listen": "stripe listen --forward-to=localhost:3000/api/webhook"
+
+2) DB: minimal ledger for payments (Supabase SQL)
+
+Create a small payments table to track charges:
+
+-- payments table
+create table if not exists public.payments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users(id) on delete cascade,
+  auction_id uuid not null references public.auctions(id) on delete cascade,
+  amount_cents integer not null check (amount_cents > 0),
+  currency text not null default 'usd',
+  payment_intent_id text not null,
+  status text not null, -- e.g. 'succeeded' | 'processing' | 'requires_action' | 'failed'
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+create index if not exists payments_user_idx on public.payments(user_id);
+create index if not exists payments_auction_idx on public.payments(auction_id);
+
+
+You already have:
+
+public.customers (id, stripe_customer_id)
+
+public.users.payment_method (JSON field) — we’ll store the default Stripe PM summary here for quick UI (brand/last4) and keep the canonical PM on Stripe.
+
+3) API: Create SetupIntent (client secret for Payment Element)
+
+File: app/api/payments/setup-intent/route.ts (new)
+
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth'; // if you use next-auth; otherwise use your helper
+import { createClient } from '@/utils/supabase/server';
+import { stripe } from '@/utils/stripe/config';
+
+export async function POST() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
+
+  // ensure Stripe customer exists in public.customers
+  const { data: custRec } = await supabase
+    .from('customers')
+    .select('stripe_customer_id')
+    .eq('id', user.id)
+    .single();
+
+  let customerId = custRec?.stripe_customer_id ?? null;
+  if (!customerId) {
+    const customer = await stripe.customers.create({ email: user.email ?? undefined, metadata: { appUserId: user.id }});
+    customerId = customer.id;
+
+    await supabase.from('customers')
+      .upsert({ id: user.id, stripe_customer_id: customerId }, { onConflict: 'id' });
+  }
+
+  const si = await stripe.setupIntents.create({
+    customer: customerId,
+    usage: 'off_session',
+    payment_method_types: ['card'],
+  });
+
+  return NextResponse.json({ clientSecret: si.client_secret });
+}
+
+4) API: Attach PM and set default
+
+File: app/api/payments/attach-default/route.ts (new)
+
+import { NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
+import { stripe } from '@/utils/stripe/config';
+
+export async function POST(req: Request) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
+
+  const { paymentMethodId } = await req.json();
+  if (!paymentMethodId) return NextResponse.json({ error: 'bad_request' }, { status: 400 });
+
+  const { data: cust } = await supabase
+    .from('customers')
+    .select('stripe_customer_id')
+    .eq('id', user.id)
+    .single();
+
+  if (!cust?.stripe_customer_id) {
+    return NextResponse.json({ error: 'no_stripe_customer' }, { status: 400 });
+  }
+
+  await stripe.paymentMethods.attach(paymentMethodId, { customer: cust.stripe_customer_id });
+  await stripe.customers.update(cust.stripe_customer_id, {
+    invoice_settings: { default_payment_method: paymentMethodId }
+  });
+
+  // Store light summary in users.payment_method (brand/last4/exp) for UI
+  const pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+  const summary = pm.card ? {
+    id: pm.id,
+    brand: pm.card.brand,
+    last4: pm.card.last4,
+    exp_month: pm.card.exp_month,
+    exp_year: pm.card.exp_year
+  } : { id: pm.id };
+
+  await supabase.from('users').update({ payment_method: summary }).eq('id', user.id);
+
+  return NextResponse.json({ ok: true });
+}
+
+5) Server action: enforce saved card before bidding
+
+You already have app/actions/bid-actions.ts.
+Add a guard right after you fetch the user:
+
+// after: const { data: { user } } = await supabase.auth.getUser();
+
+const { data: profile } = await supabase
+  .from('users')
+  .select('payment_method')
+  .eq('id', user.id)
+  .single();
+
+if (!profile?.payment_method?.id) {
+  return { error: 'Please add a payment method before bidding.' };
+}
+
+
+In your bidding UI, if API returns that error, open the Add Card modal (see frontend below).
+
+6) API: Close auction ⇒ charge winner off-session
+
+File: app/api/auctions/close/route.ts (new)
+
+import { NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
+import { stripe } from '@/utils/stripe/config';
+
+export async function POST(req: Request) {
+  const supabase = createClient();
+  // TODO: add admin check OR run from a protected scheduler
+  const { auctionId } = await req.json();
+  if (!auctionId) return NextResponse.json({ error: 'bad_request' }, { status: 400 });
+
+  const { data: auction } = await supabase
+    .from('auctions')
+    .select('id, title, status, winner_id')
+    .eq('id', auctionId)
+    .single();
+
+  if (!auction || auction.status !== 'active') {
+    return NextResponse.json({ error: 'invalid_auction' }, { status: 400 });
+  }
+
+  // Determine winner: highest bid
+  const { data: topBid } = await supabase
+    .from('bids')
+    .select('id, user_id, bid_amount')
+    .eq('auction_id', auctionId)
+    .order('bid_amount', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (!topBid) {
+    // no bids — just mark ended
+    await supabase.from('auctions').update({ status: 'ended', winner_id: null }).eq('id', auctionId);
+    return NextResponse.json({ status: 'no_bids' });
+  }
+
+  const winnerId = topBid.user_id;
+  const amountCents = Math.trunc(Number(topBid.bid_amount));
+
+  // lookup Stripe customer + default PM
+  const { data: customerRec } = await supabase
+    .from('customers')
+    .select('stripe_customer_id')
+    .eq('id', winnerId)
+    .single();
+
+  const { data: userRec } = await supabase
+    .from('users')
+    .select('payment_method')
+    .eq('id', winnerId)
+    .single();
+
+  if (!customerRec?.stripe_customer_id || !userRec?.payment_method?.id) {
+    return NextResponse.json({ error: 'no_payment_method' }, { status: 400 });
+  }
+
+  const intent = await stripe.paymentIntents.create({
+    amount: amountCents,
+    currency: 'usd',
+    customer: customerRec.stripe_customer_id,
+    payment_method: userRec.payment_method.id,
+    off_session: true,
+    confirm: true,
+    description: `Auction ${auctionId} – winning bid`,
+    metadata: { auction_id: auctionId, user_id: winnerId, bid_id: topBid.id.toString() }
+  });
+
+  // write to payments ledger
+  await supabase.from('payments').insert({
+    user_id: winnerId,
+    auction_id: auctionId,
+    amount_cents: amountCents,
+    currency: 'usd',
+    payment_intent_id: intent.id,
+    status: intent.status,
+  });
+
+  // mark auction ended & set winner
+  await supabase.from('auctions').update({ status: 'ended', winner_id: winnerId }).eq('id', auctionId);
+
+  return NextResponse.json({ status: intent.status, paymentIntentId: intent.id });
+}
+
+7) Webhook: keep payment status in sync
+
+You already have app/api/webhook/route.ts. Add/ensure handlers update public.payments.status:
+
+// inside POST() after verifying event:
+if (event.type === 'payment_intent.succeeded') {
+  const pi = event.data.object as Stripe.PaymentIntent;
+  await supabaseAdmin
+    .from('payments')
+    .update({ status: 'succeeded' })
+    .eq('payment_intent_id', pi.id);
+}
+
+if (event.type === 'payment_intent.payment_failed') {
+  const pi = event.data.object as Stripe.PaymentIntent;
+  await supabaseAdmin
+    .from('payments')
+    .update({ status: 'failed' })
+    .eq('payment_intent_id', pi.id);
+  // TODO: notify user to update card
+}
+
+if (event.type === 'setup_intent.succeeded') {
+  // optional: reconcile if needed
+}
+
+
+Note: you already initialize supabaseAdmin in that file and stripe = new Stripe(process.env.STRIPE_SECRET_KEY!), so just add the updates.
+
+8) Frontend: Add Card modal (Payment Element)
+
+Create a simple client component that:
+
+POST /api/payments/setup-intent → get clientSecret
+
+Initialize Stripe + Elements Payment Element
+
+On confirm, get setupIntent.payment_method id
+
+POST /api/payments/attach-default with { paymentMethodId }
+
+Show summary (brand/last4) from users.payment_method
+
+File: app/(dashboard)/dashboard/AddCardModal.tsx (new; adjust path to where you want it)
+
+'use client';
+import { useEffect, useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+function AddCardForm({ clientSecret, onClose }: { clientSecret: string; onClose: () => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setSaving(true);
+    const { setupIntent, error } = await stripe.confirmSetup({
+      elements,
+      confirmParams: {},
+      redirect: 'if_required'
+    });
+
+    if (error) {
+      setError(error.message || 'Failed to save card');
+      setSaving(false);
+      return;
+    }
+
+    const pmId = (setupIntent as any)?.payment_method as string;
+    await fetch('/api/payments/attach-default', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentMethodId: pmId })
+    });
+
+    setSaving(false);
+    onClose();
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <PaymentElement />
+      {error && <p className="text-red-600 text-sm">{error}</p>}
+      <button className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Save card'}</button>
+    </form>
+  );
+}
+
+export default function AddCardModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      const res = await fetch('/api/payments/setup-intent', { method: 'POST' });
+      const json = await res.json();
+      setClientSecret(json.clientSecret);
+    })();
+  }, [open]);
+
+  if (!open) return null;
+  if (!clientSecret) return <div className="p-6">Loading…</div>;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 grid place-items-center p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+        <h3 className="text-lg font-semibold mb-4">Add a payment method</h3>
+        <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <AddCardForm clientSecret={clientSecret} onClose={onClose} />
+        </Elements>
+      </div>
+    </div>
+  );
+}
+
+
+In your bid UI (e.g., app/auctions/[id]/page.tsx), if server action returns the “Please add a payment method” error, toggle this modal.
+
+9) UX rules
+
+Before placing a bid: if users.payment_method is null → open Add Card modal.
+
+After auction ends: call POST /api/auctions/close (from an admin page or cron) → status shows on the winner’s “My Bids”.
+
+Use payments table to drive UI labels: “Processing / Paid / Failed—Update card”.
+
+10) Testing (Stripe test mode)
+
+Add card 4242424242424242 → SetupIntent should succeed and users.payment_method populated.
+
+Place bids without any more card prompts.
+
+Close auction → should create a PaymentIntent and write to payments.
+
+Webhook updates payments.status to succeeded.
+
+Simulate failure with 4000000000009995 and verify UI/error path.
+
+11) Optional: deposit pre-auth
+
+If you want a $1 hold to deter spam bids:
+
+On first bid for an auction, create PaymentIntent with amount=100, capture_method='manual', confirm it, then cancel or capture at the end depending on rules. This is optional and can be added later.
+
+Summary of files you’ll add/edit
+
+NEW
+
+app/api/payments/setup-intent/route.ts
+
+app/api/payments/attach-default/route.ts
+
+app/api/auctions/close/route.ts
+
+app/(dashboard)/dashboard/AddCardModal.tsx (or your preferred location)
+
+Supabase SQL migration for public.payments
+
+EDIT
+
+package.json → fix "stripe:listen" path
+
+app/actions/bid-actions.ts → guard for saved PM
+
+app/api/webhook/route.ts → update payments on events
