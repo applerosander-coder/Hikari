@@ -68,8 +68,8 @@ export function BidDialog({
     setIsPlacingBid(false);
     onBidPlaced?.();
     
-    // Refresh to show updated bid
-    router.refresh();
+    // Redirect to My Bids page
+    router.push('/dashboard/mybids');
   };
 
   useEffect(() => {
