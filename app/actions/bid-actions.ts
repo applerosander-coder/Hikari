@@ -13,6 +13,17 @@ export async function createBidPaymentIntent(auctionId: string, bidAmount: numbe
       return { error: 'You must be signed in to place a bid' };
     }
 
+    // Enforce saved card requirement
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('payment_method')
+      .eq('id', user.id)
+      .single();
+
+    if (!customer?.payment_method?.id) {
+      return { error: 'Please add a payment method before bidding.' };
+    }
+
     const { data: auction, error: auctionError } = await supabase
       .from('auctions')
       .select('*')
