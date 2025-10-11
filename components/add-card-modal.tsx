@@ -170,7 +170,7 @@ export function AddCardModal({ open, onOpenChange, onSuccess }: AddCardModalProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Add Payment Method</DialogTitle>
           <DialogDescription>
@@ -178,25 +178,27 @@ export function AddCardModal({ open, onOpenChange, onSuccess }: AddCardModalProp
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          clientSecret && (
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: {
-                  theme: 'stripe',
-                },
-              }}
-            >
-              <CardSetupForm onSuccess={handleSuccess} onCancel={handleCancel} />
-            </Elements>
-          )
-        )}
+        <div className="overflow-y-auto flex-1 -mx-6 px-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            clientSecret && (
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  appearance: {
+                    theme: 'stripe',
+                  },
+                }}
+              >
+                <CardSetupForm onSuccess={handleSuccess} onCancel={handleCancel} />
+              </Elements>
+            )
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
