@@ -95,11 +95,8 @@ function CardSetupForm({ onSuccess, onCancel }: { onSuccess: () => void; onCance
           return;
         }
 
-        toast.success('✓ Card saved successfully! Continuing with your bid...');
-        // Small delay to let user see the success message
-        setTimeout(() => {
-          onSuccess();
-        }, 500);
+        // Success - let parent component handle the success message
+        onSuccess();
       } else {
         toast.error('Card setup incomplete. Please try again.');
         setIsProcessing(false);

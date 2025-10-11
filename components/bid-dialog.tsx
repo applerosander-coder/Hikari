@@ -177,12 +177,27 @@ export function BidDialog({
 
   const handleCardAdded = async () => {
     setShowAddCard(false);
-    toast.loading('Preparing your bid payment...', { id: 'preparing-bid' });
-    // Small delay to ensure card is fully attached
+    
+    // Give user visual confirmation with a visible duration
+    toast.success('✓ Card saved successfully! Continuing with your bid...', { 
+      duration: 2000,
+      id: 'card-saved'
+    });
+    
+    // Wait to ensure database is updated and user sees message
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Dismiss success message and show preparing message
+    toast.dismiss('card-saved');
+    toast.loading('Preparing payment...', { id: 'preparing-bid' });
+    
+    // Small delay then retry creating payment intent
     await new Promise(resolve => setTimeout(resolve, 500));
-    toast.dismiss('preparing-bid');
+    
     // Retry creating payment intent after card is added
     await handleCreatePaymentIntent();
+    
+    toast.dismiss('preparing-bid');
   };
 
   const handleSuccess = () => {
