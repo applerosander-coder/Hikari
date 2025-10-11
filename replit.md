@@ -1,167 +1,34 @@
 # BidWin - Live Auction Platform
 
 ### Overview
-BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. It enables real-time bidding, features countdown timers for auctions, and provides a swipeable carousel interface for browsing auction items. The platform's core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories like Electronics, Fashion, Services, Collectibles, Home & Living, and Sports.
-
-### Recent Changes
-**October 11, 2025 - Saved Payment Method & Auto-Charge Winner:**
-- Implemented saved card infrastructure with customers and payments database tables
-- Created API routes for SetupIntent, payment method attachment, and auction closing
-- Enhanced bid actions to enforce saved payment method requirement before bidding
-- Built AddCardModal component with Stripe Elements for card saving (scrollable interface)
-- Integrated modal into bidding flow with automatic retry after card is saved
-- Updated webhook handlers to sync payment status (succeeded/failed) for winner charges
-- Added idempotency protection to prevent double charges on auction close
-- Proper error handling and rollback logic to keep auction/payment state consistent
-- Off-session payment charging for auction winners using saved payment methods
-- Payment metadata distinguishes between bid payments (type: bid) and winner charges (type: winner_charge)
-- Enhanced error messages with specific guidance for card validation issues (incomplete number, expiry, CVC, ZIP)
-- Added clear success confirmation: "✓ Card saved successfully! Continuing with your bid..."
-- Smooth transition from card saving to bid payment with loading feedback
-
-**October 11, 2025 - Updated Pricing Plans:**
-- Updated pricing module with 3 new auction-focused plans
-- Participant Plan (Free): Join auctions, bid, win, and track items
-- Host Plan ($19.99/month): Create auctions, up to 10 listings, integrated payments & analytics
-- Business Plan ($99.99/month): Unlimited auctions, multi-user access, advanced reporting & branding
-- Adapted all pricing text and features to auction/bidding platform context
-
-**October 11, 2025 - Mobile Search Field Fix:**
-- Fixed search field visibility on My Bids page mobile view
-- Removed sticky positioning from dashboard navbar on mobile (was preventing scroll to top)
-- Navbar now scrolls naturally with page content on all devices
-- Search field fully accessible by scrolling to top
-- Simplified My Bids padding to uniform py-4 across all breakpoints
-
-**October 10, 2025 - Interactive Particle Background:**
-- Added interactive particle background to hero section using @tsparticles/react and @tsparticles/slim
-- 80 lightweight particles with smooth movement (speed: 1)
-- Mouse-following grab interaction (particles connect with lines on hover within 140px)
-- Particles auto-connect with thin lines when close (distance: 150px, opacity: 0.3)
-- Radial gradient mask creates fade-toward-edges effect for smooth blending
-- Theme-aware: black particles in light mode, white particles in dark mode
-- Layered properly with existing Ripple gradient background (Ripple → Particles → Content)
-- Responsive and optimized for performance across devices
-
-**October 10, 2025 - Dashboard Logo Fix:**
-- Restored original BidWin logo design (SunIcon + text) on dashboard and mybids pages
-- Removed broken PNG logo files and replaced with icon-based implementation from landing page
-- Logo now uses SunIcon from @heroicons/react/24/solid with "BidWin" text
-- Reduced dashboard header height from h-32 md:h-36 to h-20 for better proportions
-- Removed theme-switching logic for logo (no longer needed with icon implementation)
-
-**October 10, 2025 - My Bids Page UI Improvements:**
-- Made top menu more compact with reduced padding (py-2 sm:py-4) for cleaner interface
-- Removed card scaling animation - all cards now maintain consistent size
-- Reduced carousel container padding from py-12 to py-4 for tighter layout
-- Reduced search section margin for better visual density
-
-**October 10, 2025 - Performance Optimizations:**
-- Replaced continuous 1-second polling interval with smart exponential backoff retry mechanism (5 attempts over ~5 seconds max)
-- Changed window.location.reload() to router.refresh() with targeted data fetching to avoid full page reloads
-- Improved bid success verification with retry logic: attempts at 0ms, 500ms, 1s, 1.5s, 2s intervals
-- Significantly reduced client-side workload and improved click responsiveness
-- Maintained all functionality including bid celebration animations and real-time updates
-- Reduced worst-case query volume by 50% while maintaining eventual consistency handling
-
-**October 10, 2025 - Infinite Looping Carousel on My Bids:**
-- Implemented infinite looping carousel displaying 1.2-1.5 cards per view with partial edges visible
-- Enabled seamless loop navigation with smooth snap transitions (duration-500 ease-out)
-- Supports both drag/swipe gestures and arrow navigation (arrows hidden on mobile)
-- Applied to both Active Bids and Outbid sections
-- Responsive card sizing: basis-[85%] mobile, basis-[70%] small screens, basis-[65%] desktop
-
-**October 10, 2025 - My Bids Page Header Cleanup:**
-- Removed "My Bids" title and subtitle ("Track all your auction bids in one place") from My Bids page
-- Page now starts directly with the search bar for a cleaner, more focused interface
-
-**October 10, 2025 - Bid Success Celebration Animation:**
-- Created celebratory animation sequence for successful highest bids
-- Features monochrome confetti (black, white, gray) using canvas-confetti
-- 4 random celebration variants with different icons (Trophy, Sparkles, Zap, Heart) and messages
-- Glowing effects with animated box shadows using framer-motion
-- Counting animation for bid amount (counts up from $0 to bid amount)
-- Success sound: 3-note chime using Web Audio API with reusable AudioContext
-- "View My Bids" and "Continue" buttons for navigation
-- Auto-closes after 3.5 seconds to allow confetti animations to complete
-- Only triggers when user becomes highest bidder (checks if bid matches current_bid)
-- Smooth fade-in/fade-out transitions with AnimatePresence
-- **Payment Flow:** After successful Stripe payment, user is redirected to My Bids page where celebration displays
-- Polls for bid creation (1s intervals, 10s timeout) before showing celebration
-- Handles special characters in auction titles correctly (no double URL decoding)
-
-**October 10, 2025 - UI Consistency & Icon Updates:**
-- Applied consistent card height styling to My Bids page cards to match dashboard
-- All auction cards now use flex layout with min-heights for uniform appearance
-- Changed dashboard navigation icon from Inbox to LayoutDashboard for better visual representation
-- Fixed hydration error on countdown timers with mounted state check
-- Added pagination dots to My Bids carousels with proper event cleanup
-
-**October 10, 2025 - My Bids Page:**
-- Created dedicated `/dashboard/mybids` page to display all user's auction bids
-- Separates bids into "Active Bids" (user is highest bidder) and "Outbid" (someone bid higher)
-- Active bids: Highlighted with ring border and "Your Bid" badge with Heart icon
-- Outbid bids: Display "Outbid" badge with AlertCircle icon, no highlight
-- Both sections sorted by auction end time (closest first)
-- Added "My Bids" navigation link with Heart icon to dashboard navbar
-- Includes search functionality to filter bids by title, description, or category
-- Shows user's bid amount vs current auction price for comparison
-
-**October 10, 2025 - Landing Page Button Update:**
-- Changed hero section CTA button text from "Follow the progress on X" to "Upcoming Auctions"
-
-
-**October 10, 2025 - Stripe Payment Integration for Bidding:**
-- Implemented secure Stripe payment processing for all bids
-- Created bid dialog with Stripe Elements for payment collection (now scrollable on mobile)
-- Moved bid creation to webhook to prevent forgery (bids only created after payment verification)
-- Added idempotency protection using unique constraint on (auction_id, user_id, bid_amount)
-- Fixed webhook to work with existing bids schema (removed non-existent description field)
-- Fixed image configuration to allow Unsplash auction images
-- Fixed search field to use text input (removed browser-default search icons)
-- Dashboard highlighting for user bids with "Your Bid" badge and special styling
-- Added polling logic on auction detail page to wait for webhook processing (checks every 1s for 10s after payment)
-- Fixed dashboard caching issues with `force-dynamic` and `revalidate: 0`
-- **Webhook configured and working:** Stripe webhook successfully creates bids after payment verification
-- **Complete payment flow:** Payment → Webhook → Bid creation → Auto-refresh → Dashboard highlight
-
-**October 10, 2025 - Mobile Responsiveness Improvements:**
-- Fixed horizontal overflow on dashboard page by removing redundant wrapper div
-- Updated dashboard layout to use `flex-1 w-full overflow-x-hidden` instead of grid layout for better mobile compatibility
-- Enhanced SwipeableAuctionBrowser with responsive padding (px-4 sm:px-6) and responsive text sizes (text-2xl sm:text-4xl)
-- Removed arrow navigation from logo carousel on landing page for cleaner mobile experience (auto-play only)
-- Verified all marketing pages (welcome, pricing, auctions) display correctly without overflow on mobile viewports
+BidWin is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### User Preferences
 I prefer the agent to be concise and to the point. When suggesting code changes, provide a brief explanation of the "why" behind the change, not just the "what." I value iterative development and prefer to review smaller, focused pull requests or changes rather than large, monolithic ones. Please ensure all modifications align with the existing monochrome design aesthetic (black, white, gray). Do not make changes to the `docs/` folder.
 
 ### System Architecture
-The application is built on **Next.js 14 with the App Router** for routing and server-side rendering capabilities. **Supabase** handles both the database (PostgreSQL) and user authentication. **Stripe** is integrated for payment processing.
+The application is built on **Next.js 14 with the App Router** for routing and server-side rendering. **Supabase** handles the PostgreSQL database and user authentication. **Stripe** is integrated for payment processing, including features like auto-charge for saved cards and instant bidding.
 
 **UI/UX Decisions:**
-- **Color Scheme:** Strict monochrome palette (black, white, gray) applied consistently across all UI elements, including dashboard components, buttons, and navigation.
-- **Responsive Design:** Fully mobile-friendly with optimized layouts for various screen sizes, including responsive text, image scaling, and component adaptations (e.g., single-column layouts on mobile for category cards, hidden dashboard sidebar with hamburger menu).
-- **Interactive Elements:** Utilizes **Embla Carousel** for swipeable browsing experiences and **Framer Motion** for animations.
-- **Component Library:** Built with **Radix UI** primitives and styled with **Tailwind CSS**.
-- **User Flow:**
-    - Authentication: Supports email/password and GitHub OAuth (with automatic account linking). OAuth uses a popup window in Replit's iframe environment.
-    - Post-Login: Users are redirected to the welcome page, where navigation adapts to show a "Profile" button linking to `/dashboard/account`.
-    - Auction Browsing: Features a swipeable auction carousel on the dashboard and a grid view on the `/auctions` page.
-    - Bidding: Individual auction detail pages allow bidding, with real-time countdown timers and visual highlighting for user-bid auctions.
+- **Color Scheme:** Strict monochrome palette (black, white, gray) is consistently applied across all UI elements.
+- **Responsive Design:** Optimized layouts for various screen sizes, ensuring mobile-friendliness with responsive text, image scaling, and adaptive components.
+- **Interactive Elements:** Utilizes **Embla Carousel** for swipeable browsing and **Framer Motion** for animations, including a celebratory animation for successful bids. An interactive particle background is used in the hero section.
+- **Component Library:** Built with **Radix UI** primitives and styled using **Tailwind CSS**.
+- **User Flow:** Includes email/password and GitHub OAuth authentication, a dashboard with personalized content (My Bids), and dedicated pages for auction browsing and bidding. Bid processing incorporates a payment flow with webhook verification and idempotency protection.
 
 **Technical Implementations:**
 - **Real-time Functionality:** Leverages Supabase's real-time subscriptions for live auction updates and countdown timers.
-- **Database Schema:** Custom `auctions` and `bids` tables manage auction items, their statuses (draft, upcoming, active, ended, cancelled), categories, and user bids.
-- **State Management:** Uses **TanStack Query** for data fetching and caching, and **tRPC** for API communication between client and server.
-- **Environment Variables:** Critical configuration managed via Replit Secrets (Supabase URL/Key, Stripe Keys).
-- **Deployment:** Configured for Replit Autoscale deployment, binding to port 5000.
+- **Database Schema:** Custom `auctions`, `bids`, `customers`, and `payments` tables manage auction items, user bids, and payment information.
+- **State Management:** Uses **TanStack Query** for data fetching and caching, and **tRPC** for API communication.
+- **Performance Optimizations:** Implements exponential backoff for polling, `router.refresh()` for targeted data fetching, and retry logic for bid verification to reduce client-side workload and improve responsiveness.
+- **Deployment:** Configured for Replit Autoscale deployment.
 
 **Feature Specifications:**
-- **Live Auctions:** Real-time countdowns, dynamic bid updates.
-- **Auction Categories:** Predefined categories for item organization.
-- **User Accounts:** Authentication, profile management, avatar selection (monochrome cartoon avatars).
-- **Payment Processing:** Stripe integration for secure transactions.
-- **Mobile Optimization:** Ensures accessibility and usability on all devices.
+- **Live Auctions:** Real-time countdowns, dynamic bid updates, and categorized auction listings.
+- **User Accounts:** Secure authentication, profile management, and avatar selection.
+- **Payment Processing:** Integrated Stripe for secure bidding, managing saved payment methods, and off-session charging for auction winners.
+- **Mobile Optimization:** Ensures accessibility and usability across all devices.
+- **My Bids Page:** Dedicated section for users to track "Active Bids" and "Outbid" items with search functionality.
 
 ### External Dependencies
 - **Supabase:** Database, Authentication, Realtime subscriptions.
@@ -171,7 +38,9 @@ The application is built on **Next.js 14 with the App Router** for routing and s
 - **Tailwind CSS:** Utility-first CSS framework.
 - **Radix UI:** Unstyled component primitives.
 - **Framer Motion:** Animation library.
-- **Embla Carousel:** Carousel library for swipeable UI.
+- **Embla Carousel:** Carousel library.
 - **TanStack Query:** Data fetching and state management.
 - **tRPC:** End-to-end type-safe APIs.
 - **Fumadocs:** Documentation generation.
+- **@tsparticles/react, @tsparticles/slim:** For interactive particle backgrounds.
+- **canvas-confetti:** For celebration animations.
