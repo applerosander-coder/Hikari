@@ -27,7 +27,7 @@ export default function ParticleFieldCSS() {
     const particleCount = 100;
     const color = theme === 'dark' ? 'white' : 'black';
 
-    // Create particle elements once
+    // Create particle elements once with spread-out distribution
     particlesRef.current = Array.from({ length: particleCount }, () => {
       const element = document.createElement('div');
       element.style.position = 'absolute';
@@ -39,9 +39,15 @@ export default function ParticleFieldCSS() {
       element.style.willChange = 'transform, opacity';
       containerRef.current!.appendChild(element);
 
+      // Spread particles more toward edges using quadratic distribution
+      const getSpreadValue = () => {
+        const rand = Math.random();
+        return rand < 0.5 ? rand * rand * 200 - 100 : 100 - (1 - rand) * (1 - rand) * 200;
+      };
+
       return {
-        x: Math.random() * 100 - 50,
-        y: Math.random() * 100 - 50,
+        x: getSpreadValue(),
+        y: getSpreadValue(),
         z: Math.random() * 500 - 250,
         speedX: (Math.random() - 0.5) * 0.2,
         speedY: (Math.random() - 0.5) * 0.2,
@@ -68,14 +74,14 @@ export default function ParticleFieldCSS() {
         p.y += p.speedY;
         p.z += p.speedZ;
 
-        // Bounce at boundaries
-        if (Math.abs(p.x) > 50) p.speedX *= -1;
-        if (Math.abs(p.y) > 50) p.speedY *= -1;
+        // Bounce at boundaries (wider area)
+        if (Math.abs(p.x) > 100) p.speedX *= -1;
+        if (Math.abs(p.y) > 100) p.speedY *= -1;
         if (Math.abs(p.z) > 250) p.speedZ *= -1;
 
-        // Clamp positions
-        p.x = Math.max(-50, Math.min(50, p.x));
-        p.y = Math.max(-50, Math.min(50, p.y));
+        // Clamp positions (wider area)
+        p.x = Math.max(-100, Math.min(100, p.x));
+        p.y = Math.max(-100, Math.min(100, p.y));
         p.z = Math.max(-250, Math.min(250, p.z));
 
         // Calculate depth-based scale and opacity
