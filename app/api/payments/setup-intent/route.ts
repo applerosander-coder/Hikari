@@ -26,11 +26,19 @@ export async function POST() {
     });
     customerId = customer.id;
 
-    await supabase.from('customers')
+    const { error: insertError } = await supabase.from('customers')
       .upsert({ 
         id: user.id, 
         stripe_customer_id: customerId 
       }, { onConflict: 'id' });
+
+    if (insertError) {
+      console.error('Failed to save customer to database:', insertError);
+      return NextResponse.json({ 
+        error: 'Failed to create customer record',
+        details: insertError.message 
+      }, { status: 500 });
+    }
   }
 
   const setupIntent = await stripe.setupIntents.create({
