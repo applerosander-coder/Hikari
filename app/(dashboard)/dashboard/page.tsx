@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { getUser } from '@/utils/supabase/queries';
 import { redirect } from 'next/navigation';
-import { SwipeableAuctionBrowser } from '@/components/swipeable-auction-browser';
+import { CategorizedAuctionBrowser } from '@/components/categorized-auction-browser';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -27,9 +27,21 @@ export default async function DashboardPage() {
 
   const userBidAuctionIds = userBids?.map((bid) => bid.auction_id) || [];
 
+  const { data: bidCounts } = await supabase.rpc('get_auction_bid_counts');
+
+  const bidCountMap = new Map<string, number>();
+  bidCounts?.forEach((item: { auction_id: string; bid_count: number }) => {
+    bidCountMap.set(item.auction_id, item.bid_count);
+  });
+
+  const auctionsWithBidCounts = (auctions || []).map(auction => ({
+    ...auction,
+    bid_count: bidCountMap.get(auction.id) || 0
+  }));
+
   return (
-    <SwipeableAuctionBrowser
-      auctions={auctions || []}
+    <CategorizedAuctionBrowser
+      auctions={auctionsWithBidCounts}
       userBidAuctionIds={userBidAuctionIds}
       userId={user.id}
     />
