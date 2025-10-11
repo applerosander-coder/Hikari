@@ -11,10 +11,12 @@ import {
   getUser,
   getUserDetails,
 } from '@/utils/supabase/queries';
-import { Settings, User } from 'lucide-react';
+import { Settings, User, LogOut, Sun, Moon } from 'lucide-react';
 import { Navbar } from '@/components/dashboard-navbar';
 import Sidebar from '@/components/dashboard-sidebar';
 import { redirect } from 'next/navigation';
+import { SidebarSignOutButton } from '@/components/sidebar-signout-button';
+import { SidebarThemeToggle } from '@/components/sidebar-theme-toggle';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -45,6 +47,7 @@ export default async function DashboardLayout({
         <Sidebar navConfig={navConfig as NavItem[]} />
         <nav className="mt-auto flex flex-col items-center gap-2 px-2 sm:py-5">
           <TooltipProvider>
+            <SidebarThemeToggle />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
@@ -58,8 +61,6 @@ export default async function DashboardLayout({
               </TooltipTrigger>
               <TooltipContent side="right">Profile</TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
@@ -73,6 +74,7 @@ export default async function DashboardLayout({
               </TooltipTrigger>
               <TooltipContent side="right">Settings</TooltipContent>
             </Tooltip>
+            <SidebarSignOutButton />
           </TooltipProvider>
         </nav>
       </aside>
