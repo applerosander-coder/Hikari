@@ -55,21 +55,26 @@ export function BidDialog({
       Math.round(bidValue * 100)
     );
 
+    setIsPlacingBid(false);
+
     if (result.error) {
       toast.error(result.error);
-      setIsPlacingBid(false);
       return;
     }
 
-    // Success
-    toast.success('Bid placed successfully! You only pay if you win.');
-    onOpenChange(false);
-    setBidAmount('');
-    setIsPlacingBid(false);
-    onBidPlaced?.();
-    
-    // Redirect to My Bids page
-    router.push('/dashboard/mybids');
+    // Success - redirect to My Bids with celebration
+    if (result.success) {
+      onOpenChange(false);
+      setBidAmount('');
+      onBidPlaced?.();
+      
+      // Redirect to My Bids page with celebration parameters
+      router.push(
+        `/dashboard/mybids?bid_success=true&auction_id=${auctionId}&auction_title=${encodeURIComponent(auctionTitle)}&bid_amount=${Math.round(bidValue * 100)}`
+      );
+    } else {
+      toast.error('Failed to place bid. Please try again.');
+    }
   };
 
   useEffect(() => {
