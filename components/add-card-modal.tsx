@@ -90,14 +90,26 @@ function CardSetupForm({ onSuccess, onCancel }: { onSuccess: () => void; onCance
 
         if (!res.ok) {
           const data = await res.json();
-          toast.error(data.error || 'Failed to save card. Please try again.');
+          console.error('Attach payment method failed:', data);
+          
+          // Provide helpful error message
+          let errorMsg = 'Failed to save card. ';
+          if (data.error === 'no_stripe_customer') {
+            errorMsg += 'Please refresh the page and try again.';
+          } else {
+            errorMsg += data.error || 'Please try again.';
+          }
+          
+          toast.error(errorMsg, { duration: 5000 });
           setIsProcessing(false);
           return;
         }
 
+        console.log('Card saved successfully, calling onSuccess');
         // Success - let parent component handle the success message
         onSuccess();
       } else {
+        console.error('SetupIntent status:', setupIntent?.status);
         toast.error('Card setup incomplete. Please try again.');
         setIsProcessing(false);
       }
