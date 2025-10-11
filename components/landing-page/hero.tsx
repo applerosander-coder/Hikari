@@ -12,7 +12,7 @@ import { useTheme } from 'next-themes';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import ParticleField3D from '@/components/particle-field-3d'
+import ParticleFieldCSS from '@/components/particle-field-css'
 
 export default function HeroSection() {
   const { theme } = useTheme();
@@ -45,7 +45,7 @@ export default function HeroSection() {
         <Ripple />
       </div>
       <div className="absolute inset-0 z-[1]">
-        <ParticleField3D />
+        <ParticleFieldCSS />
       </div>
       <div className="container mx-auto px-4 sm:px-6 py-12 md:py-16 lg:py-32">
         <div className="relative z-10 flex max-w-[64rem] flex-col items-center gap-4 text-center mx-auto">

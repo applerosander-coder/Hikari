@@ -33,7 +33,7 @@ function ParticleField({ color }: { color: string }) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  useFrame((state) => {
+  useFrame((state: any) => {
     if (!pointsRef.current) return;
 
     const time = state.clock.getElapsedTime();
@@ -57,10 +57,10 @@ function ParticleField({ color }: { color: string }) {
       <PointMaterial
         transparent
         color={color}
-        size={0.02}
+        size={0.05}
         sizeAttenuation={true}
         depthWrite={false}
-        opacity={0.6}
+        opacity={0.8}
       />
     </Points>
   );
