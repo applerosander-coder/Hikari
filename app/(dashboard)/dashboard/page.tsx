@@ -14,53 +14,73 @@ export default async function DashboardPage() {
     return redirect('/signin');
   }
 
-  const { data: auctions } = await supabase
-    .from('auctions')
-    .select('*')
-    .in('status', ['active', 'upcoming'])
-    .order('end_date', { ascending: true });
+  // Fetch auction items with parent auction data
+  const { data: auctionItems } = await supabase
+    .from('auction_items')
+    .select(`
+      *,
+      auction:auctions (
+        id,
+        name,
+        place,
+        start_date,
+        end_date,
+        status,
+        seller_id
+      )
+    `)
+    .in('auction.status', ['active', 'upcoming'])
+    .order('auction.end_date', { ascending: true });
 
+  // Fetch user's bids (now references auction_item_id)
   const { data: userBids } = await supabase
     .from('bids')
-    .select('auction_id, bid_amount')
+    .select('auction_item_id, bid_amount')
     .eq('user_id', user.id);
 
-  const userBidAuctionIds = userBids?.map((bid) => bid.auction_id) || [];
+  const userBidItemIds = userBids?.map((bid) => bid.auction_item_id) || [];
   
   const userBidAmounts: Record<string, number> = {};
   userBids?.forEach((bid) => {
-    const existing = userBidAmounts[bid.auction_id];
+    if (!bid.auction_item_id) return;
+    const existing = userBidAmounts[bid.auction_item_id];
     if (!existing || bid.bid_amount > existing) {
-      userBidAmounts[bid.auction_id] = bid.bid_amount;
+      userBidAmounts[bid.auction_item_id] = bid.bid_amount;
     }
   });
 
-  const { data: bidCounts } = await supabase.rpc('get_auction_bid_counts');
+  // Get bid counts per item
+  const { data: allBids } = await supabase
+    .from('bids')
+    .select('auction_item_id');
 
   const bidCountMap = new Map<string, number>();
-  bidCounts?.forEach((item: { auction_id: string; bid_count: number }) => {
-    bidCountMap.set(item.auction_id, item.bid_count);
+  allBids?.forEach((bid) => {
+    if (!bid.auction_item_id) return;
+    const current = bidCountMap.get(bid.auction_item_id) || 0;
+    bidCountMap.set(bid.auction_item_id, current + 1);
   });
 
-  const auctionsWithBidCounts = (auctions || []).map(auction => ({
-    ...auction,
-    bid_count: bidCountMap.get(auction.id) || 0
+  const itemsWithBidCounts = (auctionItems || []).map(item => ({
+    ...item,
+    bid_count: bidCountMap.get(item.id) || 0
   }));
 
+  // Watchlist now tracks individual items
   const { data: watchlistData } = await supabase
     .from('watchlist')
-    .select('auction_id')
+    .select('auction_item_id')
     .eq('user_id', user.id);
 
-  const watchlistAuctionIds = watchlistData?.map((item) => item.auction_id) || [];
+  const watchlistItemIds = watchlistData?.map((item) => item.auction_item_id).filter(Boolean) || [];
 
   return (
     <CategorizedAuctionBrowser
-      auctions={auctionsWithBidCounts}
-      userBidAuctionIds={userBidAuctionIds}
+      items={itemsWithBidCounts}
+      userBidItemIds={userBidItemIds}
       userBidAmounts={userBidAmounts}
       userId={user.id}
-      watchlistAuctionIds={watchlistAuctionIds}
+      watchlistItemIds={watchlistItemIds}
     />
   );
 }

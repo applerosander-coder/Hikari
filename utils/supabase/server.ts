@@ -18,8 +18,8 @@ export function createClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch (error) {
-            console.error('Error setting cookies:', error);
+          } catch {
+            // Ignore cookie errors during SSR - cookies can only be set in Server Actions/Route Handlers
           }
         },
       },

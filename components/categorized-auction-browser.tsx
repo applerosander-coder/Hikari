@@ -6,25 +6,33 @@ import { Input } from '@/components/ui/input';
 import { AuctionItemCard } from './auction-item-card';
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface Auction {
+interface AuctionItem {
   id: string;
+  auction_id: string;
   title: string;
   description: string | null;
   starting_price: number;
   current_bid: number | null;
   image_url: string | null;
   category: string | null;
-  end_date: string;
-  status: string;
   bid_count?: number;
+  auction: {
+    id: string;
+    name: string;
+    place: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+    seller_id: string;
+  } | null;
 }
 
 interface CategorizedAuctionBrowserProps {
-  auctions: Auction[];
-  userBidAuctionIds: string[];
+  items: AuctionItem[];
+  userBidItemIds: string[];
   userBidAmounts: Record<string, number>;
   userId: string;
-  watchlistAuctionIds: string[];
+  watchlistItemIds: string[];
 }
 
 const CATEGORIES = [
@@ -37,47 +45,49 @@ const CATEGORIES = [
 ];
 
 export function CategorizedAuctionBrowser({
-  auctions,
-  userBidAuctionIds,
+  items,
+  userBidItemIds,
   userBidAmounts,
   userId,
-  watchlistAuctionIds
+  watchlistItemIds
 }: CategorizedAuctionBrowserProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredAuctions = React.useMemo(() => {
+  const filteredItems = React.useMemo(() => {
     if (!searchQuery.trim()) {
-      return auctions;
+      return items;
     }
 
     const query = searchQuery.toLowerCase();
-    return auctions.filter((auction) => {
+    return items.filter((item) => {
       return (
-        auction.title.toLowerCase().includes(query) ||
-        auction.description?.toLowerCase().includes(query) ||
-        auction.category?.toLowerCase().includes(query)
+        item.title.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query) ||
+        item.auction?.name.toLowerCase().includes(query) ||
+        item.auction?.place.toLowerCase().includes(query)
       );
     });
-  }, [auctions, searchQuery]);
+  }, [items, searchQuery]);
 
-  const hotAuctions = React.useMemo(() => {
-    return [...filteredAuctions]
+  const hotItems = React.useMemo(() => {
+    return [...filteredItems]
       .sort((a, b) => (b.bid_count || 0) - (a.bid_count || 0))
       .slice(0, 10);
-  }, [filteredAuctions]);
+  }, [filteredItems]);
 
-  const categorizedAuctions = React.useMemo(() => {
-    const grouped: Record<string, Auction[]> = {};
+  const categorizedItems = React.useMemo(() => {
+    const grouped: Record<string, AuctionItem[]> = {};
     
     CATEGORIES.forEach(category => {
-      grouped[category] = filteredAuctions.filter(
-        auction => auction.category === category
+      grouped[category] = filteredItems.filter(
+        item => item.category === category
       );
     });
 
-    const uncategorized = filteredAuctions.filter(
-      auction => !auction.category || !CATEGORIES.includes(auction.category)
+    const uncategorized = filteredItems.filter(
+      item => !item.category || !CATEGORIES.includes(item.category)
     );
     
     if (uncategorized.length > 0) {
@@ -85,10 +95,14 @@ export function CategorizedAuctionBrowser({
     }
 
     return grouped;
-  }, [filteredAuctions]);
+  }, [filteredItems]);
 
-  const handleBidNow = (auctionId: string) => {
-    router.push(`/auctions/${auctionId}`);
+  const handleBidNow = (itemId: string) => {
+    // Find the item to get its auction_id
+    const item = items.find(i => i.id === itemId);
+    if (item?.auction_id) {
+      router.push(`/auctions/${item.auction_id}/items/${itemId}`);
+    }
   };
 
   return (
@@ -115,10 +129,10 @@ export function CategorizedAuctionBrowser({
         </div>
       </div>
 
-      {filteredAuctions.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <div className="text-center py-12 max-w-5xl mx-auto">
           <p className="text-xl text-muted-foreground">
-            {searchQuery ? `No auctions found for "${searchQuery}"` : 'No active auctions at the moment.'}
+            {searchQuery ? `No items found for "${searchQuery}"` : 'No active auction items at the moment.'}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             {searchQuery ? 'Try a different search term' : 'Check back soon for new items!'}
@@ -126,28 +140,28 @@ export function CategorizedAuctionBrowser({
         </div>
       ) : (
         <div className="space-y-8 sm:space-y-12">
-          {hotAuctions.length > 0 && (
+          {hotItems.length > 0 && (
             <AuctionRow
-              title="🔥 Hot Auctions"
+              title="🔥 Hot Items"
               subtitle="Most popular items right now"
-              auctions={hotAuctions}
-              userBidAuctionIds={userBidAuctionIds}
+              items={hotItems}
+              userBidItemIds={userBidItemIds}
               userBidAmounts={userBidAmounts}
-              watchlistAuctionIds={watchlistAuctionIds}
+              watchlistItemIds={watchlistItemIds}
               handleBidNow={handleBidNow}
               highlight
             />
           )}
 
-          {Object.entries(categorizedAuctions).map(([category, categoryAuctions]) => 
-            categoryAuctions.length > 0 ? (
+          {Object.entries(categorizedItems).map(([category, categoryItems]) => 
+            categoryItems.length > 0 ? (
               <AuctionRow
                 key={category}
                 title={category}
-                auctions={categoryAuctions}
-                userBidAuctionIds={userBidAuctionIds}
+                items={categoryItems}
+                userBidItemIds={userBidItemIds}
                 userBidAmounts={userBidAmounts}
-                watchlistAuctionIds={watchlistAuctionIds}
+                watchlistItemIds={watchlistItemIds}
                 handleBidNow={handleBidNow}
               />
             ) : null
@@ -161,10 +175,10 @@ export function CategorizedAuctionBrowser({
 interface AuctionRowProps {
   title: string;
   subtitle?: string;
-  auctions: Auction[];
-  userBidAuctionIds: string[];
+  items: AuctionItem[];
+  userBidItemIds: string[];
   userBidAmounts: Record<string, number>;
-  watchlistAuctionIds: string[];
+  watchlistItemIds: string[];
   handleBidNow: (id: string) => void;
   highlight?: boolean;
 }
@@ -172,10 +186,10 @@ interface AuctionRowProps {
 function AuctionRow({
   title,
   subtitle,
-  auctions,
-  userBidAuctionIds,
+  items,
+  userBidItemIds,
   userBidAmounts,
-  watchlistAuctionIds,
+  watchlistItemIds,
   handleBidNow,
   highlight = false
 }: AuctionRowProps) {
@@ -200,7 +214,7 @@ function AuctionRow({
       container.addEventListener('scroll', checkScroll);
       return () => container.removeEventListener('scroll', checkScroll);
     }
-  }, [auctions]);
+  }, [items]);
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
@@ -240,17 +254,24 @@ function AuctionRow({
           className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {auctions.map((auction) => {
-            const userBidAmount = userBidAmounts[auction.id];
-            const currentPrice = auction.current_bid || auction.starting_price;
+          {items.map((item) => {
+            const userBidAmount = userBidAmounts[item.id];
+            const currentPrice = item.current_bid || item.starting_price;
             const userHasHighestBid = userBidAmount !== undefined && userBidAmount >= currentPrice;
+
+            // Convert item to auction format for AuctionItemCard (temporary compatibility)
+            const itemAsAuction = {
+              ...item,
+              end_date: item.auction?.end_date || '',
+              status: item.auction?.status || 'active'
+            };
 
             return (
               <AuctionItemCard
-                key={auction.id}
-                auction={auction}
+                key={item.id}
+                auction={itemAsAuction}
                 userBidAmount={userBidAmount}
-                isInWatchlist={watchlistAuctionIds.includes(auction.id)}
+                isInWatchlist={watchlistItemIds.includes(item.id)}
                 showWatchlist={true}
                 variant={highlight ? 'highlight' : 'compact'}
                 badgeType={highlight ? 'hot' : userHasHighestBid ? 'high-bid' : null}
