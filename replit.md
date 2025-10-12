@@ -4,6 +4,10 @@
 Auctions is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### Recent Changes
+**October 12, 2025 - Hero Section CTA Update:**
+- **Start Bidding Today Button**: Updated to redirect to /dashboard instead of /signin
+- **Direct Access**: Users can now access auctions directly from landing page CTA
+
 **October 12, 2025 - Landing Page Theme Toggle Simplification:**
 - **Removed Dropdown Menu**: Replaced dropdown theme toggle with simple button in landing page mobile menu
 - **3-State Cycle**: Button cycles through system → light → dark → system with each click
