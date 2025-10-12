@@ -4,6 +4,30 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
 ### Recent Changes
+**October 12, 2025 - Auction Ending & Bid Status Improvements:**
+- **Unified Auction Card Component**: Created `AuctionItemCard` component consolidating all card variations
+  - Shows "High Bid" badge when user has the highest bid on an item
+  - Optional watchlist/heart button for saving items
+  - Consistent design across dashboard, My Bids, and other pages
+- **Ended Auction Prevention**: Fixed bidding on ended auctions
+  - Auction detail page checks both `status === 'ended'` AND if `end_date` has passed
+  - Bid button properly disabled when auction has ended
+  - Shows win/lose messaging and prevents further bids
+- **Watchlist Filtering**: Ended auctions now automatically filtered from watchlist tab
+  - Only active auctions (not ended and end_date not passed) appear in watchlist
+  - Prevents confusion and accidental bidding attempts
+- **My Bids Tab Filtering**: Active and Soon tabs now exclude auctions past their end_date
+  - Checks both status and end_date to ensure accurate filtering
+  - Ended auctions move to Won tab when user is the winner
+- **Auction Ending Automation**: Created `/api/auctions/end-auctions` endpoint
+  - Marks auctions as 'ended' when end_date passes
+  - Sets winner_id to highest bidder
+  - Triggered via cron job every 5 minutes (configured in vercel.json)
+  - Requires CRON_SECRET for authorization
+- **CRON_SECRET Setup**: Added to .env.local for development testing
+  - Required for both end-auctions and process-winners APIs
+  - Production deployment needs this secret configured
+
 **October 12, 2025 - Authentication Redirect Fix:**
 - **Sign-Up Redirect**: Fixed redirect after sign-up to go to landing page (/) instead of login page
 - **Sign-In Redirect**: Already correctly redirects to landing page (/)
