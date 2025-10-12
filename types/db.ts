@@ -172,6 +172,47 @@ export interface Database {
           }
         ]
       }
+      invitations: {
+        Row: {
+          id: string
+          auction_id: string
+          invitee_email: string
+          invite_code: string
+          status: 'pending' | 'accepted' | 'expired'
+          sent_at: string | null
+          accepted_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          auction_id: string
+          invitee_email: string
+          invite_code: string
+          status?: 'pending' | 'accepted' | 'expired'
+          sent_at?: string | null
+          accepted_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          auction_id?: string
+          invitee_email?: string
+          invite_code?: string
+          status?: 'pending' | 'accepted' | 'expired'
+          sent_at?: string | null
+          accepted_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       posts: {
         Row: {
           content: string | null
