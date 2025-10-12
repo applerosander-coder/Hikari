@@ -103,9 +103,17 @@ export default async function DashboardPage() {
 
   const watchlistItemIds = watchlistData?.map((item) => item.auction_item_id).filter(Boolean) || [];
 
+  // Get list of all auctions for filter dropdown
+  const { data: allAuctions } = await supabase
+    .from('auctions')
+    .select('id, name, place')
+    .in('status', ['active', 'upcoming'])
+    .order('created_at', { ascending: false });
+
   return (
     <CategorizedAuctionBrowser
       items={itemsWithBidCounts}
+      auctions={allAuctions || []}
       userBidItemIds={userBidItemIds}
       userBidAmounts={userBidAmounts}
       userId={user.id}

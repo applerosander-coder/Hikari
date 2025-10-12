@@ -14,7 +14,6 @@ interface AuctionItem {
   starting_price: number;
   current_bid: number | null;
   image_url: string | null;
-  category: string | null;
   bid_count?: number;
   auction: {
     id: string;
@@ -27,8 +26,15 @@ interface AuctionItem {
   } | null;
 }
 
+interface Auction {
+  id: string;
+  name: string;
+  place: string;
+}
+
 interface CategorizedAuctionBrowserProps {
   items: AuctionItem[];
+  auctions: Auction[];
   userBidItemIds: string[];
   userBidAmounts: Record<string, number>;
   userId: string;
@@ -46,6 +52,7 @@ const CATEGORIES = [
 
 export function CategorizedAuctionBrowser({
   items,
+  auctions,
   userBidItemIds,
   userBidAmounts,
   userId,
@@ -53,23 +60,31 @@ export function CategorizedAuctionBrowser({
 }: CategorizedAuctionBrowserProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAuction, setSelectedAuction] = useState<string>('all');
 
   const filteredItems = React.useMemo(() => {
-    if (!searchQuery.trim()) {
-      return items;
+    let filtered = items;
+
+    // Filter by selected auction
+    if (selectedAuction !== 'all') {
+      filtered = filtered.filter(item => item.auction_id === selectedAuction);
     }
 
-    const query = searchQuery.toLowerCase();
-    return items.filter((item) => {
-      return (
-        item.title.toLowerCase().includes(query) ||
-        item.description?.toLowerCase().includes(query) ||
-        item.category?.toLowerCase().includes(query) ||
-        item.auction?.name.toLowerCase().includes(query) ||
-        item.auction?.place.toLowerCase().includes(query)
-      );
-    });
-  }, [items, searchQuery]);
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((item) => {
+        return (
+          item.title.toLowerCase().includes(query) ||
+          item.description?.toLowerCase().includes(query) ||
+          item.auction?.name.toLowerCase().includes(query) ||
+          item.auction?.place.toLowerCase().includes(query)
+        );
+      });
+    }
+
+    return filtered;
+  }, [items, searchQuery, selectedAuction]);
 
   const hotItems = React.useMemo(() => {
     return [...filteredItems]
@@ -77,22 +92,17 @@ export function CategorizedAuctionBrowser({
       .slice(0, 10);
   }, [filteredItems]);
 
-  const categorizedItems = React.useMemo(() => {
+  // Group items by auction instead of category
+  const auctionGroups = React.useMemo(() => {
     const grouped: Record<string, AuctionItem[]> = {};
     
-    CATEGORIES.forEach(category => {
-      grouped[category] = filteredItems.filter(
-        item => item.category === category
-      );
+    filteredItems.forEach(item => {
+      const auctionKey = item.auction?.name || 'Other';
+      if (!grouped[auctionKey]) {
+        grouped[auctionKey] = [];
+      }
+      grouped[auctionKey].push(item);
     });
-
-    const uncategorized = filteredItems.filter(
-      item => !item.category || !CATEGORIES.includes(item.category)
-    );
-    
-    if (uncategorized.length > 0) {
-      grouped['Other'] = uncategorized;
-    }
 
     return grouped;
   }, [filteredItems]);
@@ -107,12 +117,32 @@ export function CategorizedAuctionBrowser({
 
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
-      <div className="mb-6 sm:mb-8 max-w-5xl mx-auto">
-        <div className="relative mb-4">
+      <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
+        {/* Auction Filter Dropdown */}
+        <div className="flex gap-3">
+          <select
+            value={selectedAuction}
+            onChange={(e) => setSelectedAuction(e.target.value)}
+            className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="all">All Auctions ({items.length} items)</option>
+            {auctions.map((auction) => {
+              const itemCount = items.filter(i => i.auction_id === auction.id).length;
+              return (
+                <option key={auction.id} value={auction.id}>
+                  {auction.name} - {auction.place} ({itemCount} items)
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search auctions..."
+            placeholder="Search items, auctions, or locations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-10 bg-background"
@@ -140,7 +170,7 @@ export function CategorizedAuctionBrowser({
         </div>
       ) : (
         <div className="space-y-8 sm:space-y-12">
-          {hotItems.length > 0 && (
+          {hotItems.length > 0 && selectedAuction === 'all' && (
             <AuctionRow
               title="🔥 Hot Items"
               subtitle="Most popular items right now"
@@ -153,19 +183,23 @@ export function CategorizedAuctionBrowser({
             />
           )}
 
-          {Object.entries(categorizedItems).map(([category, categoryItems]) => 
-            categoryItems.length > 0 ? (
+          {Object.entries(auctionGroups).map(([auctionName, auctionItems]) => {
+            const auctionInfo = auctionItems[0]?.auction;
+            const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items` : undefined;
+            
+            return auctionItems.length > 0 ? (
               <AuctionRow
-                key={category}
-                title={category}
-                items={categoryItems}
+                key={auctionName}
+                title={auctionName}
+                subtitle={subtitle}
+                items={auctionItems}
                 userBidItemIds={userBidItemIds}
                 userBidAmounts={userBidAmounts}
                 watchlistItemIds={watchlistItemIds}
                 handleBidNow={handleBidNow}
               />
-            ) : null
-          )}
+            ) : null;
+          })}
         </div>
       )}
     </div>
