@@ -39,7 +39,7 @@ export default async function DashboardPage() {
           start_date,
           end_date,
           status,
-          seller_id
+          created_by
         )
       `)
       .in('auction_id', activeAuctionIds);
