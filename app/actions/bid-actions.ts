@@ -25,25 +25,58 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
       return { error: 'no_payment_method' };
     }
 
-    const { data: auction, error: auctionError } = await supabase
-      .from('auctions')
-      .select('*')
+    // Try to find auction item first, then fall back to legacy auction
+    const { data: auctionItem } = await supabase
+      .from('auction_items')
+      .select('*, auction:auctions(id, status, end_date)')
       .eq('id', auctionId)
       .single();
 
-    if (auctionError || !auction) {
-      return { error: 'Auction not found' };
+    let currentBid, minBid, itemStatus;
+    let isAuctionItem = false;
+
+    if (auctionItem) {
+      // This is an auction item
+      isAuctionItem = true;
+      itemStatus = auctionItem.auction?.status;
+      currentBid = auctionItem.current_bid || auctionItem.starting_price;
+      minBid = currentBid + 100;
+    } else {
+      // Legacy auction
+      const { data: auction, error: auctionError } = await supabase
+        .from('auctions')
+        .select('*')
+        .eq('id', auctionId)
+        .single();
+
+      if (auctionError || !auction) {
+        return { error: 'Auction not found' };
+      }
+
+      itemStatus = auction.status;
+      currentBid = auction.current_bid || auction.starting_price;
+      minBid = currentBid + 100;
     }
 
-    if (auction.status !== 'active') {
+    if (itemStatus !== 'active') {
       return { error: 'This auction is not currently active' };
     }
 
-    const currentBid = auction.current_bid || auction.starting_price;
-    const minBid = currentBid + 100;
-
     if (bidAmount < minBid) {
       return { error: `Bid must be at least $${(minBid / 100).toFixed(2)}` };
+    }
+
+    const metadata: any = {
+      user_id: user.id,
+      bid_amount: bidAmount.toString(),
+      type: 'bid',
+    };
+
+    // Use auction_item_id for items, auction_id for legacy
+    if (isAuctionItem) {
+      metadata.auction_item_id = auctionId;
+    } else {
+      metadata.auction_id = auctionId;
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -53,12 +86,7 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
       payment_method: paymentMethod.id,
       off_session: true,
       confirm: true,
-      metadata: {
-        auction_id: auctionId,
-        user_id: user.id,
-        bid_amount: bidAmount.toString(),
-        type: 'bid',
-      },
+      metadata,
     });
 
     if (paymentIntent.status === 'succeeded') {
@@ -109,25 +137,57 @@ export async function createBidPaymentIntent(auctionId: string, bidAmount: numbe
       return { error: 'Please add a payment method before bidding.' };
     }
 
-    const { data: auction, error: auctionError } = await supabase
-      .from('auctions')
-      .select('*')
+    // Try to find auction item first, then fall back to legacy auction
+    const { data: auctionItem } = await supabase
+      .from('auction_items')
+      .select('*, auction:auctions(id, status, end_date)')
       .eq('id', auctionId)
       .single();
 
-    if (auctionError || !auction) {
-      return { error: 'Auction not found' };
+    let currentBid, minBid, itemStatus;
+    let isAuctionItem = false;
+
+    if (auctionItem) {
+      // This is an auction item
+      isAuctionItem = true;
+      itemStatus = auctionItem.auction?.status;
+      currentBid = auctionItem.current_bid || auctionItem.starting_price;
+      minBid = currentBid + 100;
+    } else {
+      // Legacy auction
+      const { data: auction, error: auctionError } = await supabase
+        .from('auctions')
+        .select('*')
+        .eq('id', auctionId)
+        .single();
+
+      if (auctionError || !auction) {
+        return { error: 'Auction not found' };
+      }
+
+      itemStatus = auction.status;
+      currentBid = auction.current_bid || auction.starting_price;
+      minBid = currentBid + 100;
     }
 
-    if (auction.status !== 'active') {
+    if (itemStatus !== 'active') {
       return { error: 'This auction is not currently active' };
     }
 
-    const currentBid = auction.current_bid || auction.starting_price;
-    const minBid = currentBid + 100;
-
     if (bidAmount < minBid) {
       return { error: `Bid must be at least $${(minBid / 100).toFixed(2)}` };
+    }
+
+    const metadata: any = {
+      user_id: user.id,
+      bid_amount: bidAmount.toString(),
+    };
+
+    // Use auction_item_id for items, auction_id for legacy
+    if (isAuctionItem) {
+      metadata.auction_item_id = auctionId;
+    } else {
+      metadata.auction_id = auctionId;
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -136,11 +196,7 @@ export async function createBidPaymentIntent(auctionId: string, bidAmount: numbe
       automatic_payment_methods: {
         enabled: true,
       },
-      metadata: {
-        auction_id: auctionId,
-        user_id: user.id,
-        bid_amount: bidAmount.toString(),
-      },
+      metadata,
     });
 
     return { 

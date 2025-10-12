@@ -44,49 +44,86 @@ export async function POST(req: Request) {
       }
       
       // Check if this is a bid payment (has bid_amount in metadata)
-      if (paymentIntent.metadata.auction_id && paymentIntent.metadata.user_id && paymentIntent.metadata.bid_amount) {
-        const { auction_id, user_id, bid_amount } = paymentIntent.metadata;
+      const auctionItemId = paymentIntent.metadata.auction_item_id;
+      const auctionId = paymentIntent.metadata.auction_id;
+      const isItemBid = !!auctionItemId;
+      
+      if ((auctionItemId || auctionId) && paymentIntent.metadata.user_id && paymentIntent.metadata.bid_amount) {
+        const { user_id, bid_amount } = paymentIntent.metadata;
         const bidAmountNum = Number(bid_amount);
+        const targetId = auctionItemId || auctionId;
         
-        console.log(`✅ Bid payment succeeded: $${bidAmountNum / 100} for auction ${auction_id}`);
+        console.log(`✅ Bid payment succeeded: $${bidAmountNum / 100} for ${isItemBid ? 'item' : 'auction'} ${targetId}`);
         
         // Verify payment was fully captured
         if (paymentIntent.status === 'succeeded') {
           const paymentIntentId = paymentIntent.id;
 
           // IDEMPOTENCY CHECK: Check if exact bid already exists
-          // Use auction_id, user_id, and bid_amount as unique identifier
-          const { data: existingBid } = await supabaseAdmin
-            .from('bids')
-            .select('id')
-            .eq('auction_id', auction_id)
-            .eq('user_id', user_id)
-            .eq('bid_amount', bidAmountNum)
-            .maybeSingle();
+          let existingBid;
+          if (isItemBid) {
+            const { data } = await supabaseAdmin
+              .from('bids')
+              .select('id')
+              .eq('auction_item_id', auctionItemId)
+              .eq('user_id', user_id)
+              .eq('bid_amount', bidAmountNum)
+              .maybeSingle();
+            existingBid = data;
+          } else {
+            const { data } = await supabaseAdmin
+              .from('bids')
+              .select('id')
+              .eq('auction_id', auctionId)
+              .eq('user_id', user_id)
+              .eq('bid_amount', bidAmountNum)
+              .maybeSingle();
+            existingBid = data;
+          }
 
           if (existingBid) {
             console.log(`⚠️ Bid already exists for payment ${paymentIntentId} - skipping duplicate`);
             return new Response(null, { status: 200 });
           }
 
-          // Fetch and lock current auction state
-          const { data: auction, error: auctionFetchError } = await supabaseAdmin
-            .from('auctions')
-            .select('current_bid, status')
-            .eq('id', auction_id)
-            .single();
+          // Fetch and lock current state (item or auction)
+          let currentHighestBid = 0;
+          let itemStatus = 'active';
 
-          if (auctionFetchError) {
-            console.error('❌ Error fetching auction:', auctionFetchError);
-            return new Response(`Error fetching auction: ${auctionFetchError.message}`, { status: 500 });
+          if (isItemBid) {
+            const { data: item, error: itemFetchError } = await supabaseAdmin
+              .from('auction_items')
+              .select('current_bid, auction:auctions(status)')
+              .eq('id', auctionItemId)
+              .single();
+
+            if (itemFetchError) {
+              console.error('❌ Error fetching auction item:', itemFetchError);
+              return new Response(`Error fetching auction item: ${itemFetchError.message}`, { status: 500 });
+            }
+
+            itemStatus = item.auction?.status || 'draft';
+            currentHighestBid = item?.current_bid || 0;
+          } else {
+            const { data: auction, error: auctionFetchError } = await supabaseAdmin
+              .from('auctions')
+              .select('current_bid, status')
+              .eq('id', auctionId)
+              .single();
+
+            if (auctionFetchError) {
+              console.error('❌ Error fetching auction:', auctionFetchError);
+              return new Response(`Error fetching auction: ${auctionFetchError.message}`, { status: 500 });
+            }
+
+            itemStatus = auction.status;
+            currentHighestBid = auction?.current_bid || 0;
           }
 
-          if (auction.status !== 'active') {
-            console.log(`⚠️ Auction ${auction_id} is not active - rejecting bid`);
-            return new Response(`Auction not active`, { status: 400 });
+          if (itemStatus !== 'active') {
+            console.log(`⚠️ ${isItemBid ? 'Item' : 'Auction'} ${targetId} is not active - rejecting bid`);
+            return new Response(`${isItemBid ? 'Item' : 'Auction'} not active`, { status: 400 });
           }
-
-          const currentHighestBid = auction?.current_bid || 0;
 
           // Only accept bid if it's higher than current bid
           if (bidAmountNum <= currentHighestBid) {
@@ -95,24 +132,45 @@ export async function POST(req: Request) {
           }
 
           // Insert bid into database
-          const { error: bidError } = await supabaseAdmin.from('bids').insert({
-            auction_id,
+          const bidData: any = {
             user_id,
             bid_amount: bidAmountNum,
-          });
+          };
+
+          if (isItemBid) {
+            bidData.auction_item_id = auctionItemId;
+          } else {
+            bidData.auction_id = auctionId;
+          }
+
+          const { error: bidError } = await supabaseAdmin.from('bids').insert(bidData);
 
           if (bidError) {
             console.error('❌ Error inserting bid:', bidError);
             return new Response(`Error recording bid: ${bidError.message}`, { status: 500 });
           }
 
-          // Update auction current_bid - handle NULL case with proper filter
-          const { data: updateResult, error: updateError } = await supabaseAdmin
-            .from('auctions')
-            .update({ current_bid: bidAmountNum })
-            .eq('id', auction_id)
-            .or(`current_bid.is.null,current_bid.lt.${bidAmountNum}`)
-            .select();
+          // Update current_bid - handle NULL case with proper filter
+          let updateResult, updateError;
+          if (isItemBid) {
+            const result = await supabaseAdmin
+              .from('auction_items')
+              .update({ current_bid: bidAmountNum })
+              .eq('id', auctionItemId)
+              .or(`current_bid.is.null,current_bid.lt.${bidAmountNum}`)
+              .select();
+            updateResult = result.data;
+            updateError = result.error;
+          } else {
+            const result = await supabaseAdmin
+              .from('auctions')
+              .update({ current_bid: bidAmountNum })
+              .eq('id', auctionId)
+              .or(`current_bid.is.null,current_bid.lt.${bidAmountNum}`)
+              .select();
+            updateResult = result.data;
+            updateError = result.error;
+          }
 
           if (updateError) {
             console.error('❌ Error updating auction:', updateError);
@@ -121,11 +179,11 @@ export async function POST(req: Request) {
 
           // Verify the update actually happened
           if (!updateResult || updateResult.length === 0) {
-            console.error('❌ Auction update touched zero rows - concurrent bid may have won');
+            console.error('❌ Update touched zero rows - concurrent bid may have won');
             return new Response(`Bid overtaken by higher concurrent bid`, { status: 400 });
           }
 
-          console.log(`✅ Bid recorded successfully for auction ${auction_id}`);
+          console.log(`✅ Bid recorded successfully for ${isItemBid ? 'item' : 'auction'} ${targetId}`);
         }
       }
     }

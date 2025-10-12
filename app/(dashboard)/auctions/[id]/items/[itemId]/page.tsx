@@ -360,19 +360,18 @@ export default function AuctionItemDetailPage() {
         )}
       </div>
 
-      {/* Bid Dialog - convert auction to item format */}
-      <BidDialog
-        open={bidDialogOpen}
-        onOpenChange={setBidDialogOpen}
-        auction={{
-          id: item.id,
-          title: item.title,
-          current_bid: item.current_bid || item.starting_price,
-          starting_price: item.starting_price,
-          reserve_price: item.reserve_price,
-        }}
-        onBidPlaced={handleBidPlaced}
-      />
+      {/* Bid Dialog */}
+      {item && user && (
+        <BidDialog
+          open={bidDialogOpen}
+          onOpenChange={setBidDialogOpen}
+          auctionId={item.id}
+          auctionTitle={item.title}
+          currentBid={item.current_bid || item.starting_price || 0}
+          userId={user.id}
+          onBidPlaced={handleBidPlaced}
+        />
+      )}
     </div>
   );
 }
