@@ -4,6 +4,12 @@
 Auctions is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### Recent Changes
+**October 12, 2025 - Navbar Simplification:**
+- **Removed Sign Out Button**: Removed standalone Sign Out button from navbar for cleaner design
+- **Avatar-Only Navigation**: Navbar now shows only hamburger menu (mobile), centered "Auctions" title with icon, and profile avatar on right
+- **Preserved Functionality**: Sign Out still accessible via profile avatar dropdown and left sidebar
+- **Consistent Layout**: Both dashboard and mybids pages share the same simplified navbar design
+
 **October 12, 2025 - Loading Spinners & Navigation Progress:**
 - **Page Loading Spinners**: Added loading.tsx files for dashboard, marketing, and auction routes with centered spinner animations
 - **Navigation Progress Bar**: Implemented NProgress loading bar at top of screen during page transitions
