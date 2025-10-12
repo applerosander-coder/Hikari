@@ -61,7 +61,7 @@ export default function HeroSection() {
               Browse Auctions
             </Link>
             <Link
-              href="/signin"
+              href="/dashboard"
               className={cn(buttonVariants({ variant: 'outline', size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-semibold')}
             >
               Start Bidding Today
