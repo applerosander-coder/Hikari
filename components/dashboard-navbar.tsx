@@ -46,6 +46,51 @@ export function Navbar({
 
   return (
     <header className="flex h-20 items-center gap-4 border-b bg-background px-4 sm:h-20 sm:border-0 sm:bg-transparent sm:px-6">
+      <Link href="/" className="flex items-center space-x-2" prefetch={false}>
+        <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded-full">
+          <Gavel className="size-6 transition-transform duration-300 ease-in-out hover:scale-110" />
+        </div>
+        <span className="text-lg md:text-xl font-extrabold tracking-tightest">Auctions</span>
+      </Link>
+
+      <Breadcrumb className="hidden md:flex invisible">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard" prefetch={false}>
+                Dashboard
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {pathname
+            .split('/')
+            .filter(Boolean)
+            .slice(1)
+            .map((segment, index) => (
+              <BreadcrumbItem key={index}>
+                <BreadcrumbSeparator />
+                <BreadcrumbLink asChild>
+                  <Link
+                    href={`/${pathname
+                      .split('/')
+                      .slice(0, index + 2)
+                      .join('/')}`}
+                    prefetch={false}
+                  >
+                    {segment.charAt(0).toUpperCase() + segment.slice(1)}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+      
+      <div className="ml-auto" />
+      
+      <div className="hidden sm:flex">
+        <UserAccountNav user={userDetails} />
+      </div>
+
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button size="icon" variant="outline" className="sm:hidden">
@@ -117,47 +162,6 @@ export function Navbar({
           </nav>
         </SheetContent>
       </Sheet>
-      
-      <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2" prefetch={false}>
-        <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded-full">
-          <Gavel className="size-6 transition-transform duration-300 ease-in-out hover:scale-110" />
-        </div>
-        <span className="text-lg md:text-xl font-extrabold tracking-tightest">Auctions</span>
-      </Link>
-
-      <Breadcrumb className="hidden md:flex invisible">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/dashboard" prefetch={false}>
-                Dashboard
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          {pathname
-            .split('/')
-            .filter(Boolean)
-            .slice(1)
-            .map((segment, index) => (
-              <BreadcrumbItem key={index}>
-                <BreadcrumbSeparator />
-                <BreadcrumbLink asChild>
-                  <Link
-                    href={`/${pathname
-                      .split('/')
-                      .slice(0, index + 2)
-                      .join('/')}`}
-                    prefetch={false}
-                  >
-                    {segment.charAt(0).toUpperCase() + segment.slice(1)}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            ))}
-        </BreadcrumbList>
-      </Breadcrumb>
-      <div className="ml-auto" />
-      <UserAccountNav user={userDetails} />
     </header>
   );
 }
