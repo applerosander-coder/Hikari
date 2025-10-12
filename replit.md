@@ -3,6 +3,26 @@
 ### Overview
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
+### Recent Changes
+**October 12, 2025 - Unified Navigation & Seller Dashboard:**
+- **Unified Mobile Menu**: Shared navigation component (SharedMobileMenu) used across marketing and dashboard layouts
+  - Avatar displayed at top for authenticated users
+  - Navigation items: Auctions, My Bids, Seller, Pricing, How it Works (all with icons)
+  - Theme toggle with 3-state cycle (system/light/dark)
+  - Sign out button
+- **Seller Dashboard**: New `/seller` route for auction creators
+  - Auction creation form with all fields (title, description, pricing, dates, category)
+  - Image upload with base64 preview (production will need storage bucket)
+  - Real-time preview of created auctions
+  - Lists seller's existing auctions with status and details
+- **Database Schema**: Added `invitations` table for seller auction invites
+  - Stores invite codes, invitee emails, and status tracking
+  - RLS enabled (permissive for dev, production requirements documented in docs/SELLER_DATABASE_SETUP.md)
+- **API Endpoint**: `/api/auctions/create` for authenticated auction creation
+  - Validates user authentication and required fields
+  - Creates auctions with draft status by default
+- **How It Works Page**: Created `/how-it-works` marketing page explaining the auction process
+
 ### User Preferences
 I prefer the agent to be concise and to the point. When suggesting code changes, provide a brief explanation of the "why" behind the change, not just the "what." I value iterative development and prefer to review smaller, focused pull requests or changes rather than large, monolithic ones. Please ensure all modifications align with the existing monochrome design aesthetic (black, white, gray). Do not make changes to the `docs/` folder.
 
