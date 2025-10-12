@@ -35,6 +35,8 @@ export interface Database {
       auctions: {
         Row: {
           id: string
+          name: string
+          place: string | null
           title: string
           description: string | null
           starting_price: number
@@ -56,6 +58,8 @@ export interface Database {
         }
         Insert: {
           id?: string
+          name: string
+          place?: string | null
           title: string
           description?: string | null
           starting_price: number
@@ -113,10 +117,83 @@ export interface Database {
           }
         ]
       }
+      auction_items: {
+        Row: {
+          id: string
+          auction_id: string
+          title: string
+          description: string | null
+          starting_price: number
+          current_bid: number | null
+          reserve_price: number | null
+          image_url: string | null
+          image_urls: string[] | null
+          position: number
+          winner_id: string | null
+          payment_completed: boolean
+          payment_intent_id: string | null
+          payment_completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          auction_id: string
+          title: string
+          description?: string | null
+          starting_price: number
+          current_bid?: number | null
+          reserve_price?: number | null
+          image_url?: string | null
+          image_urls?: string[] | null
+          position?: number
+          winner_id?: string | null
+          payment_completed?: boolean
+          payment_intent_id?: string | null
+          payment_completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          auction_id?: string
+          title?: string
+          description?: string | null
+          starting_price?: number
+          current_bid?: number | null
+          reserve_price?: number | null
+          image_url?: string | null
+          image_urls?: string[] | null
+          position?: number
+          winner_id?: string | null
+          payment_completed?: boolean
+          payment_intent_id?: string | null
+          payment_completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_items_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_items_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       bids: {
         Row: {
           id: string
           auction_id: string
+          auction_item_id: string | null
           user_id: string
           bid_amount: number
           created_at: string
@@ -124,6 +201,7 @@ export interface Database {
         Insert: {
           id?: string
           auction_id: string
+          auction_item_id?: string | null
           user_id: string
           bid_amount: number
           created_at?: string
@@ -131,6 +209,7 @@ export interface Database {
         Update: {
           id?: string
           auction_id?: string
+          auction_item_id?: string | null
           user_id?: string
           bid_amount?: number
           created_at?: string
@@ -141,6 +220,13 @@ export interface Database {
             columns: ["auction_id"]
             isOneToOne: false
             referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_auction_item_id_fkey"
+            columns: ["auction_item_id"]
+            isOneToOne: false
+            referencedRelation: "auction_items"
             referencedColumns: ["id"]
           },
           {
