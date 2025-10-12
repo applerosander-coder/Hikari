@@ -4,6 +4,31 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
 ### Recent Changes
+**October 12, 2025 - Draft Auction Management & Preview System:**
+- **Timezone Fix**: Resolved datetime input bug where user's selected time was incorrectly saved
+  - datetime-local values now properly convert to ISO format preserving local time
+  - User selects 3:26pm → saves as 3:26pm (previously saved as 11:26am)
+  - Fixed in both create and edit auction forms
+- **Auto-Publish Functionality**: Draft auctions automatically go live when start time is reached
+  - Enhanced `/api/auctions/end-auctions` cron to handle both publishing drafts and ending auctions
+  - Checks every 5 minutes: drafts with `start_date <= now` move to 'active' status
+  - Published auctions then appear on dashboard for bidding
+  - Response includes published and ended counts for monitoring
+- **Preview Mode**: Sellers can preview draft auctions before publishing
+  - New `/seller/preview/[id]` page shows draft in published format
+  - Clear "PREVIEW MODE" banner with yellow highlighting
+  - Exact layout match to live auction detail page
+  - Bidding disabled with "Preview Only" indicator
+  - Preview buttons added to both edit form and seller dashboard cards
+  - Security: only draft owners can preview their auctions
+- **Draft Auction Editing**: Enhanced seller workflow for managing drafts
+  - Draft cards now clickable with Edit and Preview action buttons
+  - Shows planned start date on all draft auction cards
+  - Edit page at `/seller/edit/[id]` with pre-populated form
+  - PATCH `/api/auctions/[id]` for updating drafts
+  - DELETE `/api/auctions/[id]` for removing drafts
+  - Security: user can only edit/delete their own draft auctions
+
 **October 12, 2025 - Auction Ending & Bid Status Improvements:**
 - **Unified Auction Card Component**: Created `AuctionItemCard` component consolidating all card variations
   - Shows "High Bid" badge when user has the highest bid on an item
