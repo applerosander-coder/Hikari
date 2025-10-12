@@ -41,6 +41,7 @@ import {
   Puzzle,
   Menu,
   Database,
+  Waves,
   type Icon as LucideIcon
 } from 'lucide-react';
 
@@ -83,6 +84,7 @@ export const Icons = {
   sun: SunMedium,
   moon: Moon,
   laptop: Laptop,
+  waves: Waves,
   bot: Bot,
   BotIcon,
   flow: Workflow,
