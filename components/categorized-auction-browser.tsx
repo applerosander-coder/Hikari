@@ -327,12 +327,7 @@ function AuctionCard({
           </Badge>
         )}
 
-        <div className="absolute top-2 right-2 flex gap-2 items-center z-20">
-          {userHasBid && (
-            <div className="bg-black dark:bg-white text-white dark:text-black p-1.5 rounded-full">
-              <Heart className="h-3 w-3 fill-current" />
-            </div>
-          )}
+        <div className="absolute top-2 right-2 z-20">
           <WatchlistButton
             auctionId={auction.id}
             isInWatchlist={isInWatchlist}

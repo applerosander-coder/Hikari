@@ -4,13 +4,19 @@
 Auctions is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### Recent Changes
+**October 12, 2025 - Watchlist Heart Icon Update:**
+- **Heart-Based Watchlist**: Changed watchlist button from eye icon to heart icon for better user experience
+- **Single Icon System**: Removed duplicate "user has bid" heart indicator, consolidated into one heart for watchlist
+- **Toggle Functionality**: Heart appears filled when in watchlist, outlined when not in watchlist
+- **Simplified Card Design**: Cleaner auction cards with single clickable heart button in top-right corner
+
 **October 11, 2025 - My Bids Page Restructure with Watchlist:**
 - **Active Bids Tab**: Shows high bids and outbid items with visual status indicators
 - **Ending Soon Tab**: Displays auctions ending within 24 hours for quick action
 - **Won Auctions Tab**: Lists won items with payment status, shipping status, and support contact options
 - **Watchlist Tab**: User-curated list of auction items they want to track
 - **Watchlist Database**: Created `watchlist` table with user_id and auction_id relationships
-- **Watchlist Button**: Added eye icon button to all auction cards for quick add/remove from watchlist
+- **Watchlist Button**: Heart icon button on all auction cards for quick add/remove from watchlist
 - **Tabbed Interface**: Clean navigation between Active, Ending Soon, Won, and Watchlist sections
 - **Payment & Shipping Tracking**: Added `shipping_status` and `tracking_number` fields to payments table
 - **Auto-charge Integration**: Won auctions display payment status (pending/paid/failed) and shipping updates

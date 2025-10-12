@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { addToWatchlist, removeFromWatchlist } from '@/app/actions/watchlist';
 import { toast } from 'sonner';
@@ -65,16 +65,16 @@ export function WatchlistButton({
         onClick={handleToggle}
         disabled={isLoading}
         className={cn(
-          "p-2 rounded-full transition-colors disabled:opacity-50",
+          "p-2 rounded-full transition-all disabled:opacity-50",
           isAdded 
             ? "bg-black dark:bg-white text-white dark:text-black" 
             : "bg-white dark:bg-black text-black dark:text-white border border-gray-200 dark:border-gray-700",
-          "hover:scale-110 transition-transform",
+          "hover:scale-110",
           className
         )}
         aria-label={isAdded ? 'Remove from watchlist' : 'Add to watchlist'}
       >
-        {isAdded ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+        <Heart className={cn("h-4 w-4", isAdded && "fill-current")} />
       </button>
     );
   }
@@ -89,12 +89,12 @@ export function WatchlistButton({
     >
       {isAdded ? (
         <>
-          <Eye className="mr-2 h-4 w-4" />
+          <Heart className="mr-2 h-4 w-4 fill-current" />
           Watching
         </>
       ) : (
         <>
-          <EyeOff className="mr-2 h-4 w-4" />
+          <Heart className="mr-2 h-4 w-4" />
           Watch
         </>
       )}
