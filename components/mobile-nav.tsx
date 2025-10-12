@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { MainNavItem } from 'types';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import { ModeToggle } from '@/components/mode-toggle';
-import { Gavel } from 'lucide-react';
+import { Gavel, Sun, Moon } from 'lucide-react';
 import { UserAccountNav } from '@/components/user-account-nav';
+import { useTheme } from 'next-themes';
 import {
   Sheet,
   SheetContent,
@@ -35,6 +35,25 @@ export function MobileNav({
   open, 
   onOpenChange 
 }: MobileNavProps) {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    if (!mounted) return;
+    
+    if (theme === 'system') {
+      setTheme('light');
+    } else if (theme === 'light') {
+      setTheme('dark');
+    } else {
+      setTheme('system');
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
@@ -70,7 +89,15 @@ export function MobileNav({
 
           {/* Bottom Section: Theme Toggle & User */}
           <div className="flex items-center justify-between">
-            <ModeToggle />
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="relative size-8 px-0 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </button>
             {user && userDetails ? (
               <UserAccountNav user={{
                 ...userDetails,
