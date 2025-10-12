@@ -57,6 +57,33 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+  .ocean {
+    --background: 200 20% 10%;
+    --foreground: 180 10% 95%;
+    --card: 200 25% 12%;
+    --card-foreground: 180 10% 95%;
+    --popover: 200 25% 12%;
+    --popover-foreground: 180 10% 95%;
+    --primary: 190 80% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 20% 20%;
+    --secondary-foreground: 180 10% 95%;
+    --muted: 200 20% 20%;
+    --muted-foreground: 180 20% 65%;
+    --accent: 190 60% 30%;
+    --accent-foreground: 180 10% 95%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 200 25% 25%;
+    --input: 200 25% 25%;
+    --ring: 190 80% 50%;
+    --chart-1: 190 80% 50%;
+    --chart-2: 200 70% 45%;
+    --chart-3: 180 60% 40%;
+    --chart-4: 170 70% 50%;
+    --chart-5: 210 75% 55%;
+  }
 }
 
 @layer base {
