@@ -66,7 +66,11 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
     <nav className="grid gap-6 text-lg font-medium mt-6">
       {/* Avatar at Top */}
       {user && (
-        <div className="flex items-center gap-3 px-2.5 pb-4 border-b border-border">
+        <Link 
+          href="/dashboard/account"
+          onClick={onClose}
+          className="flex items-center gap-3 px-2.5 pb-4 border-b border-border hover:bg-accent/50 transition-colors rounded-md cursor-pointer"
+        >
           <Avatar className="h-10 w-10">
             <AvatarImage src={userDetails?.avatar_url || ''} alt={userDetails?.full_name || 'User'} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
@@ -75,7 +79,7 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
             <span className="text-sm font-semibold">{userDetails?.full_name || 'User'}</span>
             <span className="text-xs text-muted-foreground">{user?.email}</span>
           </div>
-        </div>
+        </Link>
       )}
 
       {/* Navigation Items */}
