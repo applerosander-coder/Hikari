@@ -6,9 +6,11 @@ Auctions is a comprehensive live auction and bidding platform built with Next.js
 ### Recent Changes
 **October 12, 2025 - Watchlist Heart Icon Update:**
 - **Heart-Based Watchlist**: Changed watchlist button from eye icon to heart icon for better user experience
+- **Red Heart Indicator**: Heart button shows red background when item is in watchlist, white/outlined when not
 - **Single Icon System**: Removed duplicate "user has bid" heart indicator, consolidated into one heart for watchlist
-- **Toggle Functionality**: Heart appears filled when in watchlist, outlined when not in watchlist
+- **Toggle Functionality**: Click heart to add/remove from watchlist with visual feedback
 - **Simplified Card Design**: Cleaner auction cards with single clickable heart button in top-right corner
+- **Mobile-Responsive Tabs**: My Bids page tabs optimized for mobile with shorter labels and hidden icons on small screens
 
 **October 11, 2025 - My Bids Page Restructure with Watchlist:**
 - **Active Bids Tab**: Shows high bids and outbid items with visual status indicators

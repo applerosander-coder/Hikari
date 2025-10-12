@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Search, X, Heart, Clock, Trophy, Eye } from 'lucide-react';
+import { Search, X, Heart, Clock, Trophy } from 'lucide-react';
 import { ActiveBidsSection } from './active-bids-section';
 import { EndingSoonSection } from './ending-soon-section';
 import { WonAuctionsSection } from './won-auctions-section';
@@ -97,38 +97,38 @@ export function MyBidsPageClient({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="active" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Active
+          <TabsTrigger value="active" className="flex items-center gap-1 sm:gap-2">
+            <Heart className="h-4 w-4 hidden sm:block" />
+            <span className="text-xs sm:text-sm">Active</span>
             {activeBidsCount > 0 && (
-              <span className="ml-1 rounded-full bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 text-xs font-bold">
+              <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
                 {activeBidsCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="ending-soon" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Ending Soon
+          <TabsTrigger value="ending-soon" className="flex items-center gap-1 sm:gap-2">
+            <Clock className="h-4 w-4 hidden sm:block" />
+            <span className="text-xs sm:text-sm">Soon</span>
             {endingSoonCount > 0 && (
-              <span className="ml-1 rounded-full bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 text-xs font-bold">
+              <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
                 {endingSoonCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="won" className="flex items-center gap-2">
-            <Trophy className="h-4 w-4" />
-            Won
+          <TabsTrigger value="won" className="flex items-center gap-1 sm:gap-2">
+            <Trophy className="h-4 w-4 hidden sm:block" />
+            <span className="text-xs sm:text-sm">Won</span>
             {wonCount > 0 && (
-              <span className="ml-1 rounded-full bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 text-xs font-bold">
+              <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
                 {wonCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="watchlist" className="flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            Watchlist
+          <TabsTrigger value="watchlist" className="flex items-center gap-1 sm:gap-2">
+            <Heart className="h-4 w-4 hidden sm:block" />
+            <span className="text-xs sm:text-sm">Watch</span>
             {watchlistCount > 0 && (
-              <span className="ml-1 rounded-full bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 text-xs font-bold">
+              <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
                 {watchlistCount}
               </span>
             )}

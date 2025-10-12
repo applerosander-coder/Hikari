@@ -67,8 +67,8 @@ export function WatchlistButton({
         className={cn(
           "p-2 rounded-full transition-all disabled:opacity-50",
           isAdded 
-            ? "bg-black dark:bg-white text-white dark:text-black" 
-            : "bg-white dark:bg-black text-black dark:text-white border border-gray-200 dark:border-gray-700",
+            ? "bg-red-500 text-white hover:bg-red-600" 
+            : "bg-white dark:bg-black text-black dark:text-white border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800",
           "hover:scale-110",
           className
         )}
