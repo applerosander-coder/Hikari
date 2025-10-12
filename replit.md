@@ -4,13 +4,15 @@
 Auctions is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### Recent Changes
-**October 12, 2025 - Watchlist Heart Icon Update:**
+**October 12, 2025 - Watchlist Heart Icon Update & Bug Fixes:**
 - **Heart-Based Watchlist**: Changed watchlist button from eye icon to heart icon for better user experience
-- **Red Heart Indicator**: Heart button shows red background when item is in watchlist, white/outlined when not
+- **Red Heart Indicator**: Heart button shows red background (bg-red-500) when item is in watchlist, white/outlined when not
 - **Single Icon System**: Removed duplicate "user has bid" heart indicator, consolidated into one heart for watchlist
 - **Toggle Functionality**: Click heart to add/remove from watchlist with visual feedback
 - **Simplified Card Design**: Cleaner auction cards with single clickable heart button in top-right corner
 - **Mobile-Responsive Tabs**: My Bids page tabs optimized for mobile with shorter labels and hidden icons on small screens
+- **Fixed Duplicate Clock Icons**: Removed duplicate clock icon from auction cards (AuctionCountdown component already renders one)
+- **Fixed Watchlist Button Clicks**: Added stopPropagation to watchlist button wrapper to prevent card onClick interference
 
 **October 11, 2025 - My Bids Page Restructure with Watchlist:**
 - **Active Bids Tab**: Shows high bids and outbid items with visual status indicators
