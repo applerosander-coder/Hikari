@@ -141,7 +141,7 @@ export function WatchlistSection({ watchlistItems, searchQuery }: WatchlistSecti
                   </div>
                 )}
                 <Button
-                  onClick={() => router.push(`/auctions/${auction.id}`)}
+                  onClick={() => router.push(auction.path || `/auctions/${auction.id}`)}
                   className="w-full"
                 >
                   <TrendingUp className="mr-2 h-4 w-4" />

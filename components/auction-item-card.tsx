@@ -11,6 +11,7 @@ import Image from 'next/image';
 
 interface Auction {
   id: string;
+  auction_id?: string; // Present if this is an auction item (not legacy auction)
   title: string;
   description?: string | null;
   starting_price: number;
@@ -181,7 +182,8 @@ export function AuctionItemCard({
         {showWatchlist && !badgeType?.includes('won') && (
           <div className="absolute top-2 right-2 z-50 pointer-events-auto">
             <WatchlistButton
-              auctionId={auction.id}
+              auctionId={auction.auction_id || auction.id}
+              itemId={auction.auction_id ? auction.id : undefined}
               isInWatchlist={isInWatchlist}
               variant="icon"
             />

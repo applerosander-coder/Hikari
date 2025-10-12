@@ -62,15 +62,31 @@ export function MyBidsPageClient({
     }
   }, [searchParams, router]);
 
-  // Group bids by auction and get the user's highest bid for each
-  const bidsMap = new Map<string, { bid: any; auction: any }>();
+  // Group bids by auction/item and get the user's highest bid for each
+  // Support both auction items (new) and legacy auctions
+  const bidsMap = new Map<string, { bid: any; auction: any; isItem: boolean }>();
   
   userBidsData.forEach((bidData) => {
-    const existingBid = bidsMap.get(bidData.auction_id);
+    // Determine if this is an item bid or legacy auction bid
+    const isItemBid = !!bidData.auction_item_id;
+    const rawId = isItemBid ? bidData.auction_item_id : bidData.auction_id;
+    
+    // Prefix with type to prevent ID collisions between items and auctions
+    const uniqueKey = isItemBid ? `item:${rawId}` : `auction:${rawId}`;
+    
+    // Get auction/item data
+    const auctionData = isItemBid 
+      ? bidData.auction_items // Item with nested auction container
+      : bidData.auctions; // Legacy auction
+    
+    if (!auctionData) return; // Skip if no auction data
+    
+    const existingBid = bidsMap.get(uniqueKey);
     if (!existingBid || bidData.bid_amount > existingBid.bid.bid_amount) {
-      bidsMap.set(bidData.auction_id, {
+      bidsMap.set(uniqueKey, {
         bid: bidData,
-        auction: bidData.auctions
+        auction: auctionData,
+        isItem: isItemBid
       });
     }
   });
@@ -80,26 +96,34 @@ export function MyBidsPageClient({
   // Separate into active and outbid
   const now = new Date();
   
-  const activeBids = auctionsWithBids.filter(({ bid, auction }) => {
+  const activeBids = auctionsWithBids.filter(({ bid, auction, isItem }) => {
+    // For items, use item's current_bid; for legacy, use auction's current_bid
     const currentBid = auction.current_bid || auction.starting_price;
-    const endDate = new Date(auction.end_date);
+    // For items, get dates from nested auction container; for legacy, from auction itself
+    const auctionContainer = isItem ? auction.auction : auction;
+    const endDate = new Date(auctionContainer?.end_date || auction.end_date);
+    const status = auctionContainer?.status || auction.status;
     const hasEnded = endDate < now;
-    return bid.bid_amount >= currentBid && auction.status !== 'ended' && !hasEnded;
+    return bid.bid_amount >= currentBid && status !== 'ended' && !hasEnded;
   });
 
-  const outbidBids = auctionsWithBids.filter(({ bid, auction }) => {
+  const outbidBids = auctionsWithBids.filter(({ bid, auction, isItem }) => {
     const currentBid = auction.current_bid || auction.starting_price;
-    const endDate = new Date(auction.end_date);
+    const auctionContainer = isItem ? auction.auction : auction;
+    const endDate = new Date(auctionContainer?.end_date || auction.end_date);
+    const status = auctionContainer?.status || auction.status;
     const hasEnded = endDate < now;
-    return bid.bid_amount < currentBid && auction.status !== 'ended' && !hasEnded;
+    return bid.bid_amount < currentBid && status !== 'ended' && !hasEnded;
   });
 
   // Get ending soon items (within 24 hours)
   const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   
-  const endingSoonBids = auctionsWithBids.filter(({ auction }) => {
-    const endDate = new Date(auction.end_date);
-    return endDate > now && endDate <= twentyFourHoursFromNow && auction.status !== 'ended';
+  const endingSoonBids = auctionsWithBids.filter(({ auction, isItem }) => {
+    const auctionContainer = isItem ? auction.auction : auction;
+    const endDate = new Date(auctionContainer?.end_date || auction.end_date);
+    const status = auctionContainer?.status || auction.status;
+    return endDate > now && endDate <= twentyFourHoursFromNow && status !== 'ended';
   });
 
   // Get counts
@@ -107,6 +131,60 @@ export function MyBidsPageClient({
   const endingSoonCount = endingSoonBids.length;
   const wonCount = wonAuctionsData.length;
   const watchlistCount = watchlistData.length;
+
+  // Normalize data: add routing path to each entry
+  const normalizedActiveBids = activeBids.map(({ bid, auction, isItem }) => ({
+    bid,
+    auction: {
+      ...auction,
+      // Add routing path based on type
+      path: isItem 
+        ? `/auctions/${auction.auction.id}/items/${auction.id}`
+        : `/auctions/${auction.id}`
+    },
+    isItem
+  }));
+
+  const normalizedOutbidBids = outbidBids.map(({ bid, auction, isItem }) => ({
+    bid,
+    auction: {
+      ...auction,
+      path: isItem 
+        ? `/auctions/${auction.auction.id}/items/${auction.id}`
+        : `/auctions/${auction.id}`
+    },
+    isItem
+  }));
+
+  const normalizedEndingSoonBids = endingSoonBids.map(({ bid, auction, isItem }) => ({
+    bid,
+    auction: {
+      ...auction,
+      path: isItem 
+        ? `/auctions/${auction.auction.id}/items/${auction.id}`
+        : `/auctions/${auction.id}`
+    },
+    isItem
+  }));
+
+  // Normalize watchlist data with routing paths
+  const normalizedWatchlistData = watchlistData.map((item) => {
+    // Determine if this is an item or legacy auction
+    const isItemWatch = !!item.auction_items;
+    const auctionData = isItemWatch ? item.auction_items : item.auctions;
+    
+    if (!auctionData) return item;
+    
+    return {
+      ...item,
+      auctions: {
+        ...auctionData,
+        path: isItemWatch
+          ? `/auctions/${auctionData.auction.id}/items/${auctionData.id}`
+          : `/auctions/${auctionData.id}`
+      }
+    };
+  });
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -179,8 +257,8 @@ export function MyBidsPageClient({
 
         <TabsContent value="active">
           <ActiveBidsSection 
-            activeBids={activeBids}
-            outbidBids={outbidBids}
+            activeBids={normalizedActiveBids}
+            outbidBids={normalizedOutbidBids}
             searchQuery={searchQuery}
             userId={userId}
           />
@@ -188,7 +266,7 @@ export function MyBidsPageClient({
 
         <TabsContent value="ending-soon">
           <EndingSoonSection 
-            endingSoonBids={endingSoonBids}
+            endingSoonBids={normalizedEndingSoonBids}
             searchQuery={searchQuery}
             userId={userId}
           />
@@ -204,7 +282,7 @@ export function MyBidsPageClient({
 
         <TabsContent value="watchlist">
           <WatchlistSection 
-            watchlistItems={watchlistData}
+            watchlistItems={normalizedWatchlistData}
             searchQuery={searchQuery}
             userId={userId}
           />

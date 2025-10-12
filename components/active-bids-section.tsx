@@ -100,7 +100,7 @@ export function ActiveBidsSection({ activeBids, outbidBids, searchQuery }: Activ
             <AuctionCountdown endDate={auction.end_date} />
           </div>
           <Button
-            onClick={() => router.push(`/auctions/${auction.id}`)}
+            onClick={() => router.push(auction.path || `/auctions/${auction.id}`)}
             className="w-full"
             variant={isActive ? "default" : "outline"}
           >

@@ -14,17 +14,32 @@ export default async function MyBidsPage() {
     return redirect('/signin');
   }
 
-  // Fetch all bids made by the user with auction details
+  // Fetch all bids made by the user with auction/item details
+  // Support both auction items (new) and legacy auctions
   const { data: userBidsData } = await supabase
     .from('bids')
-    .select('*, auctions(*)')
+    .select(`
+      *,
+      auction_items (
+        *,
+        auction:auctions (*)
+      ),
+      auctions (*)
+    `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  // Fetch watchlist items
+  // Fetch watchlist items (support both auction items and legacy auctions)
   const { data: watchlistData } = await supabase
     .from('watchlist')
-    .select('*, auctions(*)')
+    .select(`
+      *,
+      auction_items (
+        *,
+        auction:auctions (*)
+      ),
+      auctions (*)
+    `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 

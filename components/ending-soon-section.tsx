@@ -113,7 +113,7 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
                   <AuctionCountdown endDate={auction.end_date} compact />
                 </div>
                 <Button
-                  onClick={() => router.push(`/auctions/${auction.id}`)}
+                  onClick={() => router.push(auction.path || `/auctions/${auction.id}`)}
                   className="w-full"
                   variant={isHighBid ? "default" : "outline"}
                 >
