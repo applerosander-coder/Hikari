@@ -4,6 +4,23 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
 ### Recent Changes
+**October 12, 2025 - Auction Item Detail Page & Watchlist Integration:**
+- **Item Detail Page**: Created `/auctions/[id]/items/[itemId]` route for individual auction items
+  - Full item display with images, pricing, and auction context banner
+  - Real-time bid history with user indicators
+  - Integrated bidding dialog for placing bids
+  - Watchlist button with heart icon toggle
+  - Winner/ended auction status display
+  - Fixed Next.js routing conflict by using consistent `[id]` slug naming
+- **Enhanced Watchlist System**: Updated to support both item-based and legacy auction-based entries
+  - `app/actions/watchlist.ts` now accepts optional `itemId` parameter
+  - Dual-scope deletion: tries item-based first, falls back to legacy auction-based
+  - Verified row deletion before returning success (prevents false positives)
+  - Backward compatibility maintained for legacy watchlist entries
+  - `components/watchlist-button.tsx` syncs internal state with prop changes via useEffect
+  - Item detail page checks both `auction_item_id` and `auction_id` for watchlist status
+- **Migration Required**: User must run `docs/WATCHLIST_MIGRATION_ADD_ITEM_ID.sql` to add `auction_item_id` column
+
 **October 12, 2025 - Cookie Error Fix & Dashboard Updates:**
 - **Supabase Cookie Error Fix**: Resolved app loading issue caused by cookie setting during SSR
   - Silenced cookie errors in `utils/supabase/server.ts` (cookies can only be set in Server Actions/Route Handlers)

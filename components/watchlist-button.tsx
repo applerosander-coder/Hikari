@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { addToWatchlist, removeFromWatchlist } from '@/app/actions/watchlist';
@@ -10,6 +10,7 @@ import { cn } from '@/utils/cn';
 
 interface WatchlistButtonProps {
   auctionId: string;
+  itemId?: string;
   isInWatchlist: boolean;
   variant?: 'default' | 'icon';
   size?: 'default' | 'sm' | 'lg' | 'icon';
@@ -18,6 +19,7 @@ interface WatchlistButtonProps {
 
 export function WatchlistButton({ 
   auctionId, 
+  itemId,
   isInWatchlist, 
   variant = 'default',
   size = 'default',
@@ -27,17 +29,22 @@ export function WatchlistButton({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  // Sync internal state with prop changes
+  useEffect(() => {
+    setIsAdded(isInWatchlist);
+  }, [isInWatchlist]);
+
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
-    console.log('Watchlist button clicked!', { auctionId, isAdded });
+    console.log('Watchlist button clicked!', { auctionId, itemId, isAdded });
     
     setIsLoading(true);
     
     if (isAdded) {
       console.log('Removing from watchlist...');
-      const result = await removeFromWatchlist(auctionId);
+      const result = await removeFromWatchlist(auctionId, itemId);
       if (result.error) {
         console.error('Remove error:', result.error);
         toast.error(result.error);
@@ -49,7 +56,7 @@ export function WatchlistButton({
       }
     } else {
       console.log('Adding to watchlist...');
-      const result = await addToWatchlist(auctionId);
+      const result = await addToWatchlist(auctionId, itemId);
       if (result.error) {
         console.error('Add error:', result.error);
         if (result.error === 'Already in watchlist') {
