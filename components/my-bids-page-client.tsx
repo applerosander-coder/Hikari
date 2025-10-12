@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Search, X, Heart, Clock, Trophy } from 'lucide-react';
@@ -8,6 +9,7 @@ import { ActiveBidsSection } from './active-bids-section';
 import { EndingSoonSection } from './ending-soon-section';
 import { WonAuctionsSection } from './won-auctions-section';
 import { WatchlistSection } from './watchlist-section';
+import { BidSuccessCelebration } from './bid-success-celebration';
 
 interface MyBidsPageClientProps {
   userBidsData: any[];
@@ -22,8 +24,35 @@ export function MyBidsPageClient({
   wonAuctionsData,
   userId
 }: MyBidsPageClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('active');
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationBid, setCelebrationBid] = useState<{
+    amount: number;
+    auctionTitle: string;
+  } | null>(null);
+
+  // Check for celebration params in URL
+  useEffect(() => {
+    const bidSuccess = searchParams.get('bid_success');
+    const auctionId = searchParams.get('auction_id');
+    const auctionTitle = searchParams.get('auction_title');
+    const bidAmount = searchParams.get('bid_amount');
+
+    if (bidSuccess === 'true' && auctionId && auctionTitle && bidAmount) {
+      setCelebrationBid({
+        amount: parseInt(bidAmount),
+        auctionTitle: decodeURIComponent(auctionTitle)
+      });
+      setShowCelebration(true);
+
+      // Clean up URL params after showing celebration
+      const newUrl = '/mybids';
+      router.replace(newUrl);
+    }
+  }, [searchParams, router]);
 
   // Group bids by auction and get the user's highest bid for each
   const bidsMap = new Map<string, { bid: any; auction: any }>();
@@ -168,6 +197,18 @@ export function MyBidsPageClient({
           />
         </TabsContent>
       </Tabs>
+
+      {celebrationBid && (
+        <BidSuccessCelebration
+          bidAmount={celebrationBid.amount}
+          auctionTitle={celebrationBid.auctionTitle}
+          show={showCelebration}
+          onClose={() => {
+            setShowCelebration(false);
+            setCelebrationBid(null);
+          }}
+        />
+      )}
     </div>
   );
 }
