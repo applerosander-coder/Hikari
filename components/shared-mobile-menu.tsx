@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sun, Moon, LogOut } from 'lucide-react';
+import { Sun, Moon, Waves, LogOut } from 'lucide-react';
 import { mobileNavItems } from '@/config/navigation';
 
 interface SharedMobileMenuProps {
@@ -20,7 +20,7 @@ interface SharedMobileMenuProps {
 export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMenuProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -30,12 +30,12 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
   const toggleTheme = () => {
     if (!mounted) return;
     
-    if (theme === 'system') {
-      setTheme('light');
-    } else if (theme === 'light') {
+    if (theme === 'light') {
       setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('ocean');
     } else {
-      setTheme('system');
+      setTheme('light');
     }
   };
 
@@ -114,12 +114,14 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         onClick={toggleTheme}
         className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
       >
-        <span className="relative size-5 inline-flex items-center justify-center shrink-0">
-          <Sun className="absolute h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <span className="relative size-5 inline-flex items-center justify-center shrink-0" key={resolvedTheme ?? theme}>
+          {mounted && (resolvedTheme ?? theme) === 'light' && <Sun className="h-5 w-5" />}
+          {mounted && (resolvedTheme ?? theme) === 'dark' && <Moon className="h-5 w-5" />}
+          {mounted && (resolvedTheme ?? theme) === 'ocean' && <Waves className="h-5 w-5" />}
+          {!mounted && <Sun className="h-5 w-5" />}
         </span>
         <span>
-          {!mounted ? 'Theme' : theme === 'system' ? 'System Theme' : theme === 'light' ? 'Light Mode' : 'Dark Mode'}
+          {!mounted ? 'Theme' : (resolvedTheme ?? theme) === 'light' ? 'Light Mode' : (resolvedTheme ?? theme) === 'dark' ? 'Dark Mode' : 'Ocean Mode'}
         </span>
       </button>
 
