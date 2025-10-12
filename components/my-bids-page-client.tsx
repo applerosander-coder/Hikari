@@ -78,18 +78,23 @@ export function MyBidsPageClient({
   const auctionsWithBids = Array.from(bidsMap.values());
 
   // Separate into active and outbid
+  const now = new Date();
+  
   const activeBids = auctionsWithBids.filter(({ bid, auction }) => {
     const currentBid = auction.current_bid || auction.starting_price;
-    return bid.bid_amount >= currentBid && auction.status !== 'ended';
+    const endDate = new Date(auction.end_date);
+    const hasEnded = endDate < now;
+    return bid.bid_amount >= currentBid && auction.status !== 'ended' && !hasEnded;
   });
 
   const outbidBids = auctionsWithBids.filter(({ bid, auction }) => {
     const currentBid = auction.current_bid || auction.starting_price;
-    return bid.bid_amount < currentBid && auction.status !== 'ended';
+    const endDate = new Date(auction.end_date);
+    const hasEnded = endDate < now;
+    return bid.bid_amount < currentBid && auction.status !== 'ended' && !hasEnded;
   });
 
   // Get ending soon items (within 24 hours)
-  const now = new Date();
   const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   
   const endingSoonBids = auctionsWithBids.filter(({ auction }) => {

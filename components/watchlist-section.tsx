@@ -28,9 +28,20 @@ export function WatchlistSection({ watchlistItems, searchQuery }: WatchlistSecti
   };
 
   const filterItems = (items: any[]) => {
-    if (!searchQuery.trim()) return items;
+    const now = new Date();
+    
+    // First filter out ended auctions
+    const activeItems = items.filter((item: any) => {
+      const auction = item.auctions;
+      const endDate = new Date(auction.end_date);
+      const hasEnded = endDate < now;
+      return auction.status !== 'ended' && !hasEnded;
+    });
+    
+    // Then filter by search query
+    if (!searchQuery.trim()) return activeItems;
     const query = searchQuery.toLowerCase();
-    return items.filter((item: any) => {
+    return activeItems.filter((item: any) => {
       const auction = item.auctions;
       return (
         auction.title.toLowerCase().includes(query) ||

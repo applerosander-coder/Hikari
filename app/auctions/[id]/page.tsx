@@ -131,9 +131,13 @@ export default function AuctionDetailPage() {
     currency: 'USD'
   });
 
-  const isActive = auction.status === 'active';
+  const now = new Date();
+  const endDate = new Date(auction.end_date);
+  const hasEnded = endDate < now;
+  
+  const isActive = auction.status === 'active' && !hasEnded;
   const isUpcoming = auction.status === 'upcoming';
-  const isEnded = auction.status === 'ended';
+  const isEnded = auction.status === 'ended' || hasEnded;
   const userIsWinner = user && auction.winner_id === user.id;
 
   return (
