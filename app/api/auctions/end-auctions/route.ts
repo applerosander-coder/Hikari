@@ -35,6 +35,32 @@ export async function POST(request: Request) {
     const supabase = createServiceClient();
     const now = new Date().toISOString();
 
+    // Step 1: Publish draft auctions whose start_date has been reached
+    const { data: draftAuctions, error: draftFetchError } = await supabase
+      .from('auctions')
+      .select('id, title')
+      .eq('status', 'draft')
+      .lte('start_date', now);
+
+    const publishedCount = draftAuctions?.length || 0;
+
+    if (draftAuctions && draftAuctions.length > 0) {
+      const { error: publishError } = await supabase
+        .from('auctions')
+        .update({
+          status: 'active',
+          updated_at: now
+        })
+        .in('id', draftAuctions.map(a => a.id));
+
+      if (publishError) {
+        console.error('Error publishing draft auctions:', publishError);
+      } else {
+        console.log(`Published ${publishedCount} draft auctions`);
+      }
+    }
+
+    // Step 2: End active auctions whose end_date has passed
     const { data: expiredAuctions, error: fetchError } = await supabase
       .from('auctions')
       .select('id, title, current_bid')
@@ -48,8 +74,9 @@ export async function POST(request: Request) {
 
     if (!expiredAuctions || expiredAuctions.length === 0) {
       return NextResponse.json({ 
-        message: 'No auctions to end',
-        count: 0
+        message: 'Auction lifecycle check complete',
+        published: publishedCount,
+        ended: 0
       });
     }
 
@@ -124,8 +151,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      message: 'Auction ending complete',
-      count: results.length,
+      message: 'Auction lifecycle check complete',
+      published: publishedCount,
+      ended: results.length,
       results
     });
   } catch (error: any) {

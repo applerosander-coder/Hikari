@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface Auction {
   id: string;
@@ -31,9 +32,13 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
     );
   }
 
-  const handleAuctionClick = (auction: Auction) => {
+  const handleAuctionClick = (auction: Auction, action: 'edit' | 'preview' = 'edit') => {
     if (auction.status === 'draft') {
-      router.push(`/seller/edit/${auction.id}`);
+      if (action === 'preview') {
+        router.push(`/seller/preview/${auction.id}`);
+      } else {
+        router.push(`/seller/edit/${auction.id}`);
+      }
     } else {
       router.push(`/auctions/${auction.id}`);
     }
@@ -44,12 +49,12 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
       {auctions.map((auction) => (
         <div
           key={auction.id}
-          onClick={() => handleAuctionClick(auction)}
           className={`border rounded-lg p-4 transition-all ${
             auction.status === 'draft'
-              ? 'cursor-pointer hover:shadow-lg hover:border-gray-400'
-              : 'hover:shadow-md'
+              ? 'hover:shadow-lg hover:border-gray-400'
+              : 'cursor-pointer hover:shadow-md'
           }`}
+          onClick={() => auction.status !== 'draft' && handleAuctionClick(auction)}
         >
           <div className="flex justify-between items-start mb-2">
             <h3 className="font-semibold text-lg">{auction.title}</h3>
@@ -88,9 +93,30 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
           </div>
 
           {auction.status === 'draft' && (
-            <p className="text-xs text-muted-foreground mt-3 italic">
-              Click to edit this draft auction
-            </p>
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  handleAuctionClick(auction, 'edit');
+                }}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="flex-1"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  handleAuctionClick(auction, 'preview');
+                }}
+              >
+                Preview
+              </Button>
+            </div>
           )}
         </div>
       ))}

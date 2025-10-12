@@ -135,6 +135,12 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
         ? Math.round(parseFloat(formData.reserve_price) * 100) 
         : null;
 
+      // Convert datetime-local strings to ISO format (preserves user's local time)
+      const startDateISO = formData.start_date 
+        ? new Date(formData.start_date).toISOString() 
+        : new Date().toISOString();
+      const endDateISO = new Date(formData.end_date).toISOString();
+
       // Prepare auction data
       const auctionData = {
         title: formData.title,
@@ -142,8 +148,8 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
         starting_price: startingPriceCents,
         reserve_price: reservePriceCents,
         category: formData.category || null,
-        start_date: formData.start_date || new Date().toISOString(),
-        end_date: formData.end_date,
+        start_date: startDateISO,
+        end_date: endDateISO,
         image_url: imagePreview || null,
       };
 
@@ -170,7 +176,7 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap">
         <Button
           type="button"
           variant="outline"
@@ -179,6 +185,14 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => router.push(`/seller/preview/${auction.id}`)}
+          className="flex items-center gap-2"
+        >
+          Preview
         </Button>
         <Button
           type="button"

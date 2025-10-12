@@ -83,6 +83,12 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         ? Math.round(parseFloat(formData.reserve_price) * 100) 
         : null;
 
+      // Convert datetime-local strings to ISO format (preserves user's local time)
+      const startDateISO = formData.start_date 
+        ? new Date(formData.start_date).toISOString() 
+        : new Date().toISOString();
+      const endDateISO = new Date(formData.end_date).toISOString();
+
       // Prepare auction data
       const auctionData = {
         title: formData.title,
@@ -90,8 +96,8 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         starting_price: startingPriceCents,
         reserve_price: reservePriceCents,
         category: formData.category || null,
-        start_date: formData.start_date || new Date().toISOString(),
-        end_date: formData.end_date,
+        start_date: startDateISO,
+        end_date: endDateISO,
         created_by: userId,
         status: 'draft' as const,
         image_url: imagePreview || null, // For now, store base64. In production, upload to storage
