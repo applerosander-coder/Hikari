@@ -157,15 +157,6 @@ export function Navbar({
         </BreadcrumbList>
       </Breadcrumb>
       <div className="ml-auto" />
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleSignOut}
-        className="gap-2"
-      >
-        <LogOut className="h-4 w-4" />
-        <span className="hidden sm:inline">Sign Out</span>
-      </Button>
       <UserAccountNav user={userDetails} />
     </header>
   );
