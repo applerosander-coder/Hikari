@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Upload, Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { uploadImage } from '@/utils/supabase/storage/client';
 
 const CATEGORIES = [
   'Electronics',
@@ -134,13 +135,40 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         return;
       }
 
+      // Upload images to Supabase Storage
+      const uploadPromises = validItems.map(async (item, index) => {
+        if (item.image_file) {
+          const { imageUrl, error } = await uploadImage({
+            file: item.image_file,
+            bucket: 'seller-auctions',
+            folder: userId,
+          });
+          
+          if (error) {
+            throw new Error(`Failed to upload image for item "${item.title}": ${error}`);
+          }
+          
+          return imageUrl;
+        }
+        return null;
+      });
+
+      let uploadedUrls: (string | null)[] = [];
+      try {
+        uploadedUrls = await Promise.all(uploadPromises);
+      } catch (uploadError: any) {
+        toast.error(uploadError.message || 'Image upload failed');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Convert datetime-local strings to ISO format (preserves user's local time)
       const startDateISO = auctionData.start_date 
         ? new Date(auctionData.start_date).toISOString() 
         : new Date().toISOString();
       const endDateISO = new Date(auctionData.end_date).toISOString();
 
-      // Prepare items data
+      // Prepare items data with uploaded image URLs
       const itemsData = validItems.map((item, index) => ({
         title: item.title,
         description: item.description || null,
@@ -149,7 +177,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
           ? Math.round(parseFloat(item.reserve_price) * 100) 
           : null,
         category: item.category || null,
-        image_url: item.image_preview || null,
+        image_url: uploadedUrls[index] || null,
         position: index + 1,
       }));
 
@@ -170,7 +198,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
             ? Math.round(parseFloat(validItems[0].reserve_price) * 100) 
             : null,
           category: validItems[0].category || null,
-          image_url: validItems[0].image_preview || null,
+          image_url: uploadedUrls[0] || null,
         },
         items: itemsData,
       };
