@@ -13,6 +13,8 @@ Auctions is a comprehensive live auction and bidding platform built with Next.js
 - **Mobile-Responsive Tabs**: My Bids page tabs optimized for mobile with shorter labels and hidden icons on small screens
 - **Fixed Duplicate Clock Icons**: Removed duplicate clock icon from auction cards (AuctionCountdown component already renders one)
 - **Fixed Watchlist Button Clicks**: Added stopPropagation to watchlist button wrapper to prevent card onClick interference
+- **Watchlist Tab Icons**: Replaced all eye icons with heart icons in My Bids watchlist section for consistent branding
+- **Database Fix**: Created missing `watchlist` table in Supabase with proper RLS policies for user data protection
 
 **October 11, 2025 - My Bids Page Restructure with Watchlist:**
 - **Active Bids Tab**: Shows high bids and outbid items with visual status indicators

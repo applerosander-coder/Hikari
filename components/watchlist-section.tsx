@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Sparkles, TrendingUp, Clock, X } from 'lucide-react';
+import { Heart, Sparkles, TrendingUp, Clock, X } from 'lucide-react';
 import { AuctionCountdown } from './auction-countdown';
 import { useRouter } from 'next/navigation';
 import { removeFromWatchlist } from '@/app/actions/watchlist';
@@ -62,7 +62,7 @@ export function WatchlistSection({ watchlistItems, searchQuery }: WatchlistSecti
   if (filtered.length === 0) {
     return (
       <div className="text-center py-12">
-        <Eye className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+        <Heart className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
         <h3 className="text-xl font-semibold mb-2">No Watchlist Items</h3>
         <p className="text-muted-foreground">
           {searchQuery ? `No items found for "${searchQuery}"` : 'Add items to your watchlist to track them here!'}
@@ -94,7 +94,7 @@ export function WatchlistSection({ watchlistItems, searchQuery }: WatchlistSecti
               </button>
               <div className="relative h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <Badge className="absolute top-4 left-4 z-10 bg-black dark:bg-white text-white dark:text-black">
-                  <Eye className="h-3 w-3 mr-1" />
+                  <Heart className="h-3 w-3 mr-1" />
                   Watching
                 </Badge>
                 {auction.image_url ? (
