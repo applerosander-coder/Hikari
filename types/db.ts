@@ -48,6 +48,9 @@ export interface Database {
           created_by: string
           status: 'draft' | 'upcoming' | 'active' | 'ended' | 'cancelled'
           winner_id: string | null
+          payment_completed: boolean
+          payment_intent_id: string | null
+          payment_completed_at: string | null
           created_at: string
           updated_at: string
         }
@@ -66,6 +69,9 @@ export interface Database {
           created_by: string
           status?: 'draft' | 'upcoming' | 'active' | 'ended' | 'cancelled'
           winner_id?: string | null
+          payment_completed?: boolean
+          payment_intent_id?: string | null
+          payment_completed_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -84,6 +90,9 @@ export interface Database {
           created_by?: string
           status?: 'draft' | 'upcoming' | 'active' | 'ended' | 'cancelled'
           winner_id?: string | null
+          payment_completed?: boolean
+          payment_intent_id?: string | null
+          payment_completed_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -206,6 +215,54 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: "invitations_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          message: string
+          auction_id: string | null
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          message: string
+          auction_id?: string | null
+          read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          message?: string
+          auction_id?: string | null
+          read?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_auction_id_fkey"
             columns: ["auction_id"]
             isOneToOne: false
             referencedRelation: "auctions"
