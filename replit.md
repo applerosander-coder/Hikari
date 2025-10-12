@@ -4,6 +4,32 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
 ### Recent Changes
+**October 12, 2025 - Database Restructuring: Auction Containers with Multiple Items:**
+- **New Database Schema**: Restructured to support multiple items per auction
+  - `auctions` table now serves as containers with `name` and `place` fields
+  - New `auction_items` table stores individual items (title, description, pricing, images)
+  - `bids` table updated with `auction_item_id` to reference specific items
+  - Full migration SQL created: `docs/COMPLETE_MIGRATION_WITH_MOCKDATA.sql`
+  - Includes mockup data: 2 auctions with 10 items each
+- **Seller Create Form**: Completely redesigned for multi-item auctions
+  - Auction container fields: name, place, start/end dates
+  - Dynamic item management: add/remove items with individual details
+  - Each item has: title, description, pricing, category, image
+  - Form validates at least one item before submission
+- **Seller Dashboard**: Updated to display auction containers with items
+  - Shows item count and preview grid (first 3 items)
+  - Displays auction name, place, and date range
+  - Item titles listed as preview
+- **Create Auction API**: Enhanced to support new structure
+  - Handles both old (single) and new (container + items) formats
+  - Creates auction then inserts items in transaction
+  - Rollback protection if item insertion fails
+  - Backward compatible with legacy format
+- **Documentation**: 
+  - `docs/AUCTION_RESTRUCTURING_GUIDE.md` - Architecture overview
+  - `docs/RUN_MIGRATION_INSTRUCTIONS.md` - Step-by-step migration guide
+  - `docs/DATABASE_MIGRATION_AUCTION_ITEMS.sql` - Core migration script
+
 **October 12, 2025 - Draft Auction Management & Preview System:**
 - **Timezone Fix**: Resolved datetime input bug where user's selected time was incorrectly saved
   - datetime-local values now properly convert to ISO format preserving local time

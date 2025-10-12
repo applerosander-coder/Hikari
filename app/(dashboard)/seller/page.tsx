@@ -11,10 +11,21 @@ export default async function SellerPage() {
     redirect('/signin');
   }
 
-  // Fetch seller's auctions
+  // Fetch seller's auctions with their items
   const { data: sellerAuctions } = await supabase
     .from('auctions')
-    .select('*, bids(count)')
+    .select(`
+      *,
+      auction_items (
+        id,
+        title,
+        description,
+        starting_price,
+        current_bid,
+        image_url,
+        position
+      )
+    `)
     .eq('created_by', user.id)
     .order('created_at', { ascending: false });
 
@@ -24,7 +35,7 @@ export default async function SellerPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Seller Dashboard</h1>
           <p className="text-muted-foreground mt-2">
-            Create and manage your auctions
+            Create and manage your auction containers with multiple items
           </p>
         </div>
 
