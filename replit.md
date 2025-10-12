@@ -4,6 +4,11 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
 ### Recent Changes
+**October 12, 2025 - Authentication Redirect Fix:**
+- **Sign-Up Redirect**: Fixed redirect after sign-up to go to landing page (/) instead of login page
+- **Sign-In Redirect**: Already correctly redirects to landing page (/)
+- **User Flow**: New and returning users now immediately see the landing page after successful authentication
+
 **October 12, 2025 - Unified Navigation & Seller Dashboard:**
 - **Unified Mobile Menu**: Shared navigation component (SharedMobileMenu) used across marketing and dashboard layouts
   - Clickable avatar at top links to account/profile page (/dashboard/account)
