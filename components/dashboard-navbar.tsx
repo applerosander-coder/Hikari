@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/breadcrumb';
 import { UserAccountNav } from '@/components/user-account-nav';
 import Link from 'next/link';
-import { Package2, Settings, Menu, LogOut, Gavel } from 'lucide-react';
+import { Package2, Settings, Menu, LogOut, Gavel, Sun, Moon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 import { NavItem, iconComponents } from '@/config/dashboard';
 
@@ -26,12 +27,17 @@ export function Navbar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
     const { createClient } = await import('@/utils/supabase/client');
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/signin');
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (
@@ -84,6 +90,23 @@ export function Navbar({
               <Settings className="h-5 w-5" />
               Settings
             </Link>
+            
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="ml-9">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            </button>
+
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </button>
           </nav>
         </SheetContent>
       </Sheet>

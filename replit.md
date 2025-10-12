@@ -16,6 +16,7 @@ Auctions is a comprehensive live auction and bidding platform built with Next.js
 - **Watchlist Tab Icons**: Replaced all eye icons with heart icons in My Bids watchlist section for consistent branding
 - **Database Fix**: Created missing `watchlist` table in Supabase with proper RLS policies for user data protection
 - **Celebration Fix**: Restored bid success celebration on My Bids page - confetti and success message now display after successful bids
+- **Mobile Menu Enhancement**: Added theme toggle (light/dark mode) and sign out buttons to mobile hamburger menu for feature parity with desktop sidebar
 
 **October 11, 2025 - My Bids Page Restructure with Watchlist:**
 - **Active Bids Tab**: Shows high bids and outbid items with visual status indicators
