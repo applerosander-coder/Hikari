@@ -315,21 +315,21 @@ function AuctionCard({
             src={auction.image_url}
             alt={auction.title}
             fill
-            className="object-cover"
+            className="object-cover pointer-events-none"
           />
         ) : (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex items-center justify-center h-full pointer-events-none">
             <TrendingUp className="h-12 w-12 text-muted-foreground" />
           </div>
         )}
 
         {auction.category && !highlight && (
-          <Badge className="absolute top-2 left-2 bg-white/90 dark:bg-black/90 text-black dark:text-white">
+          <Badge className="absolute top-2 left-2 bg-white/90 dark:bg-black/90 text-black dark:text-white pointer-events-none">
             {auction.category}
           </Badge>
         )}
 
-        <div className="absolute top-2 right-2 z-20">
+        <div className="absolute top-2 right-2 z-50 pointer-events-auto">
           <WatchlistButton
             auctionId={auction.id}
             isInWatchlist={isInWatchlist}

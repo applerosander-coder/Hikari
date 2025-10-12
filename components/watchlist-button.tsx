@@ -31,25 +31,33 @@ export function WatchlistButton({
     e.stopPropagation();
     e.preventDefault();
     
+    console.log('Watchlist button clicked!', { auctionId, isAdded });
+    
     setIsLoading(true);
     
     if (isAdded) {
+      console.log('Removing from watchlist...');
       const result = await removeFromWatchlist(auctionId);
       if (result.error) {
+        console.error('Remove error:', result.error);
         toast.error(result.error);
       } else {
+        console.log('Removed successfully');
         setIsAdded(false);
         toast.success('Removed from watchlist');
         router.refresh();
       }
     } else {
+      console.log('Adding to watchlist...');
       const result = await addToWatchlist(auctionId);
       if (result.error) {
+        console.error('Add error:', result.error);
         if (result.error === 'Already in watchlist') {
           setIsAdded(true);
         }
         toast.error(result.error);
       } else {
+        console.log('Added successfully');
         setIsAdded(true);
         toast.success('Added to watchlist');
         router.refresh();
