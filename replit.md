@@ -4,6 +4,23 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
 ### Recent Changes
+**October 12, 2025 - Cookie Error Fix & Dashboard Updates:**
+- **Supabase Cookie Error Fix**: Resolved app loading issue caused by cookie setting during SSR
+  - Silenced cookie errors in `utils/supabase/server.ts` (cookies can only be set in Server Actions/Route Handlers)
+  - Allows app to load despite expired/invalid session tokens
+- **Dashboard Query Updates**: Migrated dashboard to work with auction items structure
+  - Fetches auction_items with nested auction data
+  - Guarded queries prevent PostgREST errors from empty arrays
+  - Client-side sorting by auction end_date
+  - Optimized bid counting (only fetches bids for displayed items)
+  - Updated CategorizedAuctionBrowser to display items instead of auctions
+  - Search now includes auction name and place
+  - Navigation updated to /auctions/{auction_id}/items/{item_id}
+- **Watchlist Migration Script**: Created `docs/WATCHLIST_MIGRATION_ADD_ITEM_ID.sql`
+  - Adds auction_item_id column to watchlist table
+  - Maintains backward compatibility with auction_id
+  - User needs to run this SQL in Supabase
+
 **October 12, 2025 - Database Restructuring: Auction Containers with Multiple Items:**
 - **New Database Schema**: Restructured to support multiple items per auction
   - `auctions` table now serves as containers with `name` and `place` fields
