@@ -12,7 +12,7 @@ Auctions is a live auction and bidding platform built with Next.js 14 and Supaba
 **October 12, 2025 - Unified Navigation & Seller Dashboard:**
 - **Unified Mobile Menu**: Shared navigation component (SharedMobileMenu) used across marketing and dashboard layouts
   - Clickable avatar at top links to account/profile page (/dashboard/account)
-  - Navigation items: Auctions, My Bids, Seller, Pricing, How it Works (all with icons)
+  - Navigation items: Auctions, My Bids, Seller, Pricing, How it Works, Settings (all with icons)
   - Theme toggle with 3-state cycle (system/light/dark)
   - Sign out button
 - **Seller Dashboard**: New `/seller` route for auction creators
