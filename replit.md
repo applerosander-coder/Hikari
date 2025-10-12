@@ -4,6 +4,13 @@
 Auctions is a comprehensive live auction and bidding platform built with Next.js 14 and Supabase. Its core purpose is to facilitate a dynamic and engaging auction experience, transforming a generic SaaS template into a specialized marketplace for various auction categories. Key capabilities include real-time bidding, countdown timers, a swipeable carousel for item browsing, and integrated payment processing with instant bidding and auto-charge functionalities for saved payment methods. The platform aims to provide a seamless and engaging auction experience for users.
 
 ### Recent Changes
+**October 12, 2025 - Loading Spinners & Navigation Progress:**
+- **Page Loading Spinners**: Added loading.tsx files for dashboard, marketing, and auction routes with centered spinner animations
+- **Navigation Progress Bar**: Implemented NProgress loading bar at top of screen during page transitions
+- **Custom Spinner Component**: Created reusable Spinner component with sm/md/lg size variants
+- **Monochrome Design**: Progress bar uses theme foreground color for consistent branding across light/dark modes
+- **Auto-trigger**: Loading states automatically display during route changes and data fetching
+
 **October 12, 2025 - Watchlist Heart Icon Update & Bug Fixes:**
 - **Heart-Based Watchlist**: Changed watchlist button from eye icon to heart icon for better user experience
 - **Red Heart Indicator**: Heart button shows red background (bg-red-500) when item is in watchlist, white/outlined when not

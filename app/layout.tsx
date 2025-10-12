@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { ThemeProvider } from '@/components/theme-provider';
+import { NavigationProgress } from '@/components/navigation-progress';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
 import type { Viewport } from 'next';
@@ -89,6 +90,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <NavigationProgress />
           <RootProvider>
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </RootProvider>
