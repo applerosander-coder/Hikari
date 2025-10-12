@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,21 +29,24 @@ export function Navbar({
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSignOut = async () => {
     const { createClient } = await import('@/utils/supabase/client');
     const supabase = createClient();
     await supabase.auth.signOut();
+    setIsOpen(false);
     router.push('/signin');
   };
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
+    setIsOpen(false);
   };
 
   return (
     <header className="flex h-20 items-center gap-4 border-b bg-background px-4 sm:h-20 sm:border-0 sm:bg-transparent sm:px-6">
-      <Sheet>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button size="icon" variant="outline" className="sm:hidden">
             <Menu className="h-5 w-5" />
@@ -53,6 +57,7 @@ export function Navbar({
           <nav className="grid gap-6 text-lg font-medium">
             <Link
               href="#"
+              onClick={() => setIsOpen(false)}
               className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
               prefetch={false}
             >
@@ -73,6 +78,7 @@ export function Navbar({
                   <Link
                     key={index}
                     href={item.href}
+                    onClick={() => setIsOpen(false)}
                     className={`flex items-center gap-4 px-2.5 ${pathname === item.href ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                     prefetch={false}
                   >
@@ -84,6 +90,7 @@ export function Navbar({
             )}
             <Link
               href="#"
+              onClick={() => setIsOpen(false)}
               className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
               prefetch={false}
             >
