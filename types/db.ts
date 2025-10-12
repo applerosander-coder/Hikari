@@ -35,7 +35,7 @@ export interface Database {
       auctions: {
         Row: {
           id: string
-          name: string
+          name: string | null
           place: string | null
           title: string
           description: string | null
@@ -58,7 +58,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          name: string
+          name?: string | null
           place?: string | null
           title: string
           description?: string | null
@@ -81,6 +81,8 @@ export interface Database {
         }
         Update: {
           id?: string
+          name?: string | null
+          place?: string | null
           title?: string
           description?: string | null
           starting_price?: number
