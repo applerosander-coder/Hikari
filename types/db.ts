@@ -270,6 +270,60 @@ export interface Database {
           }
         ]
       }
+      payments: {
+        Row: {
+          id: string
+          user_id: string
+          auction_id: string | null
+          stripe_payment_intent_id: string
+          amount: number
+          currency: string
+          status: string
+          metadata: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          auction_id?: string | null
+          stripe_payment_intent_id: string
+          amount: number
+          currency?: string
+          status: string
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          auction_id?: string | null
+          stripe_payment_intent_id?: string
+          amount?: number
+          currency?: string
+          status?: string
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       posts: {
         Row: {
           content: string | null

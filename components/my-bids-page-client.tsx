@@ -34,6 +34,14 @@ export function MyBidsPageClient({
     auctionTitle: string;
   } | null>(null);
 
+  // Check for tab parameter in URL
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['active', 'ending-soon', 'won', 'watchlist'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
   // Check for celebration params in URL
   useEffect(() => {
     const bidSuccess = searchParams.get('bid_success');

@@ -48,7 +48,7 @@ DROP POLICY IF EXISTS "Service role can insert notifications" ON public.notifica
 CREATE POLICY "Service role can insert notifications"
 ON public.notifications
 FOR INSERT
-TO authenticated
+TO service_role
 WITH CHECK (true);
 
 -- 6. Create function to mark notification as read
