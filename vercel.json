@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/auctions/end-auctions",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/auctions/process-winners",
+      "schedule": "*/10 * * * *"
+    }
+  ]
+}

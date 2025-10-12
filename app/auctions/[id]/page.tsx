@@ -133,6 +133,8 @@ export default function AuctionDetailPage() {
 
   const isActive = auction.status === 'active';
   const isUpcoming = auction.status === 'upcoming';
+  const isEnded = auction.status === 'ended';
+  const userIsWinner = user && auction.winner_id === user.id;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -211,6 +213,42 @@ export default function AuctionDetailPage() {
                 >
                   Bid Now
                 </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {isEnded && (
+            <Card className="mb-6 border-2">
+              <CardHeader>
+                <h3 className="font-semibold">Auction Ended</h3>
+              </CardHeader>
+              <CardContent>
+                {userIsWinner ? (
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-green-600 mb-2">🎉 Congratulations! You won this auction!</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Final price: {formattedCurrentBid}
+                    </p>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => router.push('/mybids?tab=won')}
+                    >
+                      View Your Won Auctions
+                    </Button>
+                  </div>
+                ) : auction.winner_id ? (
+                  <div className="text-center">
+                    <p className="text-muted-foreground">
+                      This auction has ended. The winning bid was {formattedCurrentBid}.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-muted-foreground">
+                      This auction has ended with no bids.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

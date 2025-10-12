@@ -22,10 +22,18 @@ export default async function DashboardPage() {
 
   const { data: userBids } = await supabase
     .from('bids')
-    .select('auction_id')
+    .select('auction_id, bid_amount')
     .eq('user_id', user.id);
 
   const userBidAuctionIds = userBids?.map((bid) => bid.auction_id) || [];
+  
+  const userBidAmounts: Record<string, number> = {};
+  userBids?.forEach((bid) => {
+    const existing = userBidAmounts[bid.auction_id];
+    if (!existing || bid.bid_amount > existing) {
+      userBidAmounts[bid.auction_id] = bid.bid_amount;
+    }
+  });
 
   const { data: bidCounts } = await supabase.rpc('get_auction_bid_counts');
 
@@ -50,6 +58,7 @@ export default async function DashboardPage() {
     <CategorizedAuctionBrowser
       auctions={auctionsWithBidCounts}
       userBidAuctionIds={userBidAuctionIds}
+      userBidAmounts={userBidAmounts}
       userId={user.id}
       watchlistAuctionIds={watchlistAuctionIds}
     />

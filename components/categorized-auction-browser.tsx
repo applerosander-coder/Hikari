@@ -2,14 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { AuctionCountdown } from './auction-countdown';
-import { Heart, Clock, TrendingUp, Flame, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/utils/cn';
-import Image from 'next/image';
-import { WatchlistButton } from './watchlist-button';
+import { AuctionItemCard } from './auction-item-card';
+import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Auction {
   id: string;
@@ -27,6 +22,7 @@ interface Auction {
 interface CategorizedAuctionBrowserProps {
   auctions: Auction[];
   userBidAuctionIds: string[];
+  userBidAmounts: Record<string, number>;
   userId: string;
   watchlistAuctionIds: string[];
 }
@@ -43,6 +39,7 @@ const CATEGORIES = [
 export function CategorizedAuctionBrowser({
   auctions,
   userBidAuctionIds,
+  userBidAmounts,
   userId,
   watchlistAuctionIds
 }: CategorizedAuctionBrowserProps) {
@@ -90,13 +87,6 @@ export function CategorizedAuctionBrowser({
     return grouped;
   }, [filteredAuctions]);
 
-  const formatPrice = (priceInCents: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(priceInCents / 100);
-  };
-
   const handleBidNow = (auctionId: string) => {
     router.push(`/auctions/${auctionId}`);
   };
@@ -142,8 +132,8 @@ export function CategorizedAuctionBrowser({
               subtitle="Most popular items right now"
               auctions={hotAuctions}
               userBidAuctionIds={userBidAuctionIds}
+              userBidAmounts={userBidAmounts}
               watchlistAuctionIds={watchlistAuctionIds}
-              formatPrice={formatPrice}
               handleBidNow={handleBidNow}
               highlight
             />
@@ -156,8 +146,8 @@ export function CategorizedAuctionBrowser({
                 title={category}
                 auctions={categoryAuctions}
                 userBidAuctionIds={userBidAuctionIds}
+                userBidAmounts={userBidAmounts}
                 watchlistAuctionIds={watchlistAuctionIds}
-                formatPrice={formatPrice}
                 handleBidNow={handleBidNow}
               />
             ) : null
@@ -173,8 +163,8 @@ interface AuctionRowProps {
   subtitle?: string;
   auctions: Auction[];
   userBidAuctionIds: string[];
+  userBidAmounts: Record<string, number>;
   watchlistAuctionIds: string[];
-  formatPrice: (price: number) => string;
   handleBidNow: (id: string) => void;
   highlight?: boolean;
 }
@@ -184,8 +174,8 @@ function AuctionRow({
   subtitle,
   auctions,
   userBidAuctionIds,
+  userBidAmounts,
   watchlistAuctionIds,
-  formatPrice,
   handleBidNow,
   highlight = false
 }: AuctionRowProps) {
@@ -226,10 +216,7 @@ function AuctionRow({
   return (
     <div className="relative">
       <div className="mb-4 px-4">
-        <h2 className={cn(
-          "font-bold",
-          highlight ? "text-2xl sm:text-3xl" : "text-xl sm:text-2xl"
-        )}>
+        <h2 className={highlight ? "text-2xl sm:text-3xl font-bold" : "text-xl sm:text-2xl font-bold"}>
           {title}
         </h2>
         {subtitle && (
@@ -253,17 +240,24 @@ function AuctionRow({
           className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {auctions.map((auction) => (
-            <AuctionCard
-              key={auction.id}
-              auction={auction}
-              userHasBid={userBidAuctionIds.includes(auction.id)}
-              isInWatchlist={watchlistAuctionIds.includes(auction.id)}
-              formatPrice={formatPrice}
-              handleBidNow={handleBidNow}
-              highlight={highlight}
-            />
-          ))}
+          {auctions.map((auction) => {
+            const userBidAmount = userBidAmounts[auction.id];
+            const currentPrice = auction.current_bid || auction.starting_price;
+            const userHasHighestBid = userBidAmount !== undefined && userBidAmount >= currentPrice;
+
+            return (
+              <AuctionItemCard
+                key={auction.id}
+                auction={auction}
+                userBidAmount={userBidAmount}
+                isInWatchlist={watchlistAuctionIds.includes(auction.id)}
+                showWatchlist={true}
+                variant={highlight ? 'highlight' : 'compact'}
+                badgeType={highlight ? 'hot' : userHasHighestBid ? 'high-bid' : null}
+                onClick={handleBidNow}
+              />
+            );
+          })}
         </div>
 
         {canScrollRight && (
@@ -277,93 +271,5 @@ function AuctionRow({
         )}
       </div>
     </div>
-  );
-}
-
-interface AuctionCardProps {
-  auction: Auction;
-  userHasBid: boolean;
-  isInWatchlist: boolean;
-  formatPrice: (price: number) => string;
-  handleBidNow: (id: string) => void;
-  highlight?: boolean;
-}
-
-function AuctionCard({
-  auction,
-  userHasBid,
-  isInWatchlist,
-  formatPrice,
-  handleBidNow,
-  highlight = false
-}: AuctionCardProps) {
-  const currentPrice = auction.current_bid || auction.starting_price;
-
-  return (
-    <Card
-      className={cn(
-        "flex-shrink-0 overflow-hidden transition-all hover:scale-105 hover:shadow-lg",
-        highlight ? "w-[280px] sm:w-[320px]" : "w-[240px] sm:w-[280px]"
-      )}
-    >
-      <div 
-        className={cn("relative bg-muted cursor-pointer", highlight ? "h-[180px]" : "h-[160px]")}
-        onClick={() => handleBidNow(auction.id)}
-      >
-        {auction.image_url ? (
-          <Image
-            src={auction.image_url}
-            alt={auction.title}
-            fill
-            className="object-cover pointer-events-none"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full pointer-events-none">
-            <TrendingUp className="h-12 w-12 text-muted-foreground" />
-          </div>
-        )}
-
-        {auction.category && !highlight && (
-          <Badge className="absolute top-2 left-2 bg-white/90 dark:bg-black/90 text-black dark:text-white pointer-events-none">
-            {auction.category}
-          </Badge>
-        )}
-
-        <div className="absolute top-2 right-2 z-50 pointer-events-auto">
-          <WatchlistButton
-            auctionId={auction.id}
-            isInWatchlist={isInWatchlist}
-            variant="icon"
-          />
-        </div>
-
-        {highlight && auction.bid_count && auction.bid_count > 0 && (
-          <Badge className="absolute top-2 left-2 bg-black dark:bg-white text-white dark:text-black font-bold">
-            <Flame className="h-3 w-3 mr-1" />
-            {auction.bid_count} {auction.bid_count === 1 ? 'bid' : 'bids'}
-          </Badge>
-        )}
-      </div>
-
-      <CardContent 
-        className="p-4 cursor-pointer"
-        onClick={() => handleBidNow(auction.id)}
-      >
-        <h3 className="font-semibold text-sm mb-2 line-clamp-1">
-          {auction.title}
-        </h3>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Current Bid</span>
-            <span className="font-bold">{formatPrice(currentPrice)}</span>
-          </div>
-
-          <div className="text-xs text-muted-foreground">
-            <AuctionCountdown endDate={auction.end_date} compact />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

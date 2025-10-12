@@ -33,7 +33,9 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get('authorization');
     const expectedKey = process.env.CRON_SECRET || 'dev-secret';
     
-    if (authHeader !== `Bearer ${expectedKey}`) {
+    const isAuthorized = authHeader === `Bearer ${expectedKey}`;
+    
+    if (!isAuthorized) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
