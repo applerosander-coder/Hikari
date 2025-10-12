@@ -13,11 +13,11 @@ import {
 } from '@/components/ui/breadcrumb';
 import { UserAccountNav } from '@/components/user-account-nav';
 import Link from 'next/link';
-import { Package2, Settings, Menu, LogOut, Gavel, Sun, Moon } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
+import { Menu, Gavel } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { SharedMobileMenu } from '@/components/shared-mobile-menu';
 
-import { NavItem, iconComponents } from '@/config/dashboard';
+import { NavItem } from '@/config/dashboard';
 
 export function Navbar({
   userDetails,
@@ -27,22 +27,7 @@ export function Navbar({
   navConfig: NavItem[];
 }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    const { createClient } = await import('@/utils/supabase/client');
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setIsOpen(false);
-    router.push('/signin');
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-    setIsOpen(false);
-  };
 
   return (
     <header className="flex h-20 items-center gap-4 border-b bg-background px-4 sm:h-20 sm:border-0 sm:bg-transparent sm:px-6">
@@ -99,67 +84,11 @@ export function Navbar({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs">
-          <nav className="grid gap-6 text-lg font-medium">
-            <Link
-              href="#"
-              onClick={() => setIsOpen(false)}
-              className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-              prefetch={false}
-            >
-              <Gavel className="h-5 w-5 transition-all group-hover:scale-110" />
-              <span className="sr-only">Auctions</span>
-            </Link>
-            {navConfig.map(
-              (
-                item: {
-                  icon: keyof typeof iconComponents;
-                  href: string;
-                  label: string;
-                },
-                index: number
-              ) => {
-                const IconComponent = iconComponents[item.icon];
-                return (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-4 px-2.5 ${pathname === item.href ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                    prefetch={false}
-                  >
-                    <IconComponent className="h-5 w-5" />
-                    {item.label}
-                  </Link>
-                );
-              }
-            )}
-            <Link
-              href="#"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-              prefetch={false}
-            >
-              <Settings className="h-5 w-5" />
-              Settings
-            </Link>
-            
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-            >
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="ml-9">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
-            </button>
-
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="h-5 w-5" />
-              Sign Out
-            </button>
-          </nav>
+          <SharedMobileMenu 
+            user={userDetails} 
+            userDetails={userDetails} 
+            onClose={() => setIsOpen(false)} 
+          />
         </SheetContent>
       </Sheet>
     </header>
