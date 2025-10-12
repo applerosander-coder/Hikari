@@ -302,12 +302,14 @@ function AuctionCard({
   return (
     <Card
       className={cn(
-        "flex-shrink-0 overflow-hidden cursor-pointer transition-all hover:scale-105 hover:shadow-lg",
+        "flex-shrink-0 overflow-hidden transition-all hover:scale-105 hover:shadow-lg",
         highlight ? "w-[280px] sm:w-[320px]" : "w-[240px] sm:w-[280px]"
       )}
-      onClick={() => handleBidNow(auction.id)}
     >
-      <div className={cn("relative bg-muted", highlight ? "h-[180px]" : "h-[160px]")}>
+      <div 
+        className={cn("relative bg-muted cursor-pointer", highlight ? "h-[180px]" : "h-[160px]")}
+        onClick={() => handleBidNow(auction.id)}
+      >
         {auction.image_url ? (
           <Image
             src={auction.image_url}
@@ -327,7 +329,7 @@ function AuctionCard({
           </Badge>
         )}
 
-        <div className="absolute top-2 right-2 z-20" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute top-2 right-2 z-20">
           <WatchlistButton
             auctionId={auction.id}
             isInWatchlist={isInWatchlist}
@@ -343,7 +345,10 @@ function AuctionCard({
         )}
       </div>
 
-      <CardContent className="p-4">
+      <CardContent 
+        className="p-4 cursor-pointer"
+        onClick={() => handleBidNow(auction.id)}
+      >
         <h3 className="font-semibold text-sm mb-2 line-clamp-1">
           {auction.title}
         </h3>
