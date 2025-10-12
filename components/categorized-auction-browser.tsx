@@ -327,7 +327,7 @@ function AuctionCard({
           </Badge>
         )}
 
-        <div className="absolute top-2 right-2 z-20">
+        <div className="absolute top-2 right-2 z-20" onClick={(e) => e.stopPropagation()}>
           <WatchlistButton
             auctionId={auction.id}
             isInWatchlist={isInWatchlist}
@@ -354,8 +354,7 @@ function AuctionCard({
             <span className="font-bold">{formatPrice(currentPrice)}</span>
           </div>
 
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
+          <div className="text-xs text-muted-foreground">
             <AuctionCountdown endDate={auction.end_date} compact />
           </div>
         </div>
