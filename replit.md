@@ -4,13 +4,6 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories. Key features include a seller dashboard for auction creation, watchlist functionality, and a Netflix-style categorization for browsing.
 
 ### Recent Changes
-**October 12, 2025 - Ocean Theme & Theme Toggle Update:**
-- **Ocean Theme**: Added new ocean theme with blue/teal colors for dark ocean aesthetic
-- **Theme Cycling**: Theme toggle now cycles through Light → Dark → Ocean → Light
-- **Wave Icon**: Ocean theme displays wave icon in theme toggle
-- **System Theme Removed**: Removed system theme option, replaced with ocean theme
-- **Theme Provider**: Updated to disable system theme detection (enableSystem={false})
-
 **October 12, 2025 - Authentication Redirect Fix:**
 - **Sign-Up Redirect**: Fixed redirect after sign-up to go to landing page (/) instead of login page
 - **Sign-In Redirect**: Already correctly redirects to landing page (/)

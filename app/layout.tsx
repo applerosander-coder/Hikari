@@ -89,7 +89,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           fontHeading.variable
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NavigationProgress />
           <RootProvider>
             <TRPCReactProvider>{children}</TRPCReactProvider>
