@@ -9,6 +9,33 @@ Auctions is a live auction and bidding platform built with Next.js 14 and Supaba
 - **Sign-In Redirect**: Already correctly redirects to landing page (/)
 - **User Flow**: New and returning users now immediately see the landing page after successful authentication
 
+**October 12, 2025 - Automatic Winner Payment & Notification System:**
+- **Winner Processing API**: POST `/api/auctions/process-winners` for automatic end-of-auction payment
+  - Service role Supabase client bypasses RLS for secure notification creation
+  - CRON_SECRET bearer token authorization for production security
+  - Processes ended auctions with Stripe off-session charging
+  - Idempotent design: marks all auctions (success/failure) to prevent duplicate processing
+  - Comprehensive failure handling with sentinel payment_intent_id values:
+    - `no_payment_method`: Winner lacks payment method
+    - Stripe intent ID: Payment failed or succeeded
+    - `failed`: Unexpected error during processing
+- **Notifications System**: 
+  - New `notifications` table with RLS restricted to service_role for inserts
+  - Real-time notification checking via `useAuctionNotifications` hook
+  - Toast pop-ups on login with deep linking to relevant tabs
+  - Types: `auction_won`, `payment_failed`
+- **Won Auctions UI**: Enhanced mybids page with Won tab
+  - Displays won auctions with payment status and shipping status
+  - Payment status indicators: Completed, Failed, Pending
+  - Action buttons for tracking and shipping updates
+- **Database Updates**: Added fields to auctions table
+  - `payment_completed`, `payment_completed_at`, `payment_intent_id`
+  - `winner_id` for tracking auction winners
+- **Security & Production Notes**: 
+  - Requires SUPABASE_SERVICE_ROLE_KEY for service role operations
+  - Requires CRON_SECRET for API authorization
+  - Monitor auctions with sentinel payment_intent_id for manual intervention
+
 **October 12, 2025 - Unified Navigation & Seller Dashboard:**
 - **Unified Mobile Menu**: Shared navigation component (SharedMobileMenu) used across marketing and dashboard layouts
   - Clickable avatar at top links to account/profile page (/dashboard/account)
