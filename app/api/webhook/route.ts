@@ -89,11 +89,12 @@ export async function POST(req: Request) {
           // Fetch and lock current state (item or auction)
           let currentHighestBid = 0;
           let itemStatus = 'active';
+          let parentAuctionId = null;
 
           if (isItemBid) {
             const { data: item, error: itemFetchError } = await supabaseAdmin
               .from('auction_items')
-              .select('current_bid, auction:auctions(status)')
+              .select('current_bid, auction_id, auction:auctions(status)')
               .eq('id', auctionItemId)
               .single();
 
@@ -102,8 +103,9 @@ export async function POST(req: Request) {
               return new Response(`Error fetching auction item: ${itemFetchError.message}`, { status: 500 });
             }
 
-            itemStatus = item.auction?.status || 'draft';
+            itemStatus = (item.auction as any)?.status || 'draft';
             currentHighestBid = item?.current_bid || 0;
+            parentAuctionId = item.auction_id;
           } else {
             const { data: auction, error: auctionFetchError } = await supabaseAdmin
               .from('auctions')
@@ -139,6 +141,7 @@ export async function POST(req: Request) {
 
           if (isItemBid) {
             bidData.auction_item_id = auctionItemId;
+            bidData.auction_id = parentAuctionId; // Include parent auction ID for proper joins
           } else {
             bidData.auction_id = auctionId;
           }
