@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Search, X, Heart, Clock, Trophy } from 'lucide-react';
+import { Search, X, Heart, Clock, XCircle } from 'lucide-react';
 import { ActiveBidsSection } from './active-bids-section';
 import { EndingSoonSection } from './ending-soon-section';
 import { WonAuctionsSection } from './won-auctions-section';
@@ -37,7 +37,7 @@ export function MyBidsPageClient({
   // Check for tab parameter in URL
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['active', 'ending-soon', 'won', 'watchlist'].includes(tab)) {
+    if (tab && ['active', 'ending-soon', 'ended', 'watchlist'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -150,10 +150,31 @@ export function MyBidsPageClient({
     return auction.status !== 'ended' && !hasEnded;
   });
 
+  // Get ended items where user lost (last 10)
+  const endedLostBids = auctionsWithBids
+    .filter(({ bid, auction, isItem }) => {
+      const currentBid = auction.current_bid || auction.starting_price;
+      const auctionContainer = isItem ? auction.auction : auction;
+      const endDate = new Date(auctionContainer?.end_date || auction.end_date);
+      const status = auctionContainer?.status || auction.status;
+      const hasEnded = endDate < now || status === 'ended';
+      const userLost = bid.bid_amount < currentBid;
+      return hasEnded && userLost;
+    })
+    .sort((a, b) => {
+      // Sort by end date, most recent first
+      const aContainer = a.isItem ? a.auction.auction : a.auction;
+      const bContainer = b.isItem ? b.auction.auction : b.auction;
+      const aEndDate = new Date(aContainer?.end_date || a.auction.end_date);
+      const bEndDate = new Date(bContainer?.end_date || b.auction.end_date);
+      return bEndDate.getTime() - aEndDate.getTime();
+    })
+    .slice(0, 10); // Only keep last 10
+
   // Get counts
   const activeBidsCount = activeBids.length;
   const endingSoonCount = endingSoonBids.length;
-  const wonCount = wonAuctionsData.length;
+  const endedCount = wonAuctionsData.length + endedLostBids.length; // Won + lost ended items
   const watchlistCount = activeWatchlistItems.length; // Only count active items
 
   // Normalize data: add routing path to each entry
@@ -181,6 +202,18 @@ export function MyBidsPageClient({
   }));
 
   const normalizedEndingSoonBids = endingSoonBids.map(({ bid, auction, isItem }) => ({
+    bid,
+    auction: {
+      ...auction,
+      path: isItem 
+        ? `/auctions/${auction.auction.id}/items/${auction.id}`
+        : `/auctions/${auction.id}`
+    },
+    isItem
+  }));
+
+  // Normalize ended lost bids
+  const normalizedEndedLostBids = endedLostBids.map(({ bid, auction, isItem }) => ({
     bid,
     auction: {
       ...auction,
@@ -268,12 +301,12 @@ export function MyBidsPageClient({
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="won" className="flex items-center gap-1 sm:gap-2">
-            <Trophy className="h-4 w-4 hidden sm:block" />
-            <span className="text-xs sm:text-sm">Won</span>
-            {wonCount > 0 && (
+          <TabsTrigger value="ended" className="flex items-center gap-1 sm:gap-2">
+            <XCircle className="h-4 w-4 hidden sm:block" />
+            <span className="text-xs sm:text-sm">Ended</span>
+            {endedCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
-                {wonCount}
+                {endedCount}
               </span>
             )}
           </TabsTrigger>
@@ -303,9 +336,10 @@ export function MyBidsPageClient({
           />
         </TabsContent>
 
-        <TabsContent value="won">
+        <TabsContent value="ended">
           <WonAuctionsSection 
             wonAuctions={wonAuctionsData}
+            endedLostBids={normalizedEndedLostBids}
             searchQuery={searchQuery}
             userId={userId}
           />
