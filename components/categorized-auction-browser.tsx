@@ -65,7 +65,13 @@ export function CategorizedAuctionBrowser({
   const [selectedAuction, setSelectedAuction] = useState<string>('all');
 
   const filteredItems = React.useMemo(() => {
-    let filtered = items;
+    const now = new Date();
+    
+    // First, exclude items from ended auctions (by time)
+    let filtered = items.filter(item => {
+      const endDate = item.auction?.end_date ? new Date(item.auction.end_date) : null;
+      return !endDate || endDate > now;
+    });
 
     // Filter by selected auction
     if (selectedAuction !== 'all') {
@@ -89,7 +95,25 @@ export function CategorizedAuctionBrowser({
   }, [items, searchQuery, selectedAuction]);
 
   const filteredEndedItems = React.useMemo(() => {
-    let filtered = endedItems;
+    const now = new Date();
+    
+    // Include both:
+    // 1. Items explicitly marked as ended
+    // 2. Items from active auctions that have ended by time
+    const allEndedItems = [
+      ...endedItems,
+      ...items.filter(item => {
+        const endDate = item.auction?.end_date ? new Date(item.auction.end_date) : null;
+        return endDate && endDate <= now;
+      })
+    ];
+    
+    // Remove duplicates
+    const uniqueEndedItems = allEndedItems.filter((item, index, self) => 
+      index === self.findIndex((t) => t.id === item.id)
+    );
+    
+    let filtered = uniqueEndedItems;
 
     // Filter by selected auction
     if (selectedAuction !== 'all') {
@@ -110,7 +134,7 @@ export function CategorizedAuctionBrowser({
     }
 
     return filtered;
-  }, [endedItems, searchQuery, selectedAuction]);
+  }, [items, endedItems, searchQuery, selectedAuction]);
 
   const hotItems = React.useMemo(() => {
     return [...filteredItems]
@@ -255,7 +279,7 @@ export function CategorizedAuctionBrowser({
             <>
               <div className="border-t border-border pt-8 sm:pt-12">
                 <div className="px-4 mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-muted-foreground">Recently Ended</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-muted-foreground">Ended Auctions</h2>
                   <p className="text-sm text-muted-foreground mt-1">Browse completed auctions</p>
                 </div>
               </div>
