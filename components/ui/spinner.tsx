@@ -7,28 +7,53 @@ interface SpinnerProps {
 
 export function Spinner({ className, size = 'md' }: SpinnerProps) {
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12'
+    sm: 'h-5 w-5',
+    md: 'h-10 w-10',
+    lg: 'h-16 w-16'
+  };
+
+  const barConfig = {
+    sm: { width: '2px', length: '35%' },
+    md: { width: '3px', length: '38%' },
+    lg: { width: '4px', length: '38%' }
   };
 
   return (
-    <svg
+    <div
       className={cn(
-        'animate-spin text-zinc-400',
+        'inline-flex items-center justify-center',
         sizeClasses[size],
         className
       )}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
     >
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      />
-    </svg>
+      <div className="relative h-full w-full animate-spin">
+        {[...Array(8)].map((_, i) => {
+          const rotation = i * 45;
+          const opacity = 0.2 + (i * 0.1);
+          
+          return (
+            <div
+              key={i}
+              className="absolute left-1/2 top-1/2 flex items-end justify-center"
+              style={{
+                transform: `translate(-50%, -100%) rotate(${rotation}deg)`,
+                transformOrigin: 'center bottom',
+                width: barConfig[size].width,
+                height: '50%',
+              }}
+            >
+              <div
+                className="rounded-full bg-zinc-600"
+                style={{
+                  width: '100%',
+                  height: barConfig[size].length,
+                  opacity,
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
