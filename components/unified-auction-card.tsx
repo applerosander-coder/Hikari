@@ -332,10 +332,6 @@ export function UnifiedAuctionCard({
 
         {auction.status !== 'ended' && auction.end_date && (
           <div className="mb-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-              <Clock className="h-4 w-4" />
-              Ends in
-            </div>
             <AuctionCountdown endDate={auction.end_date} compact />
           </div>
         )}
