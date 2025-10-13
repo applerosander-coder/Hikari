@@ -107,7 +107,19 @@ export function MyBidsPageClient({
     const endDate = new Date(auctionContainer?.end_date || auction.end_date);
     const status = auctionContainer?.status || auction.status;
     const hasEnded = endDate < now;
-    return bid.bid_amount >= currentBid && status !== 'ended' && !hasEnded;
+    const isWinning = bid.bid_amount >= currentBid && status !== 'ended' && !hasEnded;
+    
+    console.log('🔍 Checking bid:', {
+      title: auction.title,
+      isItem,
+      userBid: bid.bid_amount,
+      currentBid,
+      isWinning,
+      status,
+      hasEnded
+    });
+    
+    return isWinning;
   });
 
   const outbidBids = auctionsWithBids.filter(({ bid, auction, isItem }) => {
@@ -263,7 +275,6 @@ export function MyBidsPageClient({
             activeBids={normalizedActiveBids}
             outbidBids={normalizedOutbidBids}
             searchQuery={searchQuery}
-            userId={userId}
           />
         </TabsContent>
 
@@ -271,7 +282,6 @@ export function MyBidsPageClient({
           <EndingSoonSection 
             endingSoonBids={normalizedEndingSoonBids}
             searchQuery={searchQuery}
-            userId={userId}
           />
         </TabsContent>
 

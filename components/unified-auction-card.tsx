@@ -34,7 +34,56 @@ export function UnifiedAuctionCard({
   };
 
   const getAuctionData = () => {
-    if (item.auction_items) {
+    // Handle MyBids page structure: { bid, auction, isItem }
+    if (item.bid && item.auction) {
+      const auction = item.auction;
+      const isItem = item.isItem;
+      
+      if (isItem) {
+        // auction is an auction_item with nested auction container
+        const auctionContainer = auction.auction;
+        return {
+          id: auction.id,
+          auctionId: auctionContainer?.id || auction.auction_id,
+          itemId: auction.id,
+          title: auction.title,
+          description: auction.description,
+          category: auctionContainer?.category || auction.category,
+          image_url: auction.image_url,
+          current_bid: auction.current_bid,
+          starting_price: auction.starting_price,
+          reserve_price: auction.reserve_price,
+          end_date: auctionContainer?.end_date || auction.end_date,
+          status: auctionContainer?.status || auction.status,
+          path: auction.path || `/auctions/${auctionContainer?.id || auction.auction_id}/items/${auction.id}`,
+          isItem: true,
+          winner_id: auction.winner_id,
+          payments: auction.payments
+        };
+      } else {
+        // auction is a legacy auction
+        return {
+          id: auction.id,
+          auctionId: auction.id,
+          itemId: null,
+          title: auction.title,
+          description: auction.description,
+          category: auction.category,
+          image_url: auction.image_url,
+          current_bid: auction.current_bid,
+          starting_price: auction.starting_price,
+          reserve_price: auction.reserve_price,
+          end_date: auction.end_date,
+          status: auction.status,
+          path: auction.path || `/auctions/${auction.id}`,
+          isItem: false,
+          winner_id: auction.winner_id,
+          payments: auction.payments
+        };
+      }
+    }
+    // Handle watchlist/won structure: { auction_items } or { auctions }
+    else if (item.auction_items) {
       const auctionItem = item.auction_items;
       return {
         id: auctionItem.id,
