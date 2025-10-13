@@ -141,11 +141,20 @@ export function MyBidsPageClient({
     return endDate > now && endDate <= twentyFourHoursFromNow && status !== 'ended';
   });
 
+  // Filter watchlist to only count active items (not ended)
+  const activeWatchlistItems = watchlistData.filter((item: any) => {
+    const auction = item.auction_items?.auction || item.auctions;
+    if (!auction) return false;
+    const endDate = new Date(auction.end_date);
+    const hasEnded = endDate < now;
+    return auction.status !== 'ended' && !hasEnded;
+  });
+
   // Get counts
   const activeBidsCount = activeBids.length;
   const endingSoonCount = endingSoonBids.length;
   const wonCount = wonAuctionsData.length;
-  const watchlistCount = watchlistData.length;
+  const watchlistCount = activeWatchlistItems.length; // Only count active items
 
   // Normalize data: add routing path to each entry
   const normalizedActiveBids = activeBids.map(({ bid, auction, isItem }) => ({
