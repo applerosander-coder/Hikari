@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 type EndAuctionResult = {
   auction_id: string;
+  item_id?: string;
   status: string;
   winner_id?: string;
   error?: string;
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     // Step 1: Publish draft auctions whose start_date has been reached
     const { data: draftAuctions, error: draftFetchError } = await supabase
       .from('auctions')
-      .select('id, title')
+      .select('id, name')
       .eq('status', 'draft')
       .lte('start_date', now);
 
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     // Step 2: End active auctions whose end_date has passed
     const { data: expiredAuctions, error: fetchError } = await supabase
       .from('auctions')
-      .select('id, title, current_bid')
+      .select('id, name')
       .eq('status', 'active')
       .lt('end_date', now);
 
@@ -72,88 +73,115 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch auctions' }, { status: 500 });
     }
 
-    if (!expiredAuctions || expiredAuctions.length === 0) {
-      return NextResponse.json({ 
-        message: 'Auction lifecycle check complete',
-        published: publishedCount,
-        ended: 0
-      });
-    }
-
     const results: EndAuctionResult[] = [];
 
-    for (const auction of expiredAuctions) {
-      try {
-        const { data: highestBid } = await supabase
-          .from('bids')
-          .select('user_id, bid_amount')
-          .eq('auction_id', auction.id)
-          .order('bid_amount', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+    if (expiredAuctions && expiredAuctions.length > 0) {
+      // End the auction containers
+      const { error: updateError } = await supabase
+        .from('auctions')
+        .update({
+          status: 'ended',
+          updated_at: now
+        })
+        .in('id', expiredAuctions.map(a => a.id));
 
-        if (highestBid) {
-          const { error: updateError } = await supabase
-            .from('auctions')
-            .update({
-              status: 'ended',
-              winner_id: highestBid.user_id,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', auction.id);
+      if (updateError) {
+        console.error('Error ending auctions:', updateError);
+      }
 
-          if (updateError) {
-            console.error(`Error updating auction ${auction.id}:`, updateError);
-            results.push({
-              auction_id: auction.id,
-              status: 'error',
-              error: updateError.message
-            });
-          } else {
-            results.push({
-              auction_id: auction.id,
-              status: 'ended',
-              winner_id: highestBid.user_id
-            });
+      // Process each auction's items
+      for (const auction of expiredAuctions) {
+        try {
+          // Get all items for this auction
+          const { data: items, error: itemsError } = await supabase
+            .from('auction_items')
+            .select('id, title, current_bid')
+            .eq('auction_id', auction.id);
+
+          if (itemsError) {
+            console.error(`Error fetching items for auction ${auction.id}:`, itemsError);
+            continue;
           }
-        } else {
-          const { error: updateError } = await supabase
-            .from('auctions')
-            .update({
-              status: 'ended',
-              winner_id: null,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', auction.id);
 
-          if (updateError) {
-            console.error(`Error updating auction ${auction.id}:`, updateError);
+          if (!items || items.length === 0) {
             results.push({
               auction_id: auction.id,
-              status: 'error',
-              error: updateError.message
+              status: 'ended_no_items'
             });
-          } else {
-            results.push({
-              auction_id: auction.id,
-              status: 'ended_no_bids'
-            });
+            continue;
           }
+
+          // Process each item to determine winners
+          for (const item of items) {
+            try {
+              const { data: highestBid } = await supabase
+                .from('bids')
+                .select('user_id, bid_amount')
+                .eq('auction_item_id', item.id)
+                .order('bid_amount', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+              if (highestBid) {
+                // Update item with winner
+                const { error: itemUpdateError } = await supabase
+                  .from('auction_items')
+                  .update({
+                    winner_id: highestBid.user_id,
+                    updated_at: now
+                  })
+                  .eq('id', item.id);
+
+                if (itemUpdateError) {
+                  console.error(`Error updating item ${item.id}:`, itemUpdateError);
+                  results.push({
+                    auction_id: auction.id,
+                    item_id: item.id,
+                    status: 'error',
+                    error: itemUpdateError.message
+                  });
+                } else {
+                  results.push({
+                    auction_id: auction.id,
+                    item_id: item.id,
+                    status: 'ended',
+                    winner_id: highestBid.user_id
+                  });
+                }
+              } else {
+                // No bids on this item
+                results.push({
+                  auction_id: auction.id,
+                  item_id: item.id,
+                  status: 'ended_no_bids'
+                });
+              }
+            } catch (error: any) {
+              console.error(`Error processing item ${item.id}:`, error);
+              results.push({
+                auction_id: auction.id,
+                item_id: item.id,
+                status: 'error',
+                error: error.message
+              });
+            }
+          }
+        } catch (error: any) {
+          console.error(`Error processing auction ${auction.id}:`, error);
+          results.push({
+            auction_id: auction.id,
+            status: 'error',
+            error: error.message
+          });
         }
-      } catch (error: any) {
-        console.error(`Error processing auction ${auction.id}:`, error);
-        results.push({
-          auction_id: auction.id,
-          status: 'error',
-          error: error.message
-        });
       }
     }
 
     return NextResponse.json({
       message: 'Auction lifecycle check complete',
       published: publishedCount,
-      ended: results.length,
+      ended_auctions: expiredAuctions?.length || 0,
+      processed_items: results.length,
       results
     });
   } catch (error: any) {
