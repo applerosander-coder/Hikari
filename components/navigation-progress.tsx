@@ -1,25 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import NProgress from 'nprogress';
+import { Spinner } from '@/components/ui/spinner';
 
 export function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
-    NProgress.configure({ 
-      showSpinner: false,
-      trickleSpeed: 100,
-      minimum: 0.2,
-      easing: 'ease',
-      speed: 500
-    });
-  }, []);
-
-  useEffect(() => {
-    NProgress.done();
+    setIsNavigating(false);
     
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.currentTarget as HTMLAnchorElement;
@@ -27,7 +18,7 @@ export function NavigationProgress() {
       const currentUrl = window.location.href;
       
       if (href !== currentUrl && !href.includes('#')) {
-        NProgress.start();
+        setIsNavigating(true);
       }
     };
 
@@ -52,5 +43,14 @@ export function NavigationProgress() {
     };
   }, [pathname, searchParams]);
 
-  return null;
+  if (!isNavigating) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <Spinner size="lg" />
+        <p className="text-white text-lg font-medium">Loading...</p>
+      </div>
+    </div>
+  );
 }
