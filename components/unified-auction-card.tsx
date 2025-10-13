@@ -239,8 +239,7 @@ export function UnifiedAuctionCard({
 
   return (
     <Card className={cn(
-      "overflow-hidden hover:shadow-lg transition-shadow relative",
-      isWinning && "ring-2 ring-green-500"
+      "overflow-hidden hover:shadow-lg transition-shadow relative"
     )}>
       {variant === 'watchlist' && onRemoveFromWatchlist && (
         <button
