@@ -32,10 +32,11 @@ export async function POST() {
     title: 'Spring Estate Sale',
     description: 'Premium collection from local estate',
     category: 'Collectibles',
+    starting_price: 0,
     start_date: startDate.toISOString(),
     end_date: endDate.toISOString(),
     created_by: user.id,
-    status: 'active',
+    status: 'active' as const,
   };
 
   const auction2 = {
@@ -44,10 +45,11 @@ export async function POST() {
     title: 'Vintage Electronics',
     description: 'Rare vintage electronics and gadgets',
     category: 'Electronics',
+    starting_price: 0,
     start_date: startDate.toISOString(),
     end_date: endDate.toISOString(),
     created_by: user.id,
-    status: 'active',
+    status: 'active' as const,
   };
 
   console.log('📦 Creating Auction 1: Spring Estate Sale...');
