@@ -24,6 +24,13 @@ export default function AuctionItemDetailPage() {
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
 
+  const formatPrice = (priceInCents: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(priceInCents / 100);
+  };
+
   useEffect(() => {
     async function fetchData() {
       const supabase = createClient();
@@ -252,7 +259,7 @@ export default function AuctionItemDetailPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Current Bid</p>
                   <p className="text-3xl font-bold">
-                    ${item.current_bid?.toLocaleString() || item.starting_price?.toLocaleString()}
+                    {formatPrice(item.current_bid || item.starting_price)}
                   </p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-muted-foreground" />
@@ -262,12 +269,12 @@ export default function AuctionItemDetailPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Starting Price</p>
-                  <p className="font-semibold">${item.starting_price?.toLocaleString()}</p>
+                  <p className="font-semibold">{formatPrice(item.starting_price)}</p>
                 </div>
                 {item.reserve_price && (
                   <div>
                     <p className="text-muted-foreground">Reserve Price</p>
-                    <p className="font-semibold">${item.reserve_price?.toLocaleString()}</p>
+                    <p className="font-semibold">{formatPrice(item.reserve_price)}</p>
                   </div>
                 )}
               </div>
@@ -341,7 +348,7 @@ export default function AuctionItemDetailPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-lg">${bid.bid_amount?.toLocaleString()}</p>
+                      <p className="font-semibold text-lg">{formatPrice(bid.bid_amount)}</p>
                       {idx === 0 && (
                         <Badge variant="default" className="mt-1">Highest Bid</Badge>
                       )}
