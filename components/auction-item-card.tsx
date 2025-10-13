@@ -200,11 +200,32 @@ export function AuctionItemCard({
         </h3>
 
         <div className="space-y-2">
+          {userBidAmount !== undefined && (
+            <div className="flex items-center justify-between text-sm">
+              <span className={cn(
+                "font-medium",
+                userHasHighestBid && "text-green-600 dark:text-green-400"
+              )}>
+                {userHasHighestBid ? 'My Bid' : 'Your Bid'}:
+              </span>
+              <span className={cn(
+                "font-semibold",
+                userHasHighestBid && "text-green-600 dark:text-green-400"
+              )}>
+                {formatPrice(userBidAmount)}
+              </span>
+            </div>
+          )}
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              {isAuctionEnded ? 'Final Price' : 'Current Bid'}
+              {isAuctionEnded ? 'Final Price' : 'Current Price'}
             </span>
-            <span className="font-bold">{formatPrice(currentPrice)}</span>
+            <span className={cn(
+              "font-bold",
+              userHasHighestBid && !isAuctionEnded && "text-green-600 dark:text-green-400"
+            )}>
+              {formatPrice(currentPrice)}
+            </span>
           </div>
 
           <div className="text-xs text-muted-foreground">

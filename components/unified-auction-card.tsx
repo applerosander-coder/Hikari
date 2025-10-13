@@ -151,6 +151,7 @@ export function UnifiedAuctionCard({
   if (!auction) return null;
 
   const currentPrice = auction.current_bid || auction.starting_price;
+  const userIsWinning = userBidAmount !== undefined && userBidAmount >= currentPrice;
   const isWinning = variant === 'active';
   const isOutbid = variant === 'outbid';
 
@@ -286,8 +287,18 @@ export function UnifiedAuctionCard({
         <div className="space-y-2 mb-3">
           {userBidAmount !== undefined && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Your Bid:</span>
-              <span className="font-semibold">{formatPrice(userBidAmount)}</span>
+              <span className={cn(
+                "font-medium",
+                userIsWinning && "text-green-600 dark:text-green-400"
+              )}>
+                {userIsWinning ? 'My Bid' : 'Your Bid'}:
+              </span>
+              <span className={cn(
+                "font-semibold",
+                userIsWinning && "text-green-600 dark:text-green-400"
+              )}>
+                {formatPrice(userBidAmount)}
+              </span>
             </div>
           )}
           <div className="flex justify-between text-sm">
@@ -296,7 +307,7 @@ export function UnifiedAuctionCard({
             </span>
             <span className={cn(
               "font-semibold",
-              isWinning && "text-green-600 dark:text-green-400",
+              userIsWinning && variant !== 'won' && "text-green-600 dark:text-green-400",
               isOutbid && "text-red-600 dark:text-red-400"
             )}>
               {formatPrice(currentPrice)}
