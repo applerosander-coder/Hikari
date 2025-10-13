@@ -253,7 +253,7 @@ export default function AuctionItemDetailPage() {
           </div>
 
           {/* Price Information */}
-          <Card>
+          <Card className={userIsHighestBidder && !isAuctionEnded ? "border-green-500" : ""}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -261,8 +261,11 @@ export default function AuctionItemDetailPage() {
                   <p className="text-3xl font-bold">
                     {formatPrice(item.current_bid || item.starting_price)}
                   </p>
+                  {userIsHighestBidder && !isAuctionEnded && (
+                    <p className="text-sm font-medium text-green-600 mt-1">✓ You're winning!</p>
+                  )}
                 </div>
-                <TrendingUp className="h-8 w-8 text-muted-foreground" />
+                <TrendingUp className={`h-8 w-8 ${userIsHighestBidder && !isAuctionEnded ? 'text-green-600' : 'text-muted-foreground'}`} />
               </div>
             </CardHeader>
             <CardContent>
