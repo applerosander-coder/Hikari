@@ -118,15 +118,6 @@ export function AuctionItemCard({
   };
 
   const determineStatusBadge = () => {
-    if (badgeType === 'high-bid' || (userHasHighestBid && !isAuctionEnded)) {
-      return (
-        <Badge className="absolute top-4 right-4 z-10 bg-black dark:bg-white text-white dark:text-black">
-          <Heart className="h-3 w-3 mr-1 fill-current" />
-          High Bid
-        </Badge>
-      );
-    }
-
     if (badgeType === 'outbid') {
       return (
         <Badge className="absolute top-4 right-4 z-10" variant="outline">
@@ -151,8 +142,7 @@ export function AuctionItemCard({
     <Card
       className={cn(
         "flex-shrink-0 overflow-hidden transition-all hover:scale-105 hover:shadow-lg",
-        cardWidth,
-        (badgeType === 'high-bid' || userHasHighestBid) && "ring-2 ring-black dark:ring-white"
+        cardWidth
       )}
     >
       <div 
