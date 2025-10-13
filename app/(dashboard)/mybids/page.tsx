@@ -43,19 +43,33 @@ export default async function MyBidsPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  // Fetch won auctions (where user is the winner)
+  // Fetch won auction items (where user is the winner)
+  const { data: wonItemsData } = await supabase
+    .from('auction_items')
+    .select(`
+      *,
+      auction:auctions(*),
+      payments(*)
+    `)
+    .eq('winner_id', user.id)
+    .order('created_at', { ascending: false });
+
+  // Fetch won legacy auctions (where user is the winner)
   const { data: wonAuctionsData } = await supabase
     .from('auctions')
     .select('*, payments(*)')
     .eq('winner_id', user.id)
     .eq('status', 'ended')
     .order('end_date', { ascending: false });
+  
+  // Combine won items and won auctions
+  const combinedWonData = [...(wonItemsData || []), ...(wonAuctionsData || [])];
 
   return (
     <MyBidsPageClient
       userBidsData={userBidsData || []}
       watchlistData={watchlistData || []}
-      wonAuctionsData={wonAuctionsData || []}
+      wonAuctionsData={combinedWonData}
       userId={user.id}
     />
   );
