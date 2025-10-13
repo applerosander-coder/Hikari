@@ -16,8 +16,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { createBidPaymentIntent, placeBidWithSavedCard } from '@/app/actions/bid-actions';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 import { AddCardModal } from '@/components/add-card-modal';
+import { Spinner } from '@/components/ui/spinner';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -112,16 +112,10 @@ function BidCheckoutForm({
         <Button
           type="submit"
           disabled={!stripe || isProcessing}
+          loading={isProcessing}
           className="flex-1"
         >
-          {isProcessing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            `Pay $${(bidAmount / 100).toFixed(2)}`
-          )}
+          {isProcessing ? 'Processing...' : `Pay $${(bidAmount / 100).toFixed(2)}`}
         </Button>
       </div>
     </form>
@@ -291,7 +285,7 @@ export function BidDialog({
       {isProcessingBid && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center">
           <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto text-white" />
+            <Spinner size="lg" className="mx-auto text-white" />
             <p className="text-white text-lg font-medium">Processing your bid...</p>
             <p className="text-white/70 text-sm">Please wait while we confirm your bid</p>
           </div>
@@ -326,16 +320,10 @@ export function BidDialog({
               <Button
                 onClick={handleCreatePaymentIntent}
                 disabled={isCreatingIntent}
+                loading={isCreatingIntent}
                 className="w-full"
               >
-                {isCreatingIntent ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Preparing...
-                  </>
-                ) : (
-                  'Continue to Payment'
-                )}
+                {isCreatingIntent ? 'Preparing...' : 'Continue to Payment'}
               </Button>
             </div>
           ) : (

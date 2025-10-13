@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, CreditCard } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -138,12 +139,14 @@ function CardSetupForm({ onSuccess, onCancel }: { onSuccess: () => void; onCance
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={!stripe || isProcessing} className="flex-1">
+        <Button 
+          type="submit" 
+          disabled={!stripe || isProcessing}
+          loading={isProcessing}
+          className="flex-1"
+        >
           {isProcessing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
+            'Saving...'
           ) : (
             <>
               <CreditCard className="mr-2 h-4 w-4" />
@@ -220,7 +223,7 @@ export function AddCardModal({ open, onOpenChange, onSuccess }: AddCardModalProp
         <div className="overflow-y-auto flex-1 -mx-6 px-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <Spinner size="md" className="text-muted-foreground" />
             </div>
           ) : (
             clientSecret && (

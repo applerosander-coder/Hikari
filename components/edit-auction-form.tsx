@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
+import { Upload, ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -199,13 +199,11 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
           variant="destructive"
           onClick={handleDelete}
           disabled={isDeleting}
+          loading={isDeleting}
           className="flex items-center gap-2 ml-auto"
         >
           {isDeleting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Deleting...
-            </>
+            'Deleting...'
           ) : (
             <>
               <Trash2 className="h-4 w-4" />
@@ -365,15 +363,9 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
               className="w-full"
               size="lg"
               disabled={isSubmitting}
+              loading={isSubmitting}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating Auction...
-                </>
-              ) : (
-                'Update Auction'
-              )}
+              {isSubmitting ? 'Updating Auction...' : 'Update Auction'}
             </Button>
           </form>
         </CardContent>

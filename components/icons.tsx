@@ -11,7 +11,6 @@ import {
   HelpCircle,
   Image,
   Laptop,
-  Loader2,
   LucideProps,
   Moon,
   MoreVertical,
@@ -43,6 +42,7 @@ import {
   Database,
   type Icon as LucideIcon
 } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 export type Icon = typeof LucideIcon;
 
@@ -63,7 +63,7 @@ export const Icons = {
   logo: Command,
   checkCircle: CheckCircle,
   close: X,
-  spinner: Loader2,
+  spinner: Spinner,
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
   trash: Trash,
