@@ -30,12 +30,12 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
 
   // Sort by end date - soonest first
   const sorted = [...filtered].sort((a, b) => {
-    // Get end date with same fallback logic as UnifiedAuctionCard
-    const aEndDateStr = a.auction_items?.auction?.end_date || a.auction_items?.end_date || a.auctions?.end_date;
-    const bEndDateStr = b.auction_items?.auction?.end_date || b.auction_items?.end_date || b.auctions?.end_date;
+    // Use same logic as mybids page client
+    const aAuctionContainer = a.isItem ? a.auction?.auction : a.auction;
+    const bAuctionContainer = b.isItem ? b.auction?.auction : b.auction;
     
-    const aEndDate = new Date(aEndDateStr || 0);
-    const bEndDate = new Date(bEndDateStr || 0);
+    const aEndDate = new Date(aAuctionContainer?.end_date || a.auction?.end_date || 0);
+    const bEndDate = new Date(bAuctionContainer?.end_date || b.auction?.end_date || 0);
     
     return aEndDate.getTime() - bEndDate.getTime();
   });
