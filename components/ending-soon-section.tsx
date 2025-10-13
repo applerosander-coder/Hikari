@@ -28,7 +28,16 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
 
   const filtered = filterBids(endingSoonBids);
 
-  if (filtered.length === 0) {
+  // Sort by end date - soonest first
+  const sorted = [...filtered].sort((a, b) => {
+    const aAuction = a.auction_items?.auction || a.auctions;
+    const bAuction = b.auction_items?.auction || b.auctions;
+    const aEndDate = new Date(aAuction?.end_date || a.end_date || 0);
+    const bEndDate = new Date(bAuction?.end_date || b.end_date || 0);
+    return aEndDate.getTime() - bEndDate.getTime();
+  });
+
+  if (sorted.length === 0) {
     return (
       <div className="text-center py-12">
         <Clock className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -46,7 +55,7 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
         Your bids that are ending within the next 24 hours. Act fast!
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((bidItem) => (
+        {sorted.map((bidItem) => (
           <UnifiedAuctionCard
             key={bidItem.bid?.id || bidItem.id}
             item={bidItem}
