@@ -179,11 +179,13 @@ export async function POST(req: Request) {
 
           // Verify the update actually happened
           if (!updateResult || updateResult.length === 0) {
-            console.error('❌ Update touched zero rows - concurrent bid may have won');
-            return new Response(`Bid overtaken by higher concurrent bid`, { status: 400 });
+            console.log('⚠️ Update touched zero rows - concurrent bid may have won, but bid is still recorded');
+            // Bid is already saved, so we consider this a success
+            // The user's bid is valid even if not currently the highest
+            return new Response(null, { status: 200 });
           }
 
-          console.log(`✅ Bid recorded successfully for ${isItemBid ? 'item' : 'auction'} ${targetId}`);
+          console.log(`✅ Bid recorded successfully and is now highest for ${isItemBid ? 'item' : 'auction'} ${targetId}`);
         }
       }
     }
