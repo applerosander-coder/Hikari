@@ -143,6 +143,7 @@ export function BidDialog({
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showAddCard, setShowAddCard] = useState(false);
+  const [isProcessingBid, setIsProcessingBid] = useState(false);
 
   const minBid = (currentBid + 100) / 100;
 
@@ -160,6 +161,7 @@ export function BidDialog({
 
     if (savedCardResult.success) {
       // Payment succeeded with saved card - redirect to mybids with celebration
+      setIsProcessingBid(true);
       toast.success('Bid placed successfully!', { id: 'bid-success' });
       setIsCreatingIntent(false);
       onOpenChange(false);
@@ -232,6 +234,7 @@ export function BidDialog({
     toast.dismiss('processing-bid');
     
     if (savedCardResult.success) {
+      setIsProcessingBid(true);
       toast.success('Bid placed successfully!', { id: 'bid-success' });
       onOpenChange(false);
       
@@ -262,6 +265,7 @@ export function BidDialog({
   };
 
   const handleSuccess = () => {
+    setIsProcessingBid(true);
     onOpenChange(false);
     setShowPayment(false);
     setClientSecret('');
@@ -283,7 +287,17 @@ export function BidDialog({
   }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      {isProcessingBid && (
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-white" />
+            <p className="text-white text-lg font-medium">Processing your bid...</p>
+            <p className="text-white/70 text-sm">Please wait while we confirm your bid</p>
+          </div>
+        </div>
+      )}
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Place Your Bid</DialogTitle>
@@ -354,5 +368,6 @@ export function BidDialog({
         onSuccess={handleCardAdded}
       />
     </Dialog>
+    </>
   );
 }
