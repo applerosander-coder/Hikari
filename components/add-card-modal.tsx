@@ -223,7 +223,7 @@ export function AddCardModal({ open, onOpenChange, onSuccess }: AddCardModalProp
         <div className="overflow-y-auto flex-1 -mx-6 px-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Spinner size="md" className="text-muted-foreground" />
+              <Spinner size="md" />
             </div>
           ) : (
             clientSecret && (

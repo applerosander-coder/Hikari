@@ -285,7 +285,7 @@ export function BidDialog({
       {isProcessingBid && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center">
           <div className="text-center space-y-4">
-            <Spinner size="lg" className="mx-auto text-white" />
+            <Spinner size="lg" className="mx-auto" />
             <p className="text-white text-lg font-medium">Processing your bid...</p>
             <p className="text-white/70 text-sm">Please wait while we confirm your bid</p>
           </div>
