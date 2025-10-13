@@ -416,7 +416,7 @@ function AuctionRow({
 
         <div
           ref={scrollContainerRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-4"
+          className="flex gap-4 overflow-x-auto overflow-y-visible scrollbar-hide px-4 pb-4 pt-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {items.map((item) => {
