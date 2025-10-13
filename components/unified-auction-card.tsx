@@ -252,17 +252,6 @@ export function UnifiedAuctionCard({
           <X className="h-4 w-4" />
         </button>
       )}
-      
-      {variant !== 'watchlist' && (
-        <div className="absolute top-4 right-4 z-10">
-          <WatchlistButton 
-            auctionId={auction.auctionId}
-            itemId={auction.itemId}
-            isInWatchlist={false}
-            variant="icon"
-          />
-        </div>
-      )}
 
       <div className="relative h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
         {getBadge()}
