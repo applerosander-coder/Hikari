@@ -191,17 +191,42 @@ export function CategorizedAuctionBrowser({
             className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Auctions ({items.length + endedItems.length} items)</option>
-            {auctions.map((auction) => {
-              const activeCount = items.filter(i => i.auction_id === auction.id).length;
-              const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
-              const totalCount = activeCount + endedCount;
-              const statusLabel = activeCount > 0 ? 'Live' : 'Ended';
-              return (
+            {auctions
+              .map((auction) => {
+                const now = new Date();
+                const activeCount = items.filter(i => i.auction_id === auction.id).length;
+                const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
+                const totalCount = activeCount + endedCount;
+                
+                // Check if auction has ended by time
+                const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
+                const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
+                const hasEnded = endDate && endDate <= now;
+                
+                const statusLabel = hasEnded || activeCount === 0 ? 'Ended' : 'Live';
+                const isActive = !hasEnded && activeCount > 0;
+                
+                return {
+                  auction,
+                  activeCount,
+                  endedCount,
+                  totalCount,
+                  statusLabel,
+                  isActive
+                };
+              })
+              .sort((a, b) => {
+                // Sort: Live auctions first, then Ended auctions
+                if (a.isActive && !b.isActive) return -1;
+                if (!a.isActive && b.isActive) return 1;
+                return 0;
+              })
+              .map(({ auction, totalCount, statusLabel }) => (
                 <option key={auction.id} value={auction.id}>
                   {auction.name} - {auction.place} ({totalCount} items • {statusLabel})
                 </option>
-              );
-            })}
+              ))
+            }
           </select>
         </div>
 
