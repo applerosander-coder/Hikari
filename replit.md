@@ -32,7 +32,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **Seller Dashboard:** Form for creating multi-item auctions with image upload and real-time preview. Sellers can manage and preview their draft auctions.
 - **Payment Processing:** Secure bidding, saved payment methods, and automated off-session charging via Stripe for winners.
 - **Mobile Optimization:** Accessible and usable across all devices.
-- **My Bids Page:** Tracks active bids, outbid items, won auctions (with payment/shipping status), and a user-curated watchlist.
+- **My Bids Page:** Tracks active bids, outbid items, won auctions (with payment/shipping status), and a user-curated watchlist. Ended tab displays won auctions first, followed by the 10 most recent lost bids.
 - **Watchlist:** Allows users to track individual auction items.
 - **Loading Indicators:** Page loading spinners and NProgress bar for navigation.
 - **Dev Tools:** Test data creation button available in development for quick testing (creates live auctions, sets winners, adds watchlist items).

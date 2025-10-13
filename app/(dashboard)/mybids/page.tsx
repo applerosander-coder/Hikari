@@ -62,8 +62,20 @@ export default async function MyBidsPage() {
     .eq('status', 'ended')
     .order('end_date', { ascending: false });
   
+  // Normalize won items to match UnifiedAuctionCard expected structure
+  const normalizedWonItems = (wonItemsData || []).map(item => ({
+    ...item,
+    auction_items: item, // Wrap in expected structure
+  }));
+
+  // Normalize won auctions to match UnifiedAuctionCard expected structure
+  const normalizedWonAuctions = (wonAuctionsData || []).map(auction => ({
+    ...auction,
+    auctions: auction, // Wrap in expected structure
+  }));
+  
   // Combine won items and won auctions
-  const combinedWonData = [...(wonItemsData || []), ...(wonAuctionsData || [])];
+  const combinedWonData = [...normalizedWonItems, ...normalizedWonAuctions];
 
   return (
     <MyBidsPageClient
