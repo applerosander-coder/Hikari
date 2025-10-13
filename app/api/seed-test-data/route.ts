@@ -75,7 +75,6 @@ export async function POST() {
       reserve_price: 800000,
       current_bid: 500000,
       image_url: 'https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?w=400',
-      status: 'active',
     },
     {
       auction_id: auction1Data.id,
@@ -85,7 +84,7 @@ export async function POST() {
       reserve_price: 500000,
       current_bid: 300000,
       image_url: 'https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=400',
-      status: 'active',
+
     },
     {
       auction_id: auction1Data.id,
@@ -95,7 +94,7 @@ export async function POST() {
       reserve_price: 250000,
       current_bid: 150000,
       image_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400',
-      status: 'active',
+
     },
     {
       auction_id: auction1Data.id,
@@ -105,7 +104,7 @@ export async function POST() {
       reserve_price: 350000,
       current_bid: 200000,
       image_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400',
-      status: 'active',
+
     },
   ];
 
@@ -144,7 +143,7 @@ export async function POST() {
       reserve_price: 400000,
       current_bid: 250000,
       image_url: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400',
-      status: 'active',
+
     },
     {
       auction_id: auction2Data.id,
@@ -154,7 +153,7 @@ export async function POST() {
       reserve_price: 150000,
       current_bid: 80000,
       image_url: 'https://images.unsplash.com/photo-1558584673-c834fb1cc3ca?w=400',
-      status: 'active',
+
     },
     {
       auction_id: auction2Data.id,
@@ -164,7 +163,7 @@ export async function POST() {
       reserve_price: 100000,
       current_bid: 50000,
       image_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400',
-      status: 'active',
+
     },
     {
       auction_id: auction2Data.id,
@@ -174,7 +173,7 @@ export async function POST() {
       reserve_price: 80000,
       current_bid: 40000,
       image_url: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400',
-      status: 'active',
+
     },
     {
       auction_id: auction2Data.id,
@@ -184,7 +183,7 @@ export async function POST() {
       reserve_price: 60000,
       current_bid: 30000,
       image_url: 'https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?w=400',
-      status: 'active',
+
     },
   ];
 
