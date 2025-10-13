@@ -9,6 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 type ProcessResult = {
   auction_id: string;
+  item_id: string;
   status: string;
   payment_intent_id?: string;
   reason?: string;
@@ -41,37 +42,69 @@ export async function POST(request: Request) {
 
     const supabase = createServiceClient();
 
-    const { data: endedAuctions, error: auctionError } = await supabase
-      .from('auctions')
-      .select('*, bids(*)')
-      .eq('status', 'ended')
-      .eq('payment_completed', false)
-      .is('payment_intent_id', null)
+    // Find auction items that have ended, have winners, but haven't been processed for payment
+    const { data: wonItems, error: itemError } = await supabase
+      .from('auction_items')
+      .select(`
+        *,
+        auction:auctions (
+          id,
+          name,
+          status,
+          end_date
+        )
+      `)
+      .not('winner_id', 'is', null)
       .not('current_bid', 'is', null);
 
-    if (auctionError) {
-      console.error('Error fetching ended auctions:', auctionError);
-      return NextResponse.json({ error: 'Failed to fetch auctions' }, { status: 500 });
+    if (itemError) {
+      console.error('Error fetching won items:', itemError);
+      return NextResponse.json({ error: 'Failed to fetch items' }, { status: 500 });
     }
 
-    if (!endedAuctions || endedAuctions.length === 0) {
-      return NextResponse.json({ message: 'No auctions to process' });
+    if (!wonItems || wonItems.length === 0) {
+      return NextResponse.json({ message: 'No items to process' });
     }
+
+    // Filter items from ended auctions that haven't been paid yet
+    const now = new Date();
+    const itemsToProcess = wonItems.filter(item => {
+      const auction = item.auction as any;
+      if (!auction) return false;
+      
+      const endDate = new Date(auction.end_date);
+      const hasEnded = auction.status === 'ended' || endDate < now;
+      
+      // Check if payment already exists for this item
+      return hasEnded;
+    });
 
     const results: ProcessResult[] = [];
 
-    for (const auction of endedAuctions) {
+    for (const item of itemsToProcess) {
       try {
-        const bids = auction.bids as any[];
-        
-        if (!bids || bids.length === 0) continue;
+        const auction = item.auction as any;
+        const winnerId = item.winner_id!;
+        const bidAmount = item.current_bid!;
 
-        const winningBid = bids.reduce((highest, current) => 
-          current.bid_amount > highest.bid_amount ? current : highest
-        );
+        // Check if payment already processed
+        const { data: existingPayment } = await supabase
+          .from('payments')
+          .select('id')
+          .eq('auction_item_id', item.id)
+          .eq('user_id', winnerId)
+          .maybeSingle();
 
-        const winnerId = winningBid.user_id;
+        if (existingPayment) {
+          results.push({
+            auction_id: auction.id,
+            item_id: item.id,
+            status: 'already_processed',
+          });
+          continue;
+        }
 
+        // Get winner's Stripe customer info
         const { data: winner, error: winnerError } = await supabase
           .from('customers')
           .select('stripe_customer_id')
@@ -79,64 +112,52 @@ export async function POST(request: Request) {
           .single();
 
         if (winnerError || !winner?.stripe_customer_id) {
-          console.error('Winner has no payment method:', winnerId);
+          console.error('Winner has no Stripe customer:', winnerId);
           
-          await supabase
-            .from('auctions')
-            .update({
-              winner_id: winnerId,
-              payment_intent_id: 'no_payment_method',
-            })
-            .eq('id', auction.id);
-
           await supabase.from('notifications').insert({
             user_id: winnerId,
             type: 'payment_failed',
             title: 'Action Required: Add Payment Method',
-            message: `You won the auction "${auction.title}" but don't have a payment method on file. Please add one to complete your purchase.`,
+            message: `You won "${item.title}" from ${auction.name} but don't have a payment method on file. Please add one to complete your purchase.`,
             auction_id: auction.id,
+            auction_item_id: item.id,
           });
           
           results.push({
             auction_id: auction.id,
+            item_id: item.id,
             status: 'no_payment_method',
           });
           
           continue;
         }
 
+        // Get payment methods
         const { data: paymentMethods } = await stripe.paymentMethods.list({
           customer: winner.stripe_customer_id,
           type: 'card',
         });
 
         if (!paymentMethods || paymentMethods.length === 0) {
-          await supabase
-            .from('auctions')
-            .update({
-              winner_id: winnerId,
-              payment_intent_id: 'no_payment_method',
-            })
-            .eq('id', auction.id);
-
           await supabase.from('notifications').insert({
             user_id: winnerId,
             type: 'payment_failed',
             title: 'Action Required: Add Payment Method',
-            message: `You won the auction "${auction.title}" but don't have a payment method on file. Please add one to complete your purchase.`,
+            message: `You won "${item.title}" from ${auction.name} but don't have a payment method on file. Please add one to complete your purchase.`,
             auction_id: auction.id,
+            auction_item_id: item.id,
           });
           
           results.push({
             auction_id: auction.id,
+            item_id: item.id,
             status: 'no_payment_method',
           });
           
           continue;
         }
 
-        const bidAmount = auction.current_bid!;
-
+        // Create payment intent and charge
         const paymentIntent = await stripe.paymentIntents.create({
           amount: bidAmount,
           currency: 'usd',
@@ -146,100 +167,87 @@ export async function POST(request: Request) {
           confirm: true,
           metadata: {
             auction_id: auction.id,
+            auction_item_id: item.id,
             winner_id: winnerId,
-            type: 'auction_win',
+            type: 'winner_charge',
           },
-          description: `Auction win: ${auction.title}`,
+          description: `Won: ${item.title} from ${auction.name}`,
         });
 
         if (paymentIntent.status === 'succeeded') {
-          await supabase
-            .from('auctions')
-            .update({
-              winner_id: winnerId,
-              payment_completed: true,
-              payment_intent_id: paymentIntent.id,
-              payment_completed_at: new Date().toISOString(),
-            })
-            .eq('id', auction.id);
-
-          await supabase.from('notifications').insert({
-            user_id: winnerId,
-            type: 'auction_won',
-            title: 'Congratulations! You Won! 🎉',
-            message: `You won the auction "${auction.title}" for $${(bidAmount / 100).toFixed(2)}. Payment completed successfully.`,
-            auction_id: auction.id,
-          });
-
+          // Create payment record
           await supabase
             .from('payments')
             .insert({
               user_id: winnerId,
               auction_id: auction.id,
+              auction_item_id: item.id,
               stripe_payment_intent_id: paymentIntent.id,
               amount: bidAmount,
               currency: 'usd',
               status: 'succeeded',
               metadata: {
-                auction_title: auction.title,
+                auction_name: auction.name,
+                item_title: item.title,
               },
             });
 
+          // Send congratulations notification
+          await supabase.from('notifications').insert({
+            user_id: winnerId,
+            type: 'auction_won',
+            title: 'Congratulations! You Won! 🎉',
+            message: `You won "${item.title}" from ${auction.name} for $${(bidAmount / 100).toFixed(2)}. Payment completed successfully!`,
+            auction_id: auction.id,
+            auction_item_id: item.id,
+          });
+
           results.push({
             auction_id: auction.id,
+            item_id: item.id,
             status: 'success',
             payment_intent_id: paymentIntent.id,
           });
-        } else {
-          await supabase
-            .from('auctions')
-            .update({
-              winner_id: winnerId,
-              payment_intent_id: paymentIntent.id,
-            })
-            .eq('id', auction.id);
 
+          console.log(`✅ Successfully charged winner for item ${item.id}: $${(bidAmount / 100).toFixed(2)}`);
+        } else {
+          // Payment failed or requires action
           await supabase.from('notifications').insert({
             user_id: winnerId,
             type: 'payment_failed',
             title: 'Payment Failed',
-            message: `Your payment for the auction "${auction.title}" failed. Please update your payment method.`,
+            message: `Your payment for "${item.title}" from ${auction.name} failed. Please update your payment method.`,
             auction_id: auction.id,
+            auction_item_id: item.id,
           });
 
           results.push({
             auction_id: auction.id,
+            item_id: item.id,
             status: 'payment_failed',
             reason: paymentIntent.status,
           });
+
+          console.log(`❌ Payment failed for item ${item.id}: ${paymentIntent.status}`);
         }
       } catch (error: any) {
-        console.error(`Error processing auction ${auction.id}:`, error);
+        console.error(`Error processing item ${item.id}:`, error);
         
-        const bids = auction.bids as any[];
-        const winningBid = bids.reduce((highest, current) => 
-          current.bid_amount > highest.bid_amount ? current : highest
-        );
-        const winnerId = winningBid.user_id;
-
-        await supabase
-          .from('auctions')
-          .update({
-            payment_intent_id: 'failed',
-            winner_id: winnerId,
-          })
-          .eq('id', auction.id);
+        const auction = item.auction as any;
+        const winnerId = item.winner_id!;
 
         await supabase.from('notifications').insert({
           user_id: winnerId,
           type: 'payment_failed',
           title: 'Payment Failed',
-          message: `Your payment for the auction "${auction.title}" failed. Please update your payment method and try again.`,
+          message: `Your payment for "${item.title}" from ${auction.name} failed. Please update your payment method and try again.`,
           auction_id: auction.id,
+          auction_item_id: item.id,
         });
 
         results.push({
           auction_id: auction.id,
+          item_id: item.id,
           status: 'error',
           error: error.message,
         });
@@ -247,7 +255,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      message: 'Auction processing complete',
+      message: 'Winner processing complete',
+      processed: results.length,
       results,
     });
   } catch (error: any) {
