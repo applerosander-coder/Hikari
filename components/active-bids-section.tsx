@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, AlertCircle, TrendingUp, Clock, Sparkles } from 'lucide-react';
 import { AuctionCountdown } from './auction-countdown';
+import { WatchlistButton } from './watchlist-button';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/cn';
 
@@ -29,9 +30,9 @@ export function ActiveBidsSection({ activeBids, outbidBids, searchQuery }: Activ
     if (!searchQuery.trim()) return bids;
     const query = searchQuery.toLowerCase();
     return bids.filter(({ auction }: any) => 
-      auction.title.toLowerCase().includes(query) ||
+      (auction.title?.toLowerCase().includes(query) ||
       auction.description?.toLowerCase().includes(query) ||
-      auction.category?.toLowerCase().includes(query)
+      auction.category?.toLowerCase().includes(query))
     );
   };
 
@@ -39,8 +40,12 @@ export function ActiveBidsSection({ activeBids, outbidBids, searchQuery }: Activ
   const filteredOutbid = filterBids(outbidBids);
 
   const renderBidCard = (bidWithAuction: any, isActive: boolean) => {
-    const { bid, auction } = bidWithAuction;
+    const { bid, auction, isItem } = bidWithAuction;
     const currentPrice = auction.current_bid || auction.starting_price;
+    
+    // Extract correct IDs for watchlist button
+    const auctionId = isItem ? auction.auction?.id : auction.id;
+    const itemId = isItem ? auction.id : undefined;
 
     return (
       <Card key={auction.id} className={cn(
@@ -48,6 +53,12 @@ export function ActiveBidsSection({ activeBids, outbidBids, searchQuery }: Activ
         isActive && "ring-2 ring-black dark:ring-white"
       )}>
         <div className="relative h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+          <WatchlistButton
+            auctionId={auctionId}
+            itemId={itemId}
+            variant="icon"
+            className="absolute top-2 left-2 z-10"
+          />
           {isActive && (
             <Badge className="absolute top-4 right-4 z-10 bg-black dark:bg-white text-white dark:text-black">
               <Heart className="h-3 w-3 mr-1 fill-current" />

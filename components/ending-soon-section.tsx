@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Sparkles, TrendingUp, Heart, AlertCircle } from 'lucide-react';
 import { AuctionCountdown } from './auction-countdown';
+import { WatchlistButton } from './watchlist-button';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/cn';
 
@@ -28,9 +29,9 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
     if (!searchQuery.trim()) return bids;
     const query = searchQuery.toLowerCase();
     return bids.filter(({ auction }: any) => 
-      auction.title.toLowerCase().includes(query) ||
+      (auction.title?.toLowerCase().includes(query) ||
       auction.description?.toLowerCase().includes(query) ||
-      auction.category?.toLowerCase().includes(query)
+      auction.category?.toLowerCase().includes(query))
     );
   };
 
@@ -54,9 +55,13 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
         These auctions end within the next 24 hours. Act fast!
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map(({ bid, auction }: any) => {
+        {filtered.map(({ bid, auction, isItem }: any) => {
           const currentPrice = auction.current_bid || auction.starting_price;
           const isHighBid = bid.bid_amount >= currentPrice;
+          
+          // Extract correct IDs for watchlist button
+          const auctionId = isItem ? auction.auction?.id : auction.id;
+          const itemId = isItem ? auction.id : undefined;
 
           return (
             <Card key={auction.id} className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -65,6 +70,12 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
                   <Clock className="h-3 w-3 mr-1" />
                   Ending Soon
                 </Badge>
+                <WatchlistButton
+                  auctionId={auctionId}
+                  itemId={itemId}
+                  variant="icon"
+                  className="absolute bottom-2 left-2 z-10"
+                />
                 {isHighBid && (
                   <Badge className="absolute top-4 right-4 z-10 bg-black dark:bg-white text-white dark:text-black">
                     <Heart className="h-3 w-3 mr-1 fill-current" />

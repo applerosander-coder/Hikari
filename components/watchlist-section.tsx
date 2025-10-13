@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Sparkles, TrendingUp, Clock, X } from 'lucide-react';
 import { AuctionCountdown } from './auction-countdown';
+import { WatchlistButton } from './watchlist-button';
 import { useRouter } from 'next/navigation';
 import { removeFromWatchlist } from '@/app/actions/watchlist';
 import { useState } from 'react';
