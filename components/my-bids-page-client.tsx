@@ -191,7 +191,7 @@ export function MyBidsPageClient({
     isItem
   }));
 
-  // Normalize watchlist data with routing paths
+  // Normalize watchlist data with routing paths and bid information
   const normalizedWatchlistData = watchlistData.map((item) => {
     // Determine if this is an item or legacy auction
     const isItemWatch = !!item.auction_items;
@@ -199,8 +199,17 @@ export function MyBidsPageClient({
     
     if (!auctionData) return item;
     
+    // Get the unique key to match with bidsMap
+    const rawId = isItemWatch ? auctionData.id : item.auction_id;
+    const uniqueKey = isItemWatch ? `item:${rawId}` : `auction:${rawId}`;
+    
+    // Find the user's bid for this item
+    const userBidData = bidsMap.get(uniqueKey);
+    const userBidAmount = userBidData?.bid.bid_amount;
+    
     return {
       ...item,
+      userBidAmount, // Add user's bid amount
       auctions: {
         ...auctionData,
         path: isItemWatch
