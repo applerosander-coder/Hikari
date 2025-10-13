@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Button } from '@/components/ui/button';
 import { Heart, Sparkles, Trophy, Zap } from 'lucide-react';
 
 interface BidSuccessCelebrationProps {
@@ -56,11 +55,12 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
       
       const timer = setTimeout(() => {
         onClose();
+        router.push('/mybids');
       }, 3500);
 
       return () => clearTimeout(timer);
     }
-  }, [show, onClose]);
+  }, [show, onClose, router]);
 
   useEffect(() => {
     if (show && bidAmount > 0) {
@@ -185,11 +185,6 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
     }
   };
 
-  const handleViewMyBids = () => {
-    onClose();
-    router.push('/mybids');
-  };
-
   const currentVariant = celebrationVariants[variant];
   const Icon = currentVariant.icon;
 
@@ -270,22 +265,11 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="flex gap-3"
+                className="text-center"
               >
-                <Button
-                  onClick={handleViewMyBids}
-                  className="flex-1 bg-white text-black hover:bg-gray-200"
-                >
-                  <Heart className="w-4 h-4 mr-2" />
-                  View My Bids
-                </Button>
-                <Button
-                  onClick={onClose}
-                  variant="outline"
-                  className="flex-1 border-gray-600 text-white hover:bg-white/10"
-                >
-                  Continue
-                </Button>
+                <p className="text-white text-lg font-medium">
+                  Directing you to your bids
+                </p>
               </motion.div>
             </div>
           </motion.div>
