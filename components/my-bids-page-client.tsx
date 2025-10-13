@@ -79,7 +79,10 @@ export function MyBidsPageClient({
       ? bidData.auction_items // Item with nested auction container
       : bidData.auctions; // Legacy auction
     
-    if (!auctionData) return; // Skip if no auction data
+    if (!auctionData) {
+      console.log('⚠️ Skipping bid - no auction data:', { bidId: bidData.id, isItemBid, itemId: bidData.auction_item_id, auctionId: bidData.auction_id });
+      return; // Skip if no auction data
+    }
     
     const existingBid = bidsMap.get(uniqueKey);
     if (!existingBid || bidData.bid_amount > existingBid.bid.bid_amount) {
