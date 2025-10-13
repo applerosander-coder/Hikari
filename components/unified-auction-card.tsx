@@ -259,6 +259,7 @@ export function UnifiedAuctionCard({
             auctionId={auction.auctionId}
             itemId={auction.itemId}
             isInWatchlist={false}
+            variant="icon"
           />
         </div>
       )}

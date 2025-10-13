@@ -85,28 +85,14 @@ export function WatchlistSection({ watchlistItems, searchQuery }: WatchlistSecti
           const auction = item.auction_items?.auction || item.auctions;
           const auctionId = auction?.id;
           
-          // Determine if user is winning or outbid
-          const auctionData = item.auction_items || item.auctions;
+          // Get user bid amount for status display
           const userBidAmount = item.userBidAmount;
-          
-          // Get current price - check multiple sources
-          let currentPrice = auctionData?.current_bid ?? auctionData?.starting_price;
-          // For items, also check the nested auction's current_bid
-          if (currentPrice === undefined && auctionData?.auction) {
-            currentPrice = auctionData.auction.current_bid ?? auctionData.auction.starting_price;
-          }
-          
-          // Calculate variant based on bid status
-          let variant: 'active' | 'outbid' | 'watchlist' = 'watchlist';
-          if (userBidAmount !== undefined && currentPrice !== undefined) {
-            variant = userBidAmount >= currentPrice ? 'active' : 'outbid';
-          }
           
           return (
             <UnifiedAuctionCard
               key={item.id}
               item={item}
-              variant={variant}
+              variant="watchlist"
               userBidAmount={userBidAmount}
               onRemoveFromWatchlist={handleRemove}
               isRemoving={removingIds.has(auctionId)}
