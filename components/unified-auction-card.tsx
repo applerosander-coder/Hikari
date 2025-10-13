@@ -289,13 +289,15 @@ export function UnifiedAuctionCard({
             <div className="flex justify-between text-sm">
               <span className={cn(
                 "font-medium",
-                userIsWinning && "text-green-600 dark:text-green-400"
+                userIsWinning && "text-green-600 dark:text-green-400",
+                !userIsWinning && "text-red-600 dark:text-red-400"
               )}>
-                {userIsWinning ? 'My Bid' : 'Your Bid'}:
+                Your Bid:
               </span>
               <span className={cn(
                 "font-semibold",
-                userIsWinning && "text-green-600 dark:text-green-400"
+                userIsWinning && "text-green-600 dark:text-green-400",
+                !userIsWinning && "text-red-600 dark:text-red-400"
               )}>
                 {formatPrice(userBidAmount)}
               </span>

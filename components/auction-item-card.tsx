@@ -204,13 +204,15 @@ export function AuctionItemCard({
             <div className="flex items-center justify-between text-sm">
               <span className={cn(
                 "font-medium",
-                userHasHighestBid && "text-green-600 dark:text-green-400"
+                userHasHighestBid && "text-green-600 dark:text-green-400",
+                !userHasHighestBid && "text-red-600 dark:text-red-400"
               )}>
-                {userHasHighestBid ? 'My Bid' : 'Your Bid'}:
+                Your Bid:
               </span>
               <span className={cn(
                 "font-semibold",
-                userHasHighestBid && "text-green-600 dark:text-green-400"
+                userHasHighestBid && "text-green-600 dark:text-green-400",
+                !userHasHighestBid && "text-red-600 dark:text-red-400"
               )}>
                 {formatPrice(userBidAmount)}
               </span>
