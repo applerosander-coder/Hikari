@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Spinner } from '@radix-ui/themes';
+import { Spinner } from '@/components/ui/spinner';
 
 import { cn } from '@/utils/cn';
 
@@ -74,7 +74,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && <Spinner className="mr-2" />}
+        {loading && <Spinner size="sm" className="mr-2 text-current" />}
         {children}
       </Comp>
     );
