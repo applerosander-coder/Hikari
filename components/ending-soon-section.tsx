@@ -30,10 +30,13 @@ export function EndingSoonSection({ endingSoonBids, searchQuery }: EndingSoonSec
 
   // Sort by end date - soonest first
   const sorted = [...filtered].sort((a, b) => {
-    const aAuction = a.auction_items?.auction || a.auctions;
-    const bAuction = b.auction_items?.auction || b.auctions;
-    const aEndDate = new Date(aAuction?.end_date || a.end_date || 0);
-    const bEndDate = new Date(bAuction?.end_date || b.end_date || 0);
+    // Get end date with same fallback logic as UnifiedAuctionCard
+    const aEndDateStr = a.auction_items?.auction?.end_date || a.auction_items?.end_date || a.auctions?.end_date;
+    const bEndDateStr = b.auction_items?.auction?.end_date || b.auction_items?.end_date || b.auctions?.end_date;
+    
+    const aEndDate = new Date(aEndDateStr || 0);
+    const bEndDate = new Date(bEndDateStr || 0);
+    
     return aEndDate.getTime() - bEndDate.getTime();
   });
 
