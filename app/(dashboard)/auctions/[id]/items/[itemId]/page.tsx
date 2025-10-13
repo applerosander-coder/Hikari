@@ -71,15 +71,14 @@ export default function AuctionItemDetailPage() {
       // Fetch bids for this item
       const { data: bidsData, error: bidsError } = await supabase
         .from('bids')
-        .select(`
-          *,
-          user:users(full_name, avatar_url)
-        `)
+        .select('*')
         .eq('auction_item_id', params.itemId)
         .order('bid_amount', { ascending: false })
         .limit(10);
 
-      if (!bidsError && bidsData) {
+      if (bidsError) {
+        console.error('Error fetching bids:', bidsError);
+      } else if (bidsData) {
         setBids(bidsData);
       }
 
@@ -136,10 +135,7 @@ export default function AuctionItemDetailPage() {
 
       const { data: bidsData } = await supabase
         .from('bids')
-        .select(`
-          *,
-          user:users(full_name, avatar_url)
-        `)
+        .select('*')
         .eq('auction_item_id', params.itemId)
         .order('bid_amount', { ascending: false })
         .limit(10);
@@ -340,13 +336,20 @@ export default function AuctionItemDetailPage() {
                       </div>
                       <div>
                         <p className="font-medium">
-                          {bid.user?.full_name || 'Anonymous'}
+                          Bidder
                           {bid.user_id === user?.id && (
                             <Badge variant="outline" className="ml-2 text-xs">You</Badge>
                           )}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(bid.created_at).toLocaleString()}
+                          {new Date(bid.created_at).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
                         </p>
                       </div>
                     </div>
