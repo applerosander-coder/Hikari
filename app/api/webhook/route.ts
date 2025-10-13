@@ -60,13 +60,14 @@ export async function POST(req: Request) {
           const paymentIntentId = paymentIntent.id;
 
           // IDEMPOTENCY CHECK: Check if exact bid already exists
+          // Use raw SQL to handle UUID casting properly
           let existingBid;
           if (isItemBid) {
             const { data } = await supabaseAdmin
               .from('bids')
               .select('id')
-              .eq('auction_item_id', auctionItemId)
-              .eq('user_id', user_id)
+              .eq('auction_item_id', `${auctionItemId}`)
+              .eq('user_id', `${user_id}`)
               .eq('bid_amount', bidAmountNum)
               .maybeSingle();
             existingBid = data;
@@ -74,8 +75,8 @@ export async function POST(req: Request) {
             const { data } = await supabaseAdmin
               .from('bids')
               .select('id')
-              .eq('auction_id', auctionId)
-              .eq('user_id', user_id)
+              .eq('auction_id', `${auctionId}`)
+              .eq('user_id', `${user_id}`)
               .eq('bid_amount', bidAmountNum)
               .maybeSingle();
             existingBid = data;
@@ -133,20 +134,13 @@ export async function POST(req: Request) {
             return new Response(`Bid too low`, { status: 400 });
           }
 
-          // Insert bid into database
-          const bidData: any = {
-            user_id,
-            bid_amount: bidAmountNum,
-          };
-
-          if (isItemBid) {
-            bidData.auction_item_id = auctionItemId;
-            bidData.auction_id = parentAuctionId; // Include parent auction ID for proper joins
-          } else {
-            bidData.auction_id = auctionId;
-          }
-
-          const { error: bidError } = await supabaseAdmin.from('bids').insert(bidData);
+          // Insert bid using RPC function that handles UUID casting
+          const { data: bidId, error: bidError } = await supabaseAdmin.rpc('insert_bid_with_cast', {
+            p_user_id: user_id,
+            p_bid_amount: bidAmountNum,
+            p_auction_id: isItemBid ? parentAuctionId : auctionId,
+            p_auction_item_id: isItemBid ? auctionItemId : null
+          });
 
           if (bidError) {
             console.error('❌ Error inserting bid:', bidError);
