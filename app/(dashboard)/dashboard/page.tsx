@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { getUser } from '@/utils/supabase/queries';
 import { redirect } from 'next/navigation';
 import { CategorizedAuctionBrowser } from '@/components/categorized-auction-browser';
+import { DevTools } from '@/components/dev-tools';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -111,13 +112,16 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false });
 
   return (
-    <CategorizedAuctionBrowser
-      items={itemsWithBidCounts}
-      auctions={allAuctions || []}
-      userBidItemIds={userBidItemIds}
-      userBidAmounts={userBidAmounts}
-      userId={user.id}
-      watchlistItemIds={watchlistItemIds}
-    />
+    <>
+      <CategorizedAuctionBrowser
+        items={itemsWithBidCounts}
+        auctions={allAuctions || []}
+        userBidItemIds={userBidItemIds}
+        userBidAmounts={userBidAmounts}
+        userId={user.id}
+        watchlistItemIds={watchlistItemIds}
+      />
+      <DevTools />
+    </>
   );
 }
