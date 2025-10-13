@@ -13,13 +13,12 @@ export async function addToWatchlist(auctionId: string, itemId?: string) {
 
   const insertData: any = {
     user_id: user.id,
+    auction_id: auctionId,
   };
 
   // Support both auction items and legacy auctions
   if (itemId) {
     insertData.auction_item_id = itemId;
-  } else {
-    insertData.auction_id = auctionId;
   }
 
   const { error } = await supabase

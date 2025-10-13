@@ -244,19 +244,22 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          auction_id: string
+          auction_id: string | null
+          auction_item_id: string | null
           created_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          auction_id: string
+          auction_id?: string | null
+          auction_item_id?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          auction_id?: string
+          auction_id?: string | null
+          auction_item_id?: string | null
           created_at?: string
         }
         Relationships: [
@@ -265,6 +268,13 @@ export interface Database {
             columns: ["auction_id"]
             isOneToOne: false
             referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_watchlist_auction_item"
+            columns: ["auction_item_id"]
+            isOneToOne: false
+            referencedRelation: "auction_items"
             referencedColumns: ["id"]
           }
         ]
