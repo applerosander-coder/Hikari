@@ -34,6 +34,7 @@ interface Auction {
 
 interface CategorizedAuctionBrowserProps {
   items: AuctionItem[];
+  endedItems?: AuctionItem[];
   auctions: Auction[];
   userBidItemIds: string[];
   userBidAmounts: Record<string, number>;
@@ -52,6 +53,7 @@ const CATEGORIES = [
 
 export function CategorizedAuctionBrowser({
   items,
+  endedItems = [],
   auctions,
   userBidItemIds,
   userBidAmounts,
@@ -86,13 +88,37 @@ export function CategorizedAuctionBrowser({
     return filtered;
   }, [items, searchQuery, selectedAuction]);
 
+  const filteredEndedItems = React.useMemo(() => {
+    let filtered = endedItems;
+
+    // Filter by selected auction
+    if (selectedAuction !== 'all') {
+      filtered = filtered.filter(item => item.auction_id === selectedAuction);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((item) => {
+        return (
+          item.title.toLowerCase().includes(query) ||
+          item.description?.toLowerCase().includes(query) ||
+          item.auction?.name.toLowerCase().includes(query) ||
+          item.auction?.place.toLowerCase().includes(query)
+        );
+      });
+    }
+
+    return filtered;
+  }, [endedItems, searchQuery, selectedAuction]);
+
   const hotItems = React.useMemo(() => {
     return [...filteredItems]
       .sort((a, b) => (b.bid_count || 0) - (a.bid_count || 0))
       .slice(0, 10);
   }, [filteredItems]);
 
-  // Group items by auction instead of category
+  // Group active items by auction
   const auctionGroups = React.useMemo(() => {
     const grouped: Record<string, AuctionItem[]> = {};
     
@@ -106,6 +132,21 @@ export function CategorizedAuctionBrowser({
 
     return grouped;
   }, [filteredItems]);
+
+  // Group ended items by auction
+  const endedAuctionGroups = React.useMemo(() => {
+    const grouped: Record<string, AuctionItem[]> = {};
+    
+    filteredEndedItems.forEach(item => {
+      const auctionKey = item.auction?.name || 'Other';
+      if (!grouped[auctionKey]) {
+        grouped[auctionKey] = [];
+      }
+      grouped[auctionKey].push(item);
+    });
+
+    return grouped;
+  }, [filteredEndedItems]);
 
   const handleBidNow = (itemId: string) => {
     // Find the item to get its auction_id
@@ -159,10 +200,10 @@ export function CategorizedAuctionBrowser({
         </div>
       </div>
 
-      {filteredItems.length === 0 ? (
+      {filteredItems.length === 0 && filteredEndedItems.length === 0 ? (
         <div className="text-center py-12 max-w-5xl mx-auto">
           <p className="text-xl text-muted-foreground">
-            {searchQuery ? `No items found for "${searchQuery}"` : 'No active auction items at the moment.'}
+            {searchQuery ? `No items found for "${searchQuery}"` : 'No auction items at the moment.'}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             {searchQuery ? 'Try a different search term' : 'Check back soon for new items!'}
@@ -170,36 +211,72 @@ export function CategorizedAuctionBrowser({
         </div>
       ) : (
         <div className="space-y-8 sm:space-y-12">
-          {hotItems.length > 0 && selectedAuction === 'all' && (
-            <AuctionRow
-              title="🔥 Hot Items"
-              subtitle="Most popular items right now"
-              items={hotItems}
-              userBidItemIds={userBidItemIds}
-              userBidAmounts={userBidAmounts}
-              watchlistItemIds={watchlistItemIds}
-              handleBidNow={handleBidNow}
-              highlight
-            />
+          {/* Active Auctions Section */}
+          {filteredItems.length > 0 && (
+            <>
+              {hotItems.length > 0 && selectedAuction === 'all' && (
+                <AuctionRow
+                  title="🔥 Hot Items"
+                  subtitle="Most popular items right now"
+                  items={hotItems}
+                  userBidItemIds={userBidItemIds}
+                  userBidAmounts={userBidAmounts}
+                  watchlistItemIds={watchlistItemIds}
+                  handleBidNow={handleBidNow}
+                  highlight
+                />
+              )}
+
+              {Object.entries(auctionGroups).map(([auctionName, auctionItems]) => {
+                const auctionInfo = auctionItems[0]?.auction;
+                const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items` : undefined;
+                
+                return auctionItems.length > 0 ? (
+                  <AuctionRow
+                    key={auctionName}
+                    title={auctionName}
+                    subtitle={subtitle}
+                    items={auctionItems}
+                    userBidItemIds={userBidItemIds}
+                    userBidAmounts={userBidAmounts}
+                    watchlistItemIds={watchlistItemIds}
+                    handleBidNow={handleBidNow}
+                  />
+                ) : null;
+              })}
+            </>
           )}
 
-          {Object.entries(auctionGroups).map(([auctionName, auctionItems]) => {
-            const auctionInfo = auctionItems[0]?.auction;
-            const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items` : undefined;
-            
-            return auctionItems.length > 0 ? (
-              <AuctionRow
-                key={auctionName}
-                title={auctionName}
-                subtitle={subtitle}
-                items={auctionItems}
-                userBidItemIds={userBidItemIds}
-                userBidAmounts={userBidAmounts}
-                watchlistItemIds={watchlistItemIds}
-                handleBidNow={handleBidNow}
-              />
-            ) : null;
-          })}
+          {/* Ended Auctions Section */}
+          {filteredEndedItems.length > 0 && (
+            <>
+              <div className="border-t border-border pt-8 sm:pt-12">
+                <div className="px-4 mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-muted-foreground">Recently Ended</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Browse completed auctions</p>
+                </div>
+              </div>
+
+              {Object.entries(endedAuctionGroups).map(([auctionName, auctionItems]) => {
+                const auctionInfo = auctionItems[0]?.auction;
+                const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items • Ended` : undefined;
+                
+                return auctionItems.length > 0 ? (
+                  <AuctionRow
+                    key={`ended-${auctionName}`}
+                    title={auctionName}
+                    subtitle={subtitle}
+                    items={auctionItems}
+                    userBidItemIds={userBidItemIds}
+                    userBidAmounts={userBidAmounts}
+                    watchlistItemIds={watchlistItemIds}
+                    handleBidNow={handleBidNow}
+                    ended
+                  />
+                ) : null;
+              })}
+            </>
+          )}
         </div>
       )}
     </div>
@@ -215,6 +292,7 @@ interface AuctionRowProps {
   watchlistItemIds: string[];
   handleBidNow: (id: string) => void;
   highlight?: boolean;
+  ended?: boolean;
 }
 
 function AuctionRow({
@@ -225,7 +303,8 @@ function AuctionRow({
   userBidAmounts,
   watchlistItemIds,
   handleBidNow,
-  highlight = false
+  highlight = false,
+  ended = false
 }: AuctionRowProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
@@ -262,9 +341,9 @@ function AuctionRow({
   };
 
   return (
-    <div className="relative">
+    <div className={`relative ${ended ? 'opacity-60' : ''}`}>
       <div className="mb-4 px-4">
-        <h2 className={highlight ? "text-2xl sm:text-3xl font-bold" : "text-xl sm:text-2xl font-bold"}>
+        <h2 className={`${highlight ? "text-2xl sm:text-3xl font-bold" : "text-xl sm:text-2xl font-bold"} ${ended ? 'text-muted-foreground' : ''}`}>
           {title}
         </h2>
         {subtitle && (
