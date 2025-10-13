@@ -27,6 +27,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 
 **Feature Specifications:**
 - **Live Auctions:** Real-time updates, countdowns, and categorized listings of individual auction items.
+- **Dashboard Display:** Active auctions prominently featured at top with "Hot Items" section; recently ended auctions displayed at bottom with visual distinction (reduced opacity, muted colors) to keep page fresh.
 - **User Accounts:** Secure authentication, profile management, and avatar selection.
 - **Seller Dashboard:** Form for creating multi-item auctions with image upload and real-time preview. Sellers can manage and preview their draft auctions.
 - **Payment Processing:** Secure bidding, saved payment methods, and automated off-session charging via Stripe for winners.
@@ -34,6 +35,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **My Bids Page:** Tracks active bids, outbid items, won auctions (with payment/shipping status), and a user-curated watchlist.
 - **Watchlist:** Allows users to track individual auction items.
 - **Loading Indicators:** Page loading spinners and NProgress bar for navigation.
+- **Dev Tools:** Test data creation button available in development for quick testing (creates live auctions, sets winners, adds watchlist items).
 
 ### External Dependencies
 - **Supabase:** Database, Authentication, Realtime.

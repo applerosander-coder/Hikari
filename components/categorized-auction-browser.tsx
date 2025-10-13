@@ -166,12 +166,15 @@ export function CategorizedAuctionBrowser({
             onChange={(e) => setSelectedAuction(e.target.value)}
             className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="all">All Auctions ({items.length} items)</option>
+            <option value="all">All Auctions ({items.length + endedItems.length} items)</option>
             {auctions.map((auction) => {
-              const itemCount = items.filter(i => i.auction_id === auction.id).length;
+              const activeCount = items.filter(i => i.auction_id === auction.id).length;
+              const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
+              const totalCount = activeCount + endedCount;
+              const statusLabel = activeCount > 0 ? 'Live' : 'Ended';
               return (
                 <option key={auction.id} value={auction.id}>
-                  {auction.name} - {auction.place} ({itemCount} items)
+                  {auction.name} - {auction.place} ({totalCount} items • {statusLabel})
                 </option>
               );
             })}
