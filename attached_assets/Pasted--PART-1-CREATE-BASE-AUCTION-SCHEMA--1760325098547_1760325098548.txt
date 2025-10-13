@@ -1,21 +1,6 @@
-# Supabase Database Setup Instructions
-
-## The Issue
-Your auction platform code is working correctly, but the database tables (`auctions`, `auction_items`, `bids`) don't exist in your Supabase database yet. This is why:
-- Dashboard items appear (they're mock data from Unsplash)
-- But bids don't save or appear in MyBids
-
-## Solution: Run SQL in Supabase
-
-### Step 1: Open Supabase SQL Editor
-1. Go to your Supabase project dashboard
-2. Click on "SQL Editor" in the left sidebar
-3. Click "New Query"
-
-### Step 2: Run This SQL (Copy Everything Below)
-
-```sql
+========================
 -- PART 1: CREATE BASE AUCTION SCHEMA
+-- ===================================================================
 
 -- Create auction status enum
 CREATE TYPE IF NOT EXISTS auction_status AS ENUM ('draft', 'upcoming', 'active', 'ended', 'cancelled');
@@ -85,7 +70,9 @@ CREATE INDEX IF NOT EXISTS idx_bids_auction_id ON public.bids(auction_id);
 CREATE INDEX IF NOT EXISTS idx_bids_auction_item_id ON public.bids(auction_item_id);
 CREATE INDEX IF NOT EXISTS idx_bids_user_id ON public.bids(user_id);
 
+-- ===================================================================
 -- PART 2: ENABLE ROW LEVEL SECURITY (RLS)
+-- ===================================================================
 
 ALTER TABLE public.auctions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.auction_items ENABLE ROW LEVEL SECURITY;
@@ -145,7 +132,9 @@ CREATE POLICY "Authenticated users can place bids"
   ON public.bids FOR INSERT 
   WITH CHECK (auth.uid()::text = user_id);
 
+-- ===================================================================
 -- PART 3: CREATE TRIGGER TO UPDATE current_bid
+-- ===================================================================
 
 -- Function to update auction_items current_bid when bid placed
 CREATE OR REPLACE FUNCTION update_auction_item_current_bid()
@@ -167,7 +156,9 @@ CREATE TRIGGER on_new_bid_update_item
   FOR EACH ROW
   EXECUTE FUNCTION update_auction_item_current_bid();
 
+-- ===================================================================
 -- PART 4: CREATE TEST DATA
+-- ===================================================================
 
 -- Get your user ID
 DO $$
@@ -233,34 +224,3 @@ BEGIN
 
 END $$;
 ```
-
-### Step 3: Verify
-After running the SQL, run these verification queries:
-
-```sql
--- Check tables exist
-SELECT COUNT(*) as auction_count FROM auctions;
-SELECT COUNT(*) as item_count FROM auction_items;
-
--- View test data
-SELECT name, place, status FROM auctions;
-SELECT title, starting_price FROM auction_items LIMIT 10;
-```
-
-## What This Will Fix
-
-✅ Auctions will be stored in the database  
-✅ Bids will be saved and appear in MyBids  
-✅ Active/Outbid tabs will work correctly  
-✅ Real-time bidding will function  
-
-## After Running SQL
-
-1. Refresh your dashboard at `/dashboard`
-2. You'll see the 2 test auctions with 9 items
-3. Place a bid on any item
-4. Go to `/mybids` - your bid will appear in the Active tab!
-
----
-
-**Note:** Prices are in cents (e.g., 500000 = $5,000.00)
