@@ -13,10 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Upload, ArrowLeft, Trash2 } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Upload, ArrowLeft, Trash2, Plus, GripVertical, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { uploadImage } from '@/utils/supabase/storage/client';
 
 const CATEGORIES = [
   'Electronics',
@@ -30,8 +31,8 @@ const CATEGORIES = [
 
 interface Auction {
   id: string;
-  name: string | null;
-  place: string | null;
+  name?: string | null;
+  place?: string | null;
   title: string;
   description: string | null;
   starting_price: number;
@@ -43,17 +44,41 @@ interface Auction {
   status: string;
 }
 
+interface AuctionItemDB {
+  id: string;
+  auction_id: string;
+  title: string;
+  description: string | null;
+  starting_price: number;
+  reserve_price: number | null;
+  category?: string | null;
+  image_url: string | null;
+  position: number;
+}
+
+interface AuctionItem {
+  id: string;
+  dbId?: string;
+  title: string;
+  description: string;
+  starting_price: string;
+  reserve_price: string;
+  category: string;
+  image_preview: string | null;
+  image_file: File | null;
+  position: number;
+}
+
 interface EditAuctionFormProps {
   auction: Auction;
+  auctionItems: AuctionItemDB[];
   userId: string;
 }
 
-export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
+export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(auction.image_url);
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Format dates for datetime-local input
   const formatDateForInput = (dateString: string) => {
@@ -66,33 +91,106 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const [formData, setFormData] = useState({
-    name: auction.name || '',
+  const [auctionData, setAuctionData] = useState({
+    name: auction.name || auction.title,
     place: auction.place || '',
-    title: auction.title,
-    description: auction.description || '',
-    starting_price: (auction.starting_price / 100).toFixed(2),
-    reserve_price: auction.reserve_price ? (auction.reserve_price / 100).toFixed(2) : '',
-    category: auction.category || '',
     start_date: formatDateForInput(auction.start_date),
     end_date: formatDateForInput(auction.end_date),
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image must be less than 5MB');
-        return;
-      }
-      
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  // Convert existing auction items to form format
+  const [items, setItems] = useState<AuctionItem[]>(() => {
+    if (auctionItems.length > 0) {
+      return auctionItems.map(item => ({
+        id: item.id,
+        dbId: item.id,
+        title: item.title,
+        description: item.description || '',
+        starting_price: (item.starting_price / 100).toFixed(2),
+        reserve_price: item.reserve_price ? (item.reserve_price / 100).toFixed(2) : '',
+        category: item.category || '',
+        image_preview: item.image_url,
+        image_file: null,
+        position: item.position,
+      }));
+    } else {
+      return [{
+        id: Date.now().toString(),
+        title: auction.title,
+        description: auction.description || '',
+        starting_price: (auction.starting_price / 100).toFixed(2),
+        reserve_price: auction.reserve_price ? (auction.reserve_price / 100).toFixed(2) : '',
+        category: auction.category || '',
+        image_preview: auction.image_url,
+        image_file: null,
+        position: 1,
+      }];
     }
+  });
+
+  const handleAddItem = () => {
+    const newItem: AuctionItem = {
+      id: Date.now().toString(),
+      title: '',
+      description: '',
+      starting_price: '',
+      reserve_price: '',
+      category: '',
+      image_preview: null,
+      image_file: null,
+      position: items.length + 1,
+    };
+    setItems([...items, newItem]);
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    if (items.length === 1) {
+      toast.error('You must have at least one item');
+      return;
+    }
+    setItems(items.filter(item => item.id !== itemId));
+  };
+
+  const handleItemChange = (itemId: string, field: keyof AuctionItem, value: any) => {
+    setItems(prevItems => prevItems.map(item => 
+      item.id === itemId ? { ...item, [field]: value } : item
+    ));
+  };
+
+  const handleImageChange = (itemId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (!file) {
+      return;
+    }
+    
+    const maxSize = 10 * 1024 * 1024;
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    
+    if (file.size > maxSize) {
+      toast.error(`Image is too large (${fileSizeMB}MB). Maximum size is 10MB.`);
+      e.target.value = '';
+      return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onerror = () => {
+      toast.error('Failed to read image file. Please try again.');
+      e.target.value = '';
+    };
+    
+    reader.onload = () => {
+      const result = reader.result as string;
+      
+      setItems(prevItems => prevItems.map(item => 
+        item.id === itemId 
+          ? { ...item, image_preview: result, image_file: file } 
+          : item
+      ));
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   const handleDelete = async () => {
@@ -126,44 +224,87 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Validate required fields
-      if (!formData.title || !formData.starting_price || !formData.end_date) {
-        toast.error('Please fill in all required fields');
+      if (!auctionData.name || !auctionData.end_date) {
+        toast.error('Please fill in auction name and end date');
         setIsSubmitting(false);
         return;
       }
 
-      // Convert prices from dollars to cents
-      const startingPriceCents = Math.round(parseFloat(formData.starting_price) * 100);
-      const reservePriceCents = formData.reserve_price 
-        ? Math.round(parseFloat(formData.reserve_price) * 100) 
-        : null;
+      const validItems = items.filter(item => item.title && item.starting_price);
+      if (validItems.length === 0) {
+        toast.error('Please add at least one item with title and starting price');
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Convert datetime-local strings to ISO format (preserves user's local time)
-      const startDateISO = formData.start_date 
-        ? new Date(formData.start_date).toISOString() 
+      // Upload new images to Supabase Storage
+      const uploadPromises = validItems.map(async (item) => {
+        if (item.image_file) {
+          const { imageUrl, error } = await uploadImage({
+            file: item.image_file,
+            bucket: 'seller-auctions',
+            folder: userId,
+          });
+          
+          if (error) {
+            throw new Error(`Failed to upload image for item "${item.title}": ${error}`);
+          }
+          
+          return imageUrl;
+        }
+        return item.image_preview;
+      });
+
+      let uploadedUrls: (string | null)[] = [];
+      try {
+        uploadedUrls = await Promise.all(uploadPromises);
+      } catch (uploadError: any) {
+        toast.error(uploadError.message || 'Image upload failed');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const startDateISO = auctionData.start_date 
+        ? new Date(auctionData.start_date).toISOString() 
         : new Date().toISOString();
-      const endDateISO = new Date(formData.end_date).toISOString();
+      const endDateISO = new Date(auctionData.end_date).toISOString();
 
-      // Prepare auction data
-      const auctionData = {
-        name: formData.name || null,
-        place: formData.place || null,
-        title: formData.title,
-        description: formData.description || null,
-        starting_price: startingPriceCents,
-        reserve_price: reservePriceCents,
-        category: formData.category || null,
-        start_date: startDateISO,
-        end_date: endDateISO,
-        image_url: imagePreview || null,
+      // Prepare items data
+      const itemsData = validItems.map((item, index) => ({
+        id: item.dbId,
+        title: item.title,
+        description: item.description || null,
+        starting_price: Math.round(parseFloat(item.starting_price) * 100),
+        reserve_price: item.reserve_price 
+          ? Math.round(parseFloat(item.reserve_price) * 100) 
+          : null,
+        category: item.category || null,
+        image_url: uploadedUrls[index] || null,
+        position: index + 1,
+      }));
+
+      const payload = {
+        auction: {
+          name: auctionData.name,
+          place: auctionData.place || null,
+          start_date: startDateISO,
+          end_date: endDateISO,
+          title: validItems[0].title,
+          description: validItems[0].description || null,
+          starting_price: Math.round(parseFloat(validItems[0].starting_price) * 100),
+          reserve_price: validItems[0].reserve_price 
+            ? Math.round(parseFloat(validItems[0].reserve_price) * 100) 
+            : null,
+          category: validItems[0].category || null,
+          image_url: uploadedUrls[0] || null,
+        },
+        items: itemsData,
       };
 
-      // Submit to API
       const response = await fetch(`/api/auctions/${auction.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(auctionData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -205,11 +346,13 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
           variant="destructive"
           onClick={handleDelete}
           disabled={isDeleting}
-          loading={isDeleting}
           className="flex items-center gap-2 ml-auto"
         >
           {isDeleting ? (
-            'Deleting...'
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Deleting...
+            </>
           ) : (
             <>
               <Trash2 className="h-4 w-4" />
@@ -219,183 +362,228 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Auction Name</Label>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <h3 className="font-semibold">Auction Details</h3>
+            <p className="text-sm text-muted-foreground">
+              Update your auction container details
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="name">Auction Name *</Label>
               <Input
                 id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={auctionData.name}
+                onChange={(e) => setAuctionData({ ...auctionData, name: e.target.value })}
                 placeholder="e.g., Estate Sale, Art Gallery Auction"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="place">Location</Label>
-              <Input
-                id="place"
-                value={formData.place}
-                onChange={(e) => setFormData({ ...formData, place: e.target.value })}
-                placeholder="e.g., Los Angeles, CA or Online"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="title">
-                Auction Title <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g., Vintage Watch Collection"
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe your item in detail..."
-                rows={4}
+            <div>
+              <Label htmlFor="place">Location</Label>
+              <Input
+                id="place"
+                value={auctionData.place}
+                onChange={(e) => setAuctionData({ ...auctionData, place: e.target.value })}
+                placeholder="e.g., Los Angeles, CA or Online"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="starting_price">
-                  Starting Price (USD) <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="starting_price"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={formData.starting_price}
-                  onChange={(e) => setFormData({ ...formData, starting_price: e.target.value })}
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reserve_price">Reserve Price (USD)</Label>
-                <Input
-                  id="reserve_price"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={formData.reserve_price}
-                  onChange={(e) => setFormData({ ...formData, reserve_price: e.target.value })}
-                  placeholder="Optional minimum"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div>
                 <Label htmlFor="start_date">Start Date</Label>
                 <Input
                   id="start_date"
                   type="datetime-local"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  value={auctionData.start_date}
+                  onChange={(e) => setAuctionData({ ...auctionData, start_date: e.target.value })}
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="end_date">
-                  End Date <span className="text-red-500">*</span>
-                </Label>
+              <div>
+                <Label htmlFor="end_date">End Date *</Label>
                 <Input
                   id="end_date"
                   type="datetime-local"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  value={auctionData.end_date}
+                  onChange={(e) => setAuctionData({ ...auctionData, end_date: e.target.value })}
                   required
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="image">Auction Image</Label>
-              <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                <input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                {imagePreview ? (
-                  <div className="space-y-4">
-                    <div className="relative h-48 w-full">
-                      <Image
-                        src={imagePreview}
-                        alt="Preview"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">Auction Items ({items.length})</h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddItem}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          </div>
+
+          {items.map((item, index) => (
+            <Card key={item.id}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium">Item {index + 1}</span>
+                  </div>
+                  {items.length > 1 && (
                     <Button
                       type="button"
-                      variant="outline"
-                      onClick={() => document.getElementById('image')?.click()}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveItem(item.id)}
                     >
-                      Change Image
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="image"
-                    className="cursor-pointer flex flex-col items-center gap-2"
-                  >
-                    <Upload className="h-8 w-8 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Click to upload image
-                    </span>
-                    <span className="text-xs text-muted-foreground">Max 5MB</span>
-                  </label>
-                )}
-              </div>
-            </div>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor={`title-${item.id}`}>Item Title *</Label>
+                  <Input
+                    id={`title-${item.id}`}
+                    value={item.title}
+                    onChange={(e) => handleItemChange(item.id, 'title', e.target.value)}
+                    placeholder="Enter item title"
+                  />
+                </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={isSubmitting}
-              loading={isSubmitting}
-            >
-              {isSubmitting ? 'Updating Auction...' : 'Update Auction'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+                <div>
+                  <Label htmlFor={`description-${item.id}`}>Description</Label>
+                  <Textarea
+                    id={`description-${item.id}`}
+                    value={item.description}
+                    onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
+                    placeholder="Describe this item..."
+                    rows={2}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor={`category-${item.id}`}>Category</Label>
+                  <Select
+                    value={item.category}
+                    onValueChange={(value) => handleItemChange(item.id, 'category', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor={`starting_price-${item.id}`}>Starting Price ($) *</Label>
+                    <Input
+                      id={`starting_price-${item.id}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={item.starting_price}
+                      onChange={(e) => handleItemChange(item.id, 'starting_price', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`reserve_price-${item.id}`}>Reserve Price ($)</Label>
+                    <Input
+                      id={`reserve_price-${item.id}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={item.reserve_price}
+                      onChange={(e) => handleItemChange(item.id, 'reserve_price', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor={`image-${item.id}`}>Item Image</Label>
+                  <div className="mt-2">
+                    {item.image_preview ? (
+                      <div className="relative w-full h-32 border rounded-lg overflow-hidden">
+                        <Image
+                          src={item.image_preview}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setItems(prevItems => prevItems.map(i => 
+                              i.id === item.id 
+                                ? { ...i, image_preview: null, image_file: null } 
+                                : i
+                            ));
+                          }}
+                          className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor={`image-${item.id}`}
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                      >
+                        <Upload className="h-8 w-8 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground">
+                          Click to upload (Max 10MB)
+                        </span>
+                        <input
+                          id={`image-${item.id}`}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleImageChange(item.id, e)}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full"
+          size="lg"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Updating Auction...
+            </>
+          ) : (
+            `Update Auction with ${items.length} Item${items.length > 1 ? 's' : ''}`
+          )}
+        </Button>
+      </form>
     </div>
   );
 }
