@@ -2,13 +2,13 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MainNavItem } from 'types';
 import { cn } from '@/lib/utils';
 import { MobileNav } from '@/components/mobile-nav';
 import { Icons } from '@/components/icons';
 import { buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
-import { Gavel } from 'lucide-react'
 import { User } from '@supabase/supabase-js';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
@@ -46,12 +46,16 @@ export default function CircularNavigation({
   return (
     <>
       <nav className="flex flex-wrap items-center justify-between w-full md:w-fit p-2 md:p-1 gap-4 md:gap-20 md:bg-zinc-50 md:dark:bg-zinc-900 md:rounded-full md:px-8 md:border-2 md:border-muted/30 md:dark:border-muted/80 md:shadow-md mx-auto mt-4 backdrop-blur-sm md:backdrop-blur-none">
-        <div className="flex items-center space-x-2">
-          <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded-full">
-            <Gavel className="size-6 transition-transform duration-300 ease-in-out hover:scale-110" />
-          </div>
-          <span className="text-lg md:text-xl font-extrabold tracking-tightest">Auctions</span>
-        </div>
+        <Link href="/" className="flex items-center">
+          <Image 
+            src="/bidwin-logo.png" 
+            alt="BIDWIN" 
+            width={140} 
+            height={70}
+            className="h-12 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
+            priority
+          />
+        </Link>
         {items?.length ? (
           <div className="hidden md:flex space-x-6">
             {items?.map((item, index) => (
