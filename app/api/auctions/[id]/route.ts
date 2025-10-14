@@ -93,15 +93,29 @@ export async function PATCH(
         .eq('auction_id', params.id);
 
       const currentItemIds = currentItems?.map(item => item.id) || [];
+      
+      // Validate that all client-supplied item IDs belong to this auction
+      const clientItemIds = existingItemsToUpdate.map(item => item.id);
+      const invalidItemIds = clientItemIds.filter(id => !currentItemIds.includes(id));
+      
+      if (invalidItemIds.length > 0) {
+        console.error('Invalid item IDs provided:', invalidItemIds);
+        return NextResponse.json(
+          { error: 'Invalid item IDs - some items do not belong to this auction' },
+          { status: 403 }
+        );
+      }
+
       const itemIdsToKeep = existingItemsToUpdate.map(item => item.id);
       const itemIdsToDelete = currentItemIds.filter(id => !itemIdsToKeep.includes(id));
 
-      // Delete removed items
+      // Delete removed items (with double-check on auction_id)
       if (itemIdsToDelete.length > 0) {
         const { error: deleteError } = await supabase
           .from('auction_items')
           .delete()
-          .in('id', itemIdsToDelete);
+          .in('id', itemIdsToDelete)
+          .eq('auction_id', params.id);
 
         if (deleteError) {
           console.error('Error deleting removed items:', deleteError);
@@ -112,7 +126,7 @@ export async function PATCH(
         }
       }
 
-      // Update existing items
+      // Update existing items (with double-check on auction_id)
       if (existingItemsToUpdate.length > 0) {
         const updatePromises = existingItemsToUpdate.map(item => 
           supabase
@@ -126,6 +140,7 @@ export async function PATCH(
               position: item.position,
             })
             .eq('id', item.id)
+            .eq('auction_id', params.id)
         );
 
         const updateResults = await Promise.all(updatePromises);

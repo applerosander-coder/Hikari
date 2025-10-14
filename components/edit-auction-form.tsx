@@ -307,16 +307,20 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
         body: JSON.stringify(payload),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to update auction');
+        const errorMessage = data.error || 'Failed to update auction';
+        throw new Error(errorMessage);
       }
 
       toast.success('Auction updated successfully!');
       router.push('/seller');
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating auction:', error);
-      toast.error('Failed to update auction');
+      const errorMessage = error.message || 'Failed to update auction. Please try again.';
+      toast.error(errorMessage);
       setIsSubmitting(false);
     }
   };
