@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
 export function ImageUpload({ user }: { user: any }) {
-  const [avatarUrl, setAvatarUrl] = useState(user && user.avatar_url ? `${user.avatar_url}?t=${Date.now()}` : "");
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || "");
   const [imageUrl, setImageUrl] = useState("");
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();

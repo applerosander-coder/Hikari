@@ -45,7 +45,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
         className="overflow-hidden rounded-full"
       >
         <Image
-          src={`${user?.avatar_url || "/avatars/default-avatar.svg"}?t=${Date.now()}`}
+          src={user?.avatar_url || "/avatars/default-avatar.svg"}
           width={36}
           height={36}
           alt="Avatar"
