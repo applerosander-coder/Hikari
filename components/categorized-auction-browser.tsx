@@ -49,7 +49,8 @@ const CATEGORIES = [
   'Services & Experiences',
   'Collectibles & Art',
   'Home & Living',
-  'Sports & Hobbies'
+  'Sports & Hobbies',
+  'Other'
 ];
 
 export function CategorizedAuctionBrowser({
