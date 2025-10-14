@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { AuctionItemCard } from './auction-item-card';
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -66,6 +67,7 @@ export function CategorizedAuctionBrowser({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAuction, setSelectedAuction] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showArchive, setShowArchive] = useState(false);
 
   const filteredItems = React.useMemo(() => {
     const now = new Date();
@@ -353,30 +355,49 @@ export function CategorizedAuctionBrowser({
           {filteredEndedItems.length > 0 && (
             <>
               <div className="border-t border-border pt-8 sm:pt-12">
-                <div className="px-4 mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-muted-foreground">Ended Auctions</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Browse completed auctions</p>
+                <div className="px-4 mb-6 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-muted-foreground">Ended Auctions</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Browse completed auctions</p>
+                  </div>
+                  {Object.entries(endedAuctionGroups).length > 5 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowArchive(!showArchive)}
+                      className="text-sm"
+                    >
+                      {showArchive ? 'Show Less' : 'View Archive'}
+                    </Button>
+                  )}
                 </div>
               </div>
 
-              {Object.entries(endedAuctionGroups).map(([auctionName, auctionItems]) => {
-                const auctionInfo = auctionItems[0]?.auction;
-                const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items • Ended` : undefined;
-                
-                return auctionItems.length > 0 ? (
-                  <AuctionRow
-                    key={`ended-${auctionName}`}
-                    title={auctionName}
-                    subtitle={subtitle}
-                    items={auctionItems}
-                    userBidItemIds={userBidItemIds}
-                    userBidAmounts={userBidAmounts}
-                    watchlistItemIds={watchlistItemIds}
-                    handleBidNow={handleBidNow}
-                    ended
-                  />
-                ) : null;
-              })}
+              {Object.entries(endedAuctionGroups)
+                .sort((a, b) => {
+                  const aEndDate = a[1][0]?.auction?.end_date || '';
+                  const bEndDate = b[1][0]?.auction?.end_date || '';
+                  return new Date(bEndDate).getTime() - new Date(aEndDate).getTime();
+                })
+                .slice(0, showArchive ? undefined : 5)
+                .map(([auctionName, auctionItems]) => {
+                  const auctionInfo = auctionItems[0]?.auction;
+                  const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items • Ended` : undefined;
+                  
+                  return auctionItems.length > 0 ? (
+                    <AuctionRow
+                      key={`ended-${auctionName}`}
+                      title={auctionName}
+                      subtitle={subtitle}
+                      items={auctionItems}
+                      userBidItemIds={userBidItemIds}
+                      userBidAmounts={userBidAmounts}
+                      watchlistItemIds={watchlistItemIds}
+                      handleBidNow={handleBidNow}
+                      ended
+                    />
+                  ) : null;
+                })}
             </>
           )}
         </div>
