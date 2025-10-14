@@ -126,20 +126,21 @@ export async function PATCH(
         }
       }
 
-      // Update existing items using RPC function (bypasses schema cache)
+      // Update existing items (with double-check on auction_id)
       if (existingItemsToUpdate.length > 0) {
         const updatePromises = existingItemsToUpdate.map(item => 
-          supabase.rpc('update_auction_item_with_category' as any, {
-            p_item_id: item.id,
-            p_auction_id: params.id,
-            p_title: item.title,
-            p_description: item.description,
-            p_starting_price: item.starting_price,
-            p_reserve_price: item.reserve_price,
-            p_category: item.category || null,
-            p_image_url: item.image_url,
-            p_position: item.position,
-          })
+          supabase
+            .from('auction_items')
+            .update({
+              title: item.title,
+              description: item.description,
+              starting_price: item.starting_price,
+              reserve_price: item.reserve_price,
+              image_url: item.image_url,
+              position: item.position,
+            })
+            .eq('id', item.id)
+            .eq('auction_id', params.id)
         );
 
         const updateResults = await Promise.all(updatePromises);
@@ -154,32 +155,33 @@ export async function PATCH(
         }
       }
 
-      // Insert new items using RPC function (bypasses schema cache)
+      // Insert new items
       let newItemsData = [];
       if (newItemsToInsert.length > 0) {
-        const insertPromises = newItemsToInsert.map(item => 
-          supabase.rpc('insert_auction_item_with_category' as any, {
-            p_auction_id: params.id,
-            p_title: item.title,
-            p_description: item.description,
-            p_starting_price: item.starting_price,
-            p_reserve_price: item.reserve_price,
-            p_category: item.category || null,
-            p_image_url: item.image_url,
-            p_position: item.position,
-          })
-        );
+        const itemsToInsert = newItemsToInsert.map(item => ({
+          auction_id: params.id,
+          title: item.title,
+          description: item.description,
+          starting_price: item.starting_price,
+          reserve_price: item.reserve_price,
+          image_url: item.image_url,
+          position: item.position,
+        }));
 
-        const insertResults = await Promise.all(insertPromises);
-        const insertError = insertResults.find(result => result.error);
+        const { data, error: insertError } = await supabase
+          .from('auction_items')
+          .insert(itemsToInsert)
+          .select();
 
         if (insertError) {
-          console.error('Error inserting new items:', insertError.error);
+          console.error('Error inserting new items:', insertError);
           return NextResponse.json(
             { error: 'Failed to insert new items' },
             { status: 500 }
           );
         }
+
+        newItemsData = data || [];
       }
 
       // Fetch all current items to return
