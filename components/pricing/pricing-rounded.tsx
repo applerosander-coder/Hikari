@@ -157,9 +157,17 @@ export default function PricingRounded({
                 currency: price.currency!,
                 minimumFractionDigits: 0
               }).format((price?.unit_amount || 0) / 100);
-              const isActive = subscription
-                ? product.name === subscription?.prices?.products?.name
-                : false;
+              
+              // Check if this is the free Participant Plan
+              const isParticipantPlan = product.name === 'Participant Plan';
+              
+              // Participant Plan is active for all logged-in users
+              const isActive = isParticipantPlan 
+                ? !!user 
+                : subscription
+                  ? product.name === subscription?.prices?.products?.name
+                  : false;
+              
               const cardBgColor = isActive
                 ? 'border-black bg-white text-black'
                 : 'bg-white text-black';
@@ -191,8 +199,9 @@ export default function PricingRounded({
                       type="button"
                       onClick={() => handleStripeCheckout(price)}
                       className="mt-4 w-full rounded-4xl"
+                      disabled={isParticipantPlan && !!user}
                     >
-                      {subscription ? 'Manage' : 'Subscribe'}
+                      {isParticipantPlan && user ? 'Subscribed' : subscription ? 'Manage' : 'Subscribe'}
                     </Button>
                     <ul className="mt-4 space-y-2">
                       {features.map((feature, index) => (
