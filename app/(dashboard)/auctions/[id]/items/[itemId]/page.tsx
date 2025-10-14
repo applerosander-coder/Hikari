@@ -303,12 +303,6 @@ export default function AuctionItemDetailPage() {
                 Place Bid
               </Button>
             )}
-
-            {userIsHighestBidder && !isAuctionEnded && (
-              <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
-                <p className="text-sm font-medium text-green-600">You have the highest bid!</p>
-              </div>
-            )}
           </div>
 
           {/* Description */}
