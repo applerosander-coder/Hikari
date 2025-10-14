@@ -58,6 +58,19 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
     return filtered;
   }, [items, selectedAuction, selectedCategory, sortBy]);
 
+  // Calculate total amount raised for selected auction (regardless of category filter)
+  const totalAmountRaised = useMemo(() => {
+    if (selectedAuction === 'all') return 0;
+    
+    // Filter only by auction, not by category, to get the full auction total
+    const auctionItems = items.filter(item => item.auction_id === selectedAuction);
+    
+    return auctionItems.reduce((total, item) => {
+      const highestBid = item.current_bid || item.starting_bid || 0;
+      return total + highestBid;
+    }, 0) / 100; // Convert from cents to dollars
+  }, [items, selectedAuction]);
+
   const getTimeStatus = (item: any) => {
     const endDate = item.auction?.end_date ? new Date(item.auction.end_date) : null;
     const now = new Date();
@@ -130,8 +143,15 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
       </div>
 
       {/* Results count */}
-      <div className="mb-4 text-sm text-muted-foreground">
-        Showing {filteredAndSortedItems.length} {filteredAndSortedItems.length === 1 ? 'item' : 'items'}
+      <div className="mb-4">
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredAndSortedItems.length} {filteredAndSortedItems.length === 1 ? 'item' : 'items'}
+        </div>
+        {selectedAuction !== 'all' && (
+          <div className="mt-2 text-lg font-semibold">
+            Total amount raised: ${totalAmountRaised.toFixed(2)}
+          </div>
+        )}
       </div>
 
       {/* Table */}
