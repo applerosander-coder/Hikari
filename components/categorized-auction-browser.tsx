@@ -191,9 +191,11 @@ export function CategorizedAuctionBrowser({
             className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Auctions ({items.length + endedItems.length} items)</option>
-            {auctions
-              .map((auction) => {
-                const now = new Date();
+            {(() => {
+              const now = new Date();
+              
+              // Map all auctions with their metadata
+              const mappedAuctions = auctions.map((auction) => {
                 const activeCount = items.filter(i => i.auction_id === auction.id).length;
                 const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
                 const totalCount = activeCount + endedCount;
@@ -212,21 +214,31 @@ export function CategorizedAuctionBrowser({
                   endedCount,
                   totalCount,
                   statusLabel,
-                  isActive
+                  isActive,
+                  endDate
                 };
-              })
-              .sort((a, b) => {
-                // Sort: Live auctions first, then Ended auctions
-                if (a.isActive && !b.isActive) return -1;
-                if (!a.isActive && b.isActive) return 1;
-                return 0;
-              })
-              .map(({ auction, totalCount, statusLabel }) => (
+              });
+              
+              // Separate live and ended auctions
+              const liveAuctions = mappedAuctions.filter(a => a.isActive);
+              const endedAuctions = mappedAuctions
+                .filter(a => !a.isActive)
+                .sort((a, b) => {
+                  // Sort ended auctions by end date (most recent first)
+                  if (!a.endDate) return 1;
+                  if (!b.endDate) return -1;
+                  return b.endDate.getTime() - a.endDate.getTime();
+                })
+                .slice(0, 5); // Limit to 5 most recent ended auctions
+              
+              // Combine: live auctions first, then limited ended auctions
+              return [...liveAuctions, ...endedAuctions].map(({ auction, totalCount, statusLabel }) => (
                 <option key={auction.id} value={auction.id}>
                   {auction.name} - {auction.place} ({totalCount} items • {statusLabel})
                 </option>
-              ))
-            }
+              ));
+            })()}
+          
           </select>
         </div>
 
