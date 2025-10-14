@@ -80,9 +80,9 @@ export default async function DashboardLayout({
           </TooltipProvider>
         </nav>
       </aside>
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+      <div className="flex flex-col sm:pl-14">
         <Navbar userDetails={userDetails} navConfig={navConfig as NavItem[]} />
-        <main className="flex-1 w-full overflow-x-hidden">
+        <main className="flex-1 w-full overflow-x-hidden pt-20 sm:pt-0">
           {children}
         </main>
       </div>
