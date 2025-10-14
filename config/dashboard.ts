@@ -32,13 +32,7 @@ export const iconComponents = {
 export const navConfig = [
   { href: '/dashboard', icon: 'Gavel', label: 'Auctions' },
   { href: '/mybids', icon: 'Heart', label: 'My Bids' },
-  // { href: '/dashboard/posts', icon: 'FileText', label: 'Posts' },
-  {
-    href: '/dashboard/customer',
-    icon: 'Users2',
-    label: 'Customers',
-    disabled: true
-  },
+  { href: '/seller', icon: 'Users2', label: 'Seller' },
   {
     href: '/dashboard/analytics',
     icon: 'LineChart',
