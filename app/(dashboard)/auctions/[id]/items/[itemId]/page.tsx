@@ -249,7 +249,7 @@ export default function AuctionItemDetailPage() {
           </div>
 
           {/* Price Information */}
-          <Card className={userIsHighestBidder && !isAuctionEnded ? "border-green-500" : ""}>
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
