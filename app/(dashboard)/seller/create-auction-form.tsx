@@ -94,7 +94,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
 
   const handleItemChange = (itemId: string, field: keyof AuctionItem, value: any) => {
     console.log('handleItemChange:', { itemId, field, valueType: typeof value, valuePreview: typeof value === 'string' ? value.substring(0, 50) : value });
-    setItems(items.map(item => 
+    setItems(prevItems => prevItems.map(item => 
       item.id === itemId ? { ...item, [field]: value } : item
     ));
   };
