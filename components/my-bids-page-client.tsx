@@ -24,6 +24,13 @@ export function MyBidsPageClient({
   wonAuctionsData,
   userId
 }: MyBidsPageClientProps) {
+  console.log('📊 My Bids Data:', {
+    totalBids: userBidsData?.length,
+    wonAuctions: wonAuctionsData?.length,
+    watchlist: watchlistData?.length,
+    wonData: wonAuctionsData
+  });
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
