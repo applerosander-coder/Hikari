@@ -75,6 +75,16 @@ export function CategorizedAuctionBrowser({
       return !endDate || endDate > now;
     });
 
+    // Debug logging
+    if (selectedCategory !== 'all') {
+      console.log('Selected category:', selectedCategory);
+      console.log('Items with categories:', filtered.map(item => ({ 
+        id: item.id, 
+        title: item.title, 
+        category: item.category 
+      })));
+    }
+
     // Filter by selected auction
     if (selectedAuction !== 'all') {
       filtered = filtered.filter(item => item.auction_id === selectedAuction);
@@ -83,6 +93,7 @@ export function CategorizedAuctionBrowser({
     // Filter by selected category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(item => item.category === selectedCategory);
+      console.log('Filtered items after category filter:', filtered.length);
     }
 
     // Filter by search query
