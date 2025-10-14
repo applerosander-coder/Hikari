@@ -164,7 +164,8 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                   // - If active and no current_bid: show starting bid
                   // - If ended and has current_bid: show winning bid
                   // - If ended and no current_bid: show starting bid
-                  const displayBid = item.current_bid || item.starting_bid || 0;
+                  // Note: All prices are stored in cents, so divide by 100 for display
+                  const displayBid = (item.current_bid || item.starting_bid || 0) / 100;
                   const hasBids = item.current_bid && item.current_bid > 0;
                   
                   return (
