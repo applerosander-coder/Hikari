@@ -3,16 +3,18 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { createTestData } from '@/app/actions/create-test-data';
+import { processWinners } from '@/app/actions/process-winners';
 import { toast } from 'sonner';
-import { Database } from 'lucide-react';
+import { Database, DollarSign } from 'lucide-react';
 
 export function DevTools() {
-  const [loading, setLoading] = useState(false);
+  const [loadingTest, setLoadingTest] = useState(false);
+  const [loadingWinners, setLoadingWinners] = useState(false);
 
   const handleCreateTestData = async () => {
-    setLoading(true);
+    setLoadingTest(true);
     const result = await createTestData();
-    setLoading(false);
+    setLoadingTest(false);
 
     if (result.error) {
       toast.error(result.error);
@@ -22,16 +24,45 @@ export function DevTools() {
     }
   };
 
+  const handleProcessWinners = async () => {
+    setLoadingWinners(true);
+    const result = await processWinners();
+    setLoadingWinners(false);
+
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(result.message || 'Winners processed!');
+      
+      // Show details if available
+      if (result.details && result.details.length > 0) {
+        console.log('Winner processing details:', result.details);
+      }
+      
+      window.location.reload();
+    }
+  };
+
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
       <Button
         onClick={handleCreateTestData}
-        disabled={loading}
+        disabled={loadingTest || loadingWinners}
         className="gap-2"
         variant="outline"
       >
         <Database className="h-4 w-4" />
-        {loading ? 'Creating...' : 'Create Test Data'}
+        {loadingTest ? 'Creating...' : 'Create Test Data'}
+      </Button>
+      
+      <Button
+        onClick={handleProcessWinners}
+        disabled={loadingTest || loadingWinners}
+        className="gap-2"
+        variant="outline"
+      >
+        <DollarSign className="h-4 w-4" />
+        {loadingWinners ? 'Processing...' : 'Process Winners'}
       </Button>
     </div>
   );
