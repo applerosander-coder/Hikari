@@ -6,6 +6,7 @@ Auctions is a live auction and bidding platform built with Next.js 14 and Supaba
 ### Recent Changes (Oct 2025)
 - **Fixed Critical Bidding Bug:** Added null safety checks in My Bids page to prevent crashes when users bid on other users' auction items. Previously failed with TypeError when accessing nested auction relations.
 - **Mobile Layout Improvements:** Made seller form responsive by changing date and price field grids to stack vertically on mobile (`grid-cols-1 sm:grid-cols-2`), fixing overflow and alignment issues.
+- **Fixed Image Preview Race Condition:** Resolved issue where image previews wouldn't display after upload for all users. Combined dual state updates into single atomic updates for both image upload and removal paths, eliminating React state batching race conditions.
 
 ### User Preferences
 I prefer the agent to be concise and to the point. When suggesting code changes, provide a brief explanation of the "why" behind the change, not just the "what." I value iterative development and prefer to review smaller, focused pull requests or changes rather than large, monolithic ones. Please ensure all modifications align with the existing monochrome design aesthetic (black, white, gray). Do not make changes to the `docs/` folder.
