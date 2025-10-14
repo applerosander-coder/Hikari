@@ -59,7 +59,6 @@ export function BidDialog({
     if (result.success) {
       // Bid placed successfully - redirect to mybids with celebration
       setIsProcessingBid(true);
-      toast.success('Bid placed successfully!', { id: 'bid-success' });
       setIsCreatingIntent(false);
       onOpenChange(false);
       
@@ -112,7 +111,6 @@ export function BidDialog({
     
     if (result.success) {
       setIsProcessingBid(true);
-      toast.success('Bid placed successfully!', { id: 'bid-success' });
       onOpenChange(false);
       
       // Redirect to mybids with celebration
