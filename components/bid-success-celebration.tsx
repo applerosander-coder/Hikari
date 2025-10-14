@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Heart, Sparkles, Trophy, Zap } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 interface BidSuccessCelebrationProps {
   bidAmount: number;
@@ -13,43 +13,20 @@ interface BidSuccessCelebrationProps {
   show: boolean;
 }
 
-const celebrationVariants = [
-  {
-    icon: Trophy,
-    title: 'You\'re in the lead!',
-    message: 'Great job — your bid is currently the highest!',
-    color: 'from-gray-800 to-gray-950',
-  },
-  {
-    icon: Sparkles,
-    title: 'Winning Bid Confirmed!',
-    message: 'You\'re on top! Keep watching the auction.',
-    color: 'from-gray-900 to-black',
-  },
-  {
-    icon: Zap,
-    title: 'You\'re Leading!',
-    message: 'Fantastic! Your bid is #1 right now.',
-    color: 'from-black to-gray-800',
-  },
-  {
-    icon: Heart,
-    title: 'Bid Successful!',
-    message: 'You\'re currently the highest bidder. Well done!',
-    color: 'from-gray-950 to-gray-900',
-  },
-];
+const celebrationVariant = {
+  icon: Trophy,
+  title: 'Bid Successful!',
+  message: 'You\'re currently the highest bidder.',
+  color: 'from-gray-800 to-gray-950',
+};
 
 export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }: BidSuccessCelebrationProps) {
   const router = useRouter();
-  const [variant, setVariant] = useState(0);
   const [displayAmount, setDisplayAmount] = useState(0);
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     if (show) {
-      setVariant(Math.floor(Math.random() * celebrationVariants.length));
-      
       fireConfetti();
       playSuccessSound();
       
@@ -185,8 +162,7 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
     }
   };
 
-  const currentVariant = celebrationVariants[variant];
-  const Icon = currentVariant.icon;
+  const Icon = celebrationVariant.icon;
 
   return (
     <AnimatePresence>
@@ -203,7 +179,7 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0, y: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className={`relative w-full max-w-md bg-gradient-to-br ${currentVariant.color} p-8 rounded-2xl shadow-2xl border border-gray-700`}
+            className={`relative w-full max-w-md bg-gradient-to-br ${celebrationVariant.color} p-8 rounded-2xl shadow-2xl border border-gray-700`}
             onClick={(e) => e.stopPropagation()}
           >
             <motion.div
@@ -236,7 +212,7 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
                 transition={{ delay: 0.3 }}
                 className="text-3xl font-bold text-white"
               >
-                {currentVariant.title}
+                {celebrationVariant.title}
               </motion.h2>
 
               <motion.p
@@ -245,7 +221,7 @@ export function BidSuccessCelebration({ bidAmount, auctionTitle, onClose, show }
                 transition={{ delay: 0.4 }}
                 className="text-gray-300 text-lg"
               >
-                {currentVariant.message}
+                {celebrationVariant.message}
               </motion.p>
 
               <motion.div
