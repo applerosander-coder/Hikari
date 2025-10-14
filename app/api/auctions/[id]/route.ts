@@ -19,6 +19,8 @@ export async function PATCH(
 
     const body = await request.json();
     const {
+      name,
+      place,
       title,
       description,
       starting_price,
@@ -55,6 +57,8 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('auctions')
       .update({
+        name,
+        place,
         title,
         description,
         starting_price,
