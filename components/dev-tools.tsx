@@ -11,6 +11,11 @@ export function DevTools() {
   const [loadingTest, setLoadingTest] = useState(false);
   const [loadingWinners, setLoadingWinners] = useState(false);
 
+  // Only show in development
+  if (process.env.NODE_ENV !== 'development') {
+    return null;
+  }
+
   const handleCreateTestData = async () => {
     setLoadingTest(true);
     const result = await createTestData();

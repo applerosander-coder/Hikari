@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import CreateAuctionForm from './create-auction-form';
 import { SellerAuctionsList } from '@/components/seller-auctions-list';
+import { DevTools } from '@/components/dev-tools';
 
 export default async function SellerPage() {
   const supabase = createClient();
@@ -39,20 +40,19 @@ export default async function SellerPage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Create Auction Form */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Create New Auction</h2>
-            <CreateAuctionForm userId={user.id} />
-          </div>
+        {/* Create Auction Form */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Create New Auction</h2>
+          <CreateAuctionForm userId={user.id} />
+        </div>
 
-          {/* Auction Preview & My Auctions */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Your Auctions</h2>
-            <SellerAuctionsList auctions={sellerAuctions || []} />
-          </div>
+        {/* Your Auctions */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Your Auctions</h2>
+          <SellerAuctionsList auctions={sellerAuctions || []} />
         </div>
       </div>
+      <DevTools />
     </div>
   );
 }
