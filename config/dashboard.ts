@@ -34,9 +34,8 @@ export const navConfig = [
   { href: '/mybids', icon: 'Heart', label: 'My Bids' },
   { href: '/seller', icon: 'Users2', label: 'Seller' },
   {
-    href: '/dashboard/analytics',
+    href: '/dashboard/leaderboard',
     icon: 'LineChart',
-    label: 'Analytics',
-    disabled: true
+    label: 'Leaderboard'
   }
 ];
