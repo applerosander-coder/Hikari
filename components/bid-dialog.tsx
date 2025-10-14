@@ -89,20 +89,11 @@ export function BidDialog({
   const handleCardAdded = async () => {
     setShowAddCard(false);
     
-    // Give user visual confirmation
-    toast.success('✓ Card saved successfully! Placing your bid...', { 
-      duration: 2000,
-      id: 'card-saved'
-    });
+    // Show single loading message
+    toast.loading('Card saved! Placing your bid...', { id: 'placing-bid' });
     
     // Wait to ensure database is updated
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast.dismiss('card-saved');
-    toast.loading('Placing bid...', { id: 'placing-bid' });
-    
-    // Small delay then retry placing bid
-    await new Promise(resolve => setTimeout(resolve, 500));
     
     const bidValue = parseFloat(bidAmount);
     const result = await placeBidWithSavedCard(auctionId, Math.round(bidValue * 100));
