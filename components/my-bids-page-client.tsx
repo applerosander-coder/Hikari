@@ -194,7 +194,7 @@ export function MyBidsPageClient({
     auction: {
       ...auction,
       // Add routing path based on type
-      path: isItem 
+      path: isItem && auction.auction
         ? `/auctions/${auction.auction.id}/items/${auction.id}`
         : `/auctions/${auction.id}`
     },
@@ -205,7 +205,7 @@ export function MyBidsPageClient({
     bid,
     auction: {
       ...auction,
-      path: isItem 
+      path: isItem && auction.auction
         ? `/auctions/${auction.auction.id}/items/${auction.id}`
         : `/auctions/${auction.id}`
     },
@@ -216,7 +216,7 @@ export function MyBidsPageClient({
     bid,
     auction: {
       ...auction,
-      path: isItem 
+      path: isItem && auction.auction
         ? `/auctions/${auction.auction.id}/items/${auction.id}`
         : `/auctions/${auction.id}`
     },
@@ -228,7 +228,7 @@ export function MyBidsPageClient({
     bid,
     auction: {
       ...auction,
-      path: isItem 
+      path: isItem && auction.auction
         ? `/auctions/${auction.auction.id}/items/${auction.id}`
         : `/auctions/${auction.id}`
     },
@@ -256,7 +256,7 @@ export function MyBidsPageClient({
       userBidAmount, // Add user's bid amount
       auctions: {
         ...auctionData,
-        path: isItemWatch
+        path: isItemWatch && auctionData.auction
           ? `/auctions/${auctionData.auction.id}/items/${auctionData.id}`
           : `/auctions/${auctionData.id}`
       }
