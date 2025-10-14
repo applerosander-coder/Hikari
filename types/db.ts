@@ -130,6 +130,7 @@ export interface Database {
           reserve_price: number | null
           image_url: string | null
           image_urls: string[] | null
+          category: string | null
           position: number
           winner_id: string | null
           payment_completed: boolean
@@ -148,6 +149,7 @@ export interface Database {
           reserve_price?: number | null
           image_url?: string | null
           image_urls?: string[] | null
+          category?: string | null
           position?: number
           winner_id?: string | null
           payment_completed?: boolean
@@ -166,6 +168,7 @@ export interface Database {
           reserve_price?: number | null
           image_url?: string | null
           image_urls?: string[] | null
+          category?: string | null
           position?: number
           winner_id?: string | null
           payment_completed?: boolean

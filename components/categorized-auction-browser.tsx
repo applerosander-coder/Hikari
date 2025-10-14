@@ -14,6 +14,7 @@ interface AuctionItem {
   starting_price: number;
   current_bid: number | null;
   image_url: string | null;
+  category: string | null;
   bid_count?: number;
   auction: {
     id: string;
@@ -63,6 +64,7 @@ export function CategorizedAuctionBrowser({
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAuction, setSelectedAuction] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const filteredItems = React.useMemo(() => {
     const now = new Date();
@@ -76,6 +78,11 @@ export function CategorizedAuctionBrowser({
     // Filter by selected auction
     if (selectedAuction !== 'all') {
       filtered = filtered.filter(item => item.auction_id === selectedAuction);
+    }
+
+    // Filter by selected category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(item => item.category === selectedCategory);
     }
 
     // Filter by search query
@@ -92,7 +99,7 @@ export function CategorizedAuctionBrowser({
     }
 
     return filtered;
-  }, [items, searchQuery, selectedAuction]);
+  }, [items, searchQuery, selectedAuction, selectedCategory]);
 
   const filteredEndedItems = React.useMemo(() => {
     const now = new Date();
@@ -120,6 +127,11 @@ export function CategorizedAuctionBrowser({
       filtered = filtered.filter(item => item.auction_id === selectedAuction);
     }
 
+    // Filter by selected category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(item => item.category === selectedCategory);
+    }
+
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -134,7 +146,7 @@ export function CategorizedAuctionBrowser({
     }
 
     return filtered;
-  }, [items, endedItems, searchQuery, selectedAuction]);
+  }, [items, endedItems, searchQuery, selectedAuction, selectedCategory]);
 
   const hotItems = React.useMemo(() => {
     return [...filteredItems]
@@ -183,8 +195,8 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Auction Filter Dropdown */}
-        <div className="flex gap-3">
+        {/* Filter Dropdowns */}
+        <div className="flex flex-wrap gap-3">
           <select
             value={selectedAuction}
             onChange={(e) => setSelectedAuction(e.target.value)}
@@ -239,6 +251,20 @@ export function CategorizedAuctionBrowser({
               ));
             })()}
           
+          </select>
+
+          {/* Category Filter Dropdown */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="all">All Categories</option>
+            {CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
           </select>
         </div>
 
