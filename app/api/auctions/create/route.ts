@@ -75,32 +75,39 @@ export async function POST(request: Request) {
         );
       }
 
-      // Create auction items
-      const itemsToInsert = items.map(item => ({
-        auction_id: auctionData.id,
-        title: item.title,
-        description: item.description,
-        starting_price: item.starting_price,
-        reserve_price: item.reserve_price,
-        category: item.category,
-        image_url: item.image_url,
-        position: item.position,
-      }));
+      // Create auction items using RPC function (bypasses schema cache)
+      const insertPromises = items.map(item => 
+        supabase.rpc('insert_auction_item_with_category' as any, {
+          p_auction_id: auctionData.id,
+          p_title: item.title,
+          p_description: item.description,
+          p_starting_price: item.starting_price,
+          p_reserve_price: item.reserve_price,
+          p_category: item.category || null,
+          p_image_url: item.image_url,
+          p_position: item.position,
+        })
+      );
 
-      const { data: itemsData, error: itemsError } = await supabase
-        .from('auction_items')
-        .insert(itemsToInsert)
-        .select();
+      const insertResults = await Promise.all(insertPromises);
+      const itemsError = insertResults.find(result => result.error);
 
-      if (itemsError) {
-        console.error('Supabase error creating items:', itemsError);
+      if (itemsError && itemsError.error) {
+        console.error('Supabase error creating items:', itemsError.error);
         // Rollback: delete the auction we just created
         await supabase.from('auctions').delete().eq('id', auctionData.id);
         return NextResponse.json(
-          { error: 'Failed to create auction items', details: itemsError.message },
+          { error: 'Failed to create auction items', details: itemsError.error.message || 'Unknown error' },
           { status: 500 }
         );
       }
+
+      // Fetch created items
+      const { data: itemsData } = await supabase
+        .from('auction_items')
+        .select('*')
+        .eq('auction_id', auctionData.id)
+        .order('position', { ascending: true });
 
       return NextResponse.json({ 
         data: { 
