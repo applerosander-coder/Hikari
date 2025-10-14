@@ -30,6 +30,8 @@ const CATEGORIES = [
 
 interface Auction {
   id: string;
+  name: string | null;
+  place: string | null;
   title: string;
   description: string | null;
   starting_price: number;
@@ -65,6 +67,8 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
   };
 
   const [formData, setFormData] = useState({
+    name: auction.name || '',
+    place: auction.place || '',
     title: auction.title,
     description: auction.description || '',
     starting_price: (auction.starting_price / 100).toFixed(2),
@@ -143,6 +147,8 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
 
       // Prepare auction data
       const auctionData = {
+        name: formData.name || null,
+        place: formData.place || null,
         title: formData.title,
         description: formData.description || null,
         starting_price: startingPriceCents,
@@ -216,6 +222,26 @@ export function EditAuctionForm({ auction, userId }: EditAuctionFormProps) {
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Auction Name</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Estate Sale, Art Gallery Auction"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="place">Location</Label>
+              <Input
+                id="place"
+                value={formData.place}
+                onChange={(e) => setFormData({ ...formData, place: e.target.value })}
+                placeholder="e.g., Los Angeles, CA or Online"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="title">
                 Auction Title <span className="text-red-500">*</span>
