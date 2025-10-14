@@ -1,6 +1,7 @@
 import {
   Gavel,
   Heart,
+  LineChart,
   Store,
   DollarSign,
   HelpCircle,
@@ -17,6 +18,7 @@ export interface MobileNavItem {
 export const mobileNavItems: MobileNavItem[] = [
   { href: '/dashboard', icon: Gavel, label: 'Auctions' },
   { href: '/mybids', icon: Heart, label: 'My Bids' },
+  { href: '/dashboard/leaderboard', icon: LineChart, label: 'Leaderboard' },
   { href: '/seller', icon: Store, label: 'Seller' },
   { href: '/pricing', icon: DollarSign, label: 'Pricing' },
   { href: '/how-it-works', icon: HelpCircle, label: 'How it Works' },
