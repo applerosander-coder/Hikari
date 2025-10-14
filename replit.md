@@ -4,6 +4,7 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories, featuring a seller dashboard for auction creation, watchlist functionality, and Netflix-style categorization for browsing. The project focuses on scalability and a rich, interactive user experience.
 
 ### Recent Changes (Oct 2025)
+- **Fixed Mobile Filter Width:** Constrained auction and category filter dropdowns to max-width of 280px on mobile for consistent sizing and better layout.
 - **Removed System Theme Option:** Simplified theme selector to only toggle between Light Mode and Dark Mode. Removed the System Theme option from mobile menu and set default theme to Light Mode for a more consistent user experience.
 - **Fixed Winner Processing Flow:** Corrected "Process Winners" dev tool button to properly end auctions before processing payments. The button now calls both `end-auctions` (to set winner_id) and `process-winners` (to charge payment) in sequence, ensuring items correctly appear in the Ended tab.
 - **Fixed Category Field Persistence:** Added category field to auction item update and insert operations in the PATCH /api/auctions/[id] endpoint. Category selections now properly save when editing auction items.

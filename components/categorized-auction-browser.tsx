@@ -212,7 +212,7 @@ export function CategorizedAuctionBrowser({
           <select
             value={selectedAuction}
             onChange={(e) => setSelectedAuction(e.target.value)}
-            className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-auto max-w-[280px] sm:max-w-none px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Auctions ({items.length + endedItems.length} items)</option>
             {(() => {
@@ -269,7 +269,7 @@ export function CategorizedAuctionBrowser({
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-auto max-w-[280px] sm:max-w-none px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Categories</option>
             {CATEGORIES.map((category) => (
