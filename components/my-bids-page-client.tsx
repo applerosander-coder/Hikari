@@ -5,12 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, X, Heart, Clock, XCircle } from 'lucide-react';
+import { Search, X, Heart, Clock, XCircle, RefreshCw } from 'lucide-react';
 import { ActiveBidsSection } from './active-bids-section';
 import { EndingSoonSection } from './ending-soon-section';
 import { WonAuctionsSection } from './won-auctions-section';
 import { WatchlistSection } from './watchlist-section';
 import { BidSuccessCelebration } from './bid-success-celebration';
+import { syncWonItemPayments } from '@/app/actions/create-test-data';
 import { toast } from 'sonner';
 
 interface MyBidsPageClientProps {
@@ -35,6 +36,24 @@ export function MyBidsPageClient({
     amount: number;
     auctionTitle: string;
   } | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncPayments = async () => {
+    setIsSyncing(true);
+    try {
+      const result = await syncWonItemPayments();
+      if (result.error) {
+        toast.error('Failed to sync payments', { description: result.error });
+      } else {
+        toast.success(result.message);
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error('Failed to sync payments');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Check for tab parameter in URL
   useEffect(() => {
