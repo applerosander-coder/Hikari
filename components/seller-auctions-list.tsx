@@ -3,8 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Package } from 'lucide-react';
 import Image from 'next/image';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface AuctionItem {
   id: string;
@@ -36,6 +39,8 @@ interface SellerAuctionsListProps {
 
 export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
   const router = useRouter();
+  const [publishingStates, setPublishingStates] = useState<Record<string, boolean>>({});
+  const [optimisticStatuses, setOptimisticStatuses] = useState<Record<string, string>>({});
 
   if (auctions.length === 0) {
     return (
@@ -59,21 +64,56 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
     }
   };
 
+  const handlePublishToggle = async (auctionId: string, currentStatus: string, checked: boolean) => {
+    const newStatus = checked ? 'active' : 'draft';
+    
+    // Optimistic update
+    setOptimisticStatuses(prev => ({ ...prev, [auctionId]: newStatus }));
+    setPublishingStates(prev => ({ ...prev, [auctionId]: true }));
+
+    try {
+      const response = await fetch('/api/auctions/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auctionId, status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update auction status');
+      }
+
+      toast.success(checked ? 'Auction published!' : 'Auction unpublished');
+      router.refresh();
+    } catch (error) {
+      console.error('Error updating auction status:', error);
+      toast.error('Failed to update auction status');
+      // Revert optimistic update on error
+      setOptimisticStatuses(prev => ({ ...prev, [auctionId]: currentStatus }));
+    } finally {
+      setPublishingStates(prev => ({ ...prev, [auctionId]: false }));
+    }
+  };
+
+  const getDisplayStatus = (auction: Auction) => {
+    return optimisticStatuses[auction.id] || auction.status;
+  };
+
   return (
     <div className="space-y-4">
       {auctions.map((auction) => {
         const itemCount = auction.auction_items?.length || 0;
         const hasItems = itemCount > 0;
+        const displayStatus = getDisplayStatus(auction);
         
         return (
           <div
             key={auction.id}
             className={`border rounded-lg p-4 transition-all ${
-              auction.status === 'draft'
+              displayStatus === 'draft'
                 ? 'hover:shadow-lg hover:border-gray-400'
                 : 'cursor-pointer hover:shadow-md'
             }`}
-            onClick={() => auction.status !== 'draft' && handleAuctionClick(auction)}
+            onClick={() => displayStatus !== 'draft' && handleAuctionClick(auction)}
           >
             <div className="flex justify-between items-start mb-2">
               <div className="flex-1">
@@ -86,12 +126,22 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
                   </p>
                 )}
               </div>
-              <Badge 
-                variant={auction.status === 'draft' ? 'secondary' : 'default'}
-                className="capitalize"
-              >
-                {auction.status}
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Badge 
+                  variant={displayStatus === 'draft' ? 'secondary' : 'default'}
+                  className="capitalize"
+                >
+                  {displayStatus}
+                </Badge>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Switch
+                    checked={displayStatus !== 'draft'}
+                    onCheckedChange={(checked) => handlePublishToggle(auction.id, auction.status, checked)}
+                    disabled={publishingStates[auction.id]}
+                    className="data-[state=checked]:bg-black"
+                  />
+                </div>
+              </div>
             </div>
             
             {/* Item Count and Preview */}
@@ -158,7 +208,7 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
               </div>
             </div>
 
-            {auction.status === 'draft' && (
+            {displayStatus === 'draft' && (
               <div className="flex gap-2 mt-4">
                 <Button
                   variant="outline"
