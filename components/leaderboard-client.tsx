@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Clock, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 const CATEGORIES = [
   'Electronics',
@@ -23,6 +24,7 @@ interface LeaderboardClientProps {
 }
 
 export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
+  const router = useRouter();
   const [selectedAuction, setSelectedAuction] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortType>('latest');
@@ -189,7 +191,11 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                   const hasBids = item.current_bid && item.current_bid > 0;
                   
                   return (
-                    <tr key={item.id} className={`hover:bg-muted/30 transition-colors ${hasEnded ? 'opacity-60' : ''}`}>
+                    <tr 
+                      key={item.id} 
+                      onClick={() => router.push(`/auctions/${item.auction_id}/items/${item.id}`)}
+                      className={`hover:bg-muted/30 transition-colors cursor-pointer ${hasEnded ? 'opacity-60' : ''}`}
+                    >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="relative h-12 w-12 flex-shrink-0 rounded-md overflow-hidden bg-muted">
@@ -254,8 +260,9 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
 
             return (
               <div 
-                key={item.id} 
-                className={`border rounded-lg p-4 space-y-3 ${hasEnded ? 'opacity-60' : ''}`}
+                key={item.id}
+                onClick={() => router.push(`/auctions/${item.auction_id}/items/${item.id}`)}
+                className={`border rounded-lg p-4 space-y-3 cursor-pointer hover:bg-muted/30 transition-colors ${hasEnded ? 'opacity-60' : ''}`}
               >
                 {/* Item with Image */}
                 <div className="flex items-center gap-3">
