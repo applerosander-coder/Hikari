@@ -74,8 +74,12 @@ export default async function MyBidsPage() {
     auctions: auction, // Wrap in expected structure
   }));
   
-  // Combine won items and won auctions
-  const combinedWonData = [...normalizedWonItems, ...normalizedWonAuctions];
+  // Combine won items and won auctions, then sort by end date (most recent first)
+  const combinedWonData = [...normalizedWonItems, ...normalizedWonAuctions].sort((a, b) => {
+    const aEndDate = a.auction?.end_date || a.auctions?.end_date || a.end_date || '';
+    const bEndDate = b.auction?.end_date || b.auctions?.end_date || b.end_date || '';
+    return new Date(bEndDate).getTime() - new Date(aEndDate).getTime();
+  });
 
   return (
     <MyBidsPageClient
