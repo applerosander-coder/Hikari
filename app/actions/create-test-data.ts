@@ -107,22 +107,67 @@ export async function createTestData() {
 
     if (items2Error) throw items2Error;
 
-    // Set winner_id on ended items
-    const { data: endedItems } = await supabase
-      .from('auction_items')
-      .select('*, auction:auctions!inner(*)')
-      .eq('auctions.status', 'ended')
-      .limit(3);
+    // Create an ENDED auction with items you WON
+    const { data: endedAuction, error: endedAuctionError } = await supabase
+      .from('auctions')
+      .insert({
+        name: 'Estate Sale - Ended',
+        place: 'Los Angeles, CA',
+        title: 'Estate Sale',
+        starting_price: 0,
+        category: 'collectibles',
+        start_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        end_date: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        created_by: user.id,
+        status: 'ended'
+      })
+      .select()
+      .single();
 
     let wonCount = 0;
-    if (endedItems && endedItems.length > 0) {
-      const itemsToWin = endedItems.slice(0, 2);
-      const { error: winError } = await supabase
+    if (!endedAuctionError && endedAuction) {
+      // Create won items
+      const { data: wonItems, error: wonItemsError } = await supabase
         .from('auction_items')
-        .update({ winner_id: user.id })
-        .in('id', itemsToWin.map(item => item.id));
+        .insert([
+          {
+            auction_id: endedAuction.id,
+            title: 'Antique Pocket Watch',
+            description: 'Rare 19th century timepiece',
+            starting_price: 50000,
+            current_bid: 75000,
+            winner_id: user.id,
+            image_url: 'https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=400',
+            position: 1
+          },
+          {
+            auction_id: endedAuction.id,
+            title: 'Vintage Typewriter',
+            description: 'Working condition, 1940s model',
+            starting_price: 30000,
+            current_bid: 45000,
+            winner_id: user.id,
+            image_url: 'https://images.unsplash.com/photo-1520642313207-1a13e7c4baa0?w=400',
+            position: 2
+          }
+        ])
+        .select();
 
-      if (!winError) wonCount = itemsToWin.length;
+      if (!wonItemsError && wonItems) {
+        wonCount = wonItems.length;
+        
+        // Create bids for won items
+        await supabase
+          .from('bids')
+          .insert(
+            wonItems.map(item => ({
+              auction_item_id: item.id,
+              auction_id: endedAuction.id,
+              user_id: user.id,
+              bid_amount: item.current_bid || item.starting_price
+            }))
+          );
+      }
     }
 
     // Get new live items for watchlist
