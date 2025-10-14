@@ -155,7 +155,7 @@ BEGIN
     UPDATE public.auction_items
     SET current_bid = NEW.bid_amount,
         updated_at = NOW()
-    WHERE id::text = NEW.auction_item_id;
+    WHERE id = NEW.auction_item_id;
   END IF;
   RETURN NEW;
 END;
