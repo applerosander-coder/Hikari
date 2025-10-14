@@ -82,6 +82,7 @@ export async function POST(request: Request) {
         description: item.description,
         starting_price: item.starting_price,
         reserve_price: item.reserve_price,
+        category: item.category,
         image_url: item.image_url,
         position: item.position,
       }));
