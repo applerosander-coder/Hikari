@@ -102,41 +102,35 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
     const file = e.target.files?.[0];
     
     if (!file) {
-      console.log('No file selected');
       return;
     }
     
-    console.log('File selected:', file.name, 'Size:', file.size);
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
     
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+    if (file.size > maxSize) {
+      toast.error(`Image is too large (${fileSizeMB}MB). Maximum size is 10MB.`);
+      e.target.value = ''; // Clear the file input
       return;
     }
     
     const reader = new FileReader();
     
-    reader.onerror = (error) => {
-      console.error('FileReader error:', error);
-      toast.error('Failed to read image file');
+    reader.onerror = () => {
+      toast.error('Failed to read image file. Please try again.');
+      e.target.value = ''; // Clear the file input
     };
     
     reader.onload = () => {
-      console.log('FileReader loaded successfully');
       const result = reader.result as string;
-      console.log('Setting preview for item:', itemId, 'Preview length:', result?.length);
       
-      setItems(prevItems => {
-        const updated = prevItems.map(item => 
-          item.id === itemId 
-            ? { ...item, image_preview: result, image_file: file } 
-            : item
-        );
-        console.log('Updated items:', updated.find(i => i.id === itemId));
-        return updated;
-      });
+      setItems(prevItems => prevItems.map(item => 
+        item.id === itemId 
+          ? { ...item, image_preview: result, image_file: file } 
+          : item
+      ));
     };
     
-    console.log('Starting to read file...');
     reader.readAsDataURL(file);
   };
 
@@ -471,7 +465,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     >
                       <Upload className="h-8 w-8 text-muted-foreground mb-1" />
                       <span className="text-xs text-muted-foreground">
-                        Click to upload (Max 5MB)
+                        Click to upload (Max 10MB)
                       </span>
                       <input
                         id={`image-${item.id}`}
