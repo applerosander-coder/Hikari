@@ -30,12 +30,10 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
   const toggleTheme = () => {
     if (!mounted) return;
     
-    if (theme === 'system') {
-      setTheme('light');
-    } else if (theme === 'light') {
+    if (theme === 'light' || theme === 'system') {
       setTheme('dark');
     } else {
-      setTheme('system');
+      setTheme('light');
     }
   };
 
@@ -119,7 +117,7 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </span>
         <span>
-          {!mounted ? 'Theme' : theme === 'system' ? 'System Theme' : theme === 'light' ? 'Light Mode' : 'Dark Mode'}
+          {!mounted ? 'Theme' : theme === 'light' || theme === 'system' ? 'Light Mode' : 'Dark Mode'}
         </span>
       </button>
 
