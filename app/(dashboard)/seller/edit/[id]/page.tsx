@@ -27,6 +27,13 @@ export default async function EditAuctionPage({ params }: { params: { id: string
     redirect('/seller');
   }
 
+  // Fetch existing auction items
+  const { data: auctionItems } = await supabase
+    .from('auction_items')
+    .select('*')
+    .eq('auction_id', params.id)
+    .order('position', { ascending: true });
+
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto">
@@ -37,7 +44,7 @@ export default async function EditAuctionPage({ params }: { params: { id: string
           </p>
         </div>
 
-        <EditAuctionForm auction={auction} userId={user.id} />
+        <EditAuctionForm auction={auction} auctionItems={auctionItems || []} userId={user.id} />
       </div>
     </div>
   );
