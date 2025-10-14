@@ -4,12 +4,15 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Search, X, Heart, Clock, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, X, Heart, Clock, XCircle, RefreshCw } from 'lucide-react';
 import { ActiveBidsSection } from './active-bids-section';
 import { EndingSoonSection } from './ending-soon-section';
 import { WonAuctionsSection } from './won-auctions-section';
 import { WatchlistSection } from './watchlist-section';
 import { BidSuccessCelebration } from './bid-success-celebration';
+import { syncWonItemPayments } from '@/app/actions/create-test-data';
+import { toast } from 'sonner';
 
 interface MyBidsPageClientProps {
   userBidsData: any[];
@@ -33,6 +36,24 @@ export function MyBidsPageClient({
     amount: number;
     auctionTitle: string;
   } | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncPayments = async () => {
+    setIsSyncing(true);
+    try {
+      const result = await syncWonItemPayments();
+      if (result.error) {
+        toast.error('Failed to sync payments', { description: result.error });
+      } else {
+        toast.success(result.message);
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error('Failed to sync payments');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Check for tab parameter in URL
   useEffect(() => {
@@ -244,9 +265,22 @@ export function MyBidsPageClient({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">My Bids</h1>
-        <p className="text-muted-foreground">Track your bids, watchlist, and won auctions</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">My Bids</h1>
+          <p className="text-muted-foreground">Track your bids, watchlist, and won auctions</p>
+        </div>
+        {process.env.NODE_ENV === 'development' && (
+          <Button
+            onClick={handleSyncPayments}
+            disabled={isSyncing}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Syncing...' : 'Sync Payments'}
+          </Button>
+        )}
       </div>
 
       <div className="mb-6">

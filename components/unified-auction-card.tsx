@@ -201,11 +201,14 @@ export function UnifiedAuctionCard({
     if (!auction.payments || auction.payments.length === 0) {
       return { status: 'pending', label: 'Payment Required', icon: CreditCard };
     }
-    const payment = auction.payments[0];
+    
+    const payment = auction.payments.find((p: any) => 
+      p.metadata?.auction_item_id === auction.itemId
+    ) || auction.payments[0];
     
     switch (payment.status) {
       case 'succeeded':
-        return { status: 'paid', label: 'Paid', icon: CheckCircle2 };
+        return { status: 'paid', label: 'Card Charged', icon: CheckCircle2 };
       case 'processing':
         return { status: 'processing', label: 'Processing', icon: CreditCard };
       default:
@@ -217,13 +220,16 @@ export function UnifiedAuctionCard({
     if (!auction.payments || auction.payments.length === 0) {
       return { status: 'pending', label: 'Awaiting Payment', icon: Package };
     }
-    const payment = auction.payments[0];
+    
+    const payment = auction.payments.find((p: any) => 
+      p.metadata?.auction_item_id === auction.itemId
+    ) || auction.payments[0];
     
     if (payment.status !== 'succeeded') {
       return { status: 'pending', label: 'Awaiting Payment', icon: Package };
     }
 
-    const shippingStatus = payment.shipping_status || 'pending';
+    const shippingStatus = payment.metadata?.shipping_status || 'pending';
     
     switch (shippingStatus) {
       case 'shipped':
@@ -231,7 +237,7 @@ export function UnifiedAuctionCard({
       case 'delivered':
         return { status: 'delivered', label: 'Delivered', icon: CheckCircle2 };
       default:
-        return { status: 'pending', label: 'Processing', icon: Package };
+        return { status: 'pending', label: 'Shipping Processing', icon: Package };
     }
   };
 
