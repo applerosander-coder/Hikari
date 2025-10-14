@@ -5,13 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, X, Heart, Clock, XCircle, RefreshCw } from 'lucide-react';
+import { Search, X, Heart, Clock, XCircle } from 'lucide-react';
 import { ActiveBidsSection } from './active-bids-section';
 import { EndingSoonSection } from './ending-soon-section';
 import { WonAuctionsSection } from './won-auctions-section';
 import { WatchlistSection } from './watchlist-section';
 import { BidSuccessCelebration } from './bid-success-celebration';
-import { syncWonItemPayments } from '@/app/actions/create-test-data';
 import { toast } from 'sonner';
 
 interface MyBidsPageClientProps {
