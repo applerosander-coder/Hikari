@@ -82,36 +82,99 @@ export async function PATCH(
         );
       }
 
-      // Delete existing items
-      await supabase
+      // Separate existing items (with ID) from new items (without ID)
+      const existingItemsToUpdate = items.filter(item => item.id);
+      const newItemsToInsert = items.filter(item => !item.id);
+
+      // Get current auction item IDs
+      const { data: currentItems } = await supabase
         .from('auction_items')
-        .delete()
+        .select('id')
         .eq('auction_id', params.id);
 
-      // Insert new/updated items
-      const itemsToInsert = items.map(item => ({
-        auction_id: params.id,
-        title: item.title,
-        description: item.description,
-        starting_price: item.starting_price,
-        reserve_price: item.reserve_price,
-        category: item.category,
-        image_url: item.image_url,
-        position: item.position,
-      }));
+      const currentItemIds = currentItems?.map(item => item.id) || [];
+      const itemIdsToKeep = existingItemsToUpdate.map(item => item.id);
+      const itemIdsToDelete = currentItemIds.filter(id => !itemIdsToKeep.includes(id));
 
-      const { data: itemsData, error: itemsError } = await supabase
-        .from('auction_items')
-        .insert(itemsToInsert)
-        .select();
+      // Delete removed items
+      if (itemIdsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('auction_items')
+          .delete()
+          .in('id', itemIdsToDelete);
 
-      if (itemsError) {
-        console.error('Error updating items:', itemsError);
-        return NextResponse.json(
-          { error: 'Failed to update auction items' },
-          { status: 500 }
-        );
+        if (deleteError) {
+          console.error('Error deleting removed items:', deleteError);
+          return NextResponse.json(
+            { error: 'Failed to delete removed items' },
+            { status: 500 }
+          );
+        }
       }
+
+      // Update existing items
+      if (existingItemsToUpdate.length > 0) {
+        const updatePromises = existingItemsToUpdate.map(item => 
+          supabase
+            .from('auction_items')
+            .update({
+              title: item.title,
+              description: item.description,
+              starting_price: item.starting_price,
+              reserve_price: item.reserve_price,
+              image_url: item.image_url,
+              position: item.position,
+            })
+            .eq('id', item.id)
+        );
+
+        const updateResults = await Promise.all(updatePromises);
+        const updateError = updateResults.find(result => result.error);
+        
+        if (updateError) {
+          console.error('Error updating items:', updateError.error);
+          return NextResponse.json(
+            { error: 'Failed to update auction items' },
+            { status: 500 }
+          );
+        }
+      }
+
+      // Insert new items
+      let newItemsData = [];
+      if (newItemsToInsert.length > 0) {
+        const itemsToInsert = newItemsToInsert.map(item => ({
+          auction_id: params.id,
+          title: item.title,
+          description: item.description,
+          starting_price: item.starting_price,
+          reserve_price: item.reserve_price,
+          image_url: item.image_url,
+          position: item.position,
+        }));
+
+        const { data, error: insertError } = await supabase
+          .from('auction_items')
+          .insert(itemsToInsert)
+          .select();
+
+        if (insertError) {
+          console.error('Error inserting new items:', insertError);
+          return NextResponse.json(
+            { error: 'Failed to insert new items' },
+            { status: 500 }
+          );
+        }
+
+        newItemsData = data || [];
+      }
+
+      // Fetch all current items to return
+      const { data: itemsData } = await supabase
+        .from('auction_items')
+        .select('*')
+        .eq('auction_id', params.id)
+        .order('position', { ascending: true });
 
       return NextResponse.json({ 
         data: { 
