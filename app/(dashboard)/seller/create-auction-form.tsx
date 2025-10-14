@@ -114,8 +114,11 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
       };
       
       reader.onloadend = () => {
-        handleItemChange(itemId, 'image_preview', reader.result as string);
-        handleItemChange(itemId, 'image_file', file);
+        setItems(prevItems => prevItems.map(item => 
+          item.id === itemId 
+            ? { ...item, image_preview: reader.result as string, image_file: file } 
+            : item
+        ));
       };
       
       reader.readAsDataURL(file);
@@ -435,8 +438,11 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                       <button
                         type="button"
                         onClick={() => {
-                          handleItemChange(item.id, 'image_preview', null);
-                          handleItemChange(item.id, 'image_file', null);
+                          setItems(prevItems => prevItems.map(i => 
+                            i.id === item.id 
+                              ? { ...i, image_preview: null, image_file: null } 
+                              : i
+                          ));
                         }}
                         className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
                       >
