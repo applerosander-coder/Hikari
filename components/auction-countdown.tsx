@@ -36,20 +36,7 @@ export function AuctionCountdown({ endDate, compact = false, onExpire }: Countdo
   }, [endDate, onExpire]);
 
   if (!mounted) {
-    return (
-      <div className="flex items-center gap-4">
-        <Clock className="h-5 w-5 text-primary" />
-        <div className="flex gap-2">
-          <TimeUnit value={0} label="Days" />
-          <Separator />
-          <TimeUnit value={0} label="Hours" />
-          <Separator />
-          <TimeUnit value={0} label="Min" />
-          <Separator />
-          <TimeUnit value={0} label="Sec" />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (timeLeft.isExpired) {
