@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { AuctionCountdown } from './auction-countdown';
 import { WatchlistButton } from './watchlist-button';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
 
 interface UnifiedAuctionCardProps {
   item: any;
@@ -25,6 +27,7 @@ export function UnifiedAuctionCard({
   isRemoving = false 
 }: UnifiedAuctionCardProps) {
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const formatPrice = (priceInCents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -248,6 +251,11 @@ export function UnifiedAuctionCard({
     <Card className={cn(
       "overflow-hidden hover:shadow-lg transition-shadow relative"
     )}>
+      {isNavigating && (
+        <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      )}
       {variant === 'watchlist' && onRemoveFromWatchlist && (
         <button
           onClick={() => onRemoveFromWatchlist(auction.auctionId)}
@@ -345,14 +353,20 @@ export function UnifiedAuctionCard({
         {variant === 'won' && paymentStatus?.status === 'pending' ? (
           <div className="flex gap-2">
             <Button
-              onClick={() => router.push('/dashboard/account')}
+              onClick={() => {
+                setIsNavigating(true);
+                router.push('/dashboard/account');
+              }}
               className="flex-1"
             >
               <CreditCard className="mr-2 h-4 w-4" />
               Add Payment Method
             </Button>
             <Button
-              onClick={() => router.push('/support')}
+              onClick={() => {
+                setIsNavigating(true);
+                router.push('/support');
+              }}
               variant="outline"
             >
               Contact Support
@@ -360,7 +374,10 @@ export function UnifiedAuctionCard({
           </div>
         ) : (
           <Button
-            onClick={() => router.push(auction.path)}
+            onClick={() => {
+              setIsNavigating(true);
+              router.push(auction.path);
+            }}
             className="w-full"
             variant={isWinning ? 'default' : 'outline'}
           >
