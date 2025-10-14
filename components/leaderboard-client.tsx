@@ -160,10 +160,10 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
           <table className="w-full">
             <thead className="bg-muted/50 border-b">
               <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold">Item</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold hidden sm:table-cell">Category</th>
-                <th className="text-right px-4 py-3 text-sm font-semibold">Highest Bid</th>
-                <th className="text-right px-4 py-3 text-sm font-semibold hidden md:table-cell">Status</th>
+                <th className="text-left px-4 py-3 text-sm font-semibold w-[40%]">Item</th>
+                <th className="text-left px-6 py-3 text-sm font-semibold hidden sm:table-cell w-[20%]">Category</th>
+                <th className="text-right px-6 py-3 text-sm font-semibold w-[20%]">Highest Bid</th>
+                <th className="text-center px-6 py-3 text-sm font-semibold hidden md:table-cell w-[20%]">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -214,10 +214,10 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                      <td className="px-6 py-3 text-sm text-muted-foreground hidden sm:table-cell">
                         {item.category || 'Uncategorized'}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-6 py-3 text-right">
                         <div className="font-semibold">${displayBid.toFixed(2)}</div>
                         {!hasBids && (
                           <div className="text-xs text-muted-foreground">Starting bid</div>
@@ -229,7 +229,7 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                           <div className="text-xs text-muted-foreground">Current bid</div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm hidden md:table-cell">
+                      <td className="px-6 py-3 text-center text-sm hidden md:table-cell">
                         {getTimeStatus(item)}
                       </td>
                     </tr>
