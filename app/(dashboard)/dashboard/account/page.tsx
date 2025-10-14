@@ -35,7 +35,8 @@ export default async function AccountPage() {
     return redirect('/signin'); // Keep this for user redirection
   }
 
-  const isSubscribed = subscription?.status === 'active';
+  // All logged-in users have the free Participant Plan
+  const hasPaidSubscription = subscription?.status === 'active';
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/40 gap-4">
@@ -80,7 +81,7 @@ export default async function AccountPage() {
             />
           </CardContent>
         </Card>
-        {isSubscribed ? (
+        {hasPaidSubscription ? (
           <Card className="flex flex-col gap-4 w-full">
             <CardHeader>
               <CardTitle>Your Subscription</CardTitle>
@@ -126,24 +127,44 @@ export default async function AccountPage() {
             </CardFooter>
           </Card>
         ) : (
-          <Card className="flex flex-col gap-4">
+          <Card className="flex flex-col gap-4 w-full">
             <CardHeader>
-              <CardTitle>No Active Subscription</CardTitle>
+              <CardTitle>Your Subscription</CardTitle>
               <CardDescription>
-                You currently do not have an active subscription. Please consider upgrading to access more features.
+                You are currently on the free Participant Plan.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4">
-              <div className="flex items-center justify-between">
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="plan">Plan</Label>
+                <div className="text-muted-foreground">
+                  Participant Plan
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="amount">Amount</Label>
+                <div className="text-muted-foreground">
+                  $0 / month
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="status">Status</Label>
+                <div className="text-muted-foreground capitalize">
+                  Active
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <div className="flex items-center justify-between w-full">
                 <div>
-                  <h4 className="text-lg font-medium">Explore Plans</h4>
-                  <p className="text-muted-foreground">Check out our pricing options.</p>
+                  <h4 className="text-sm font-medium">Upgrade to Premium</h4>
+                  <p className="text-sm text-muted-foreground">Get access to more features</p>
                 </div>
                 <Link href="/pricing">
                   <Button>View Pricing</Button>
                 </Link>
               </div>
-            </CardContent>
+            </CardFooter>
           </Card>
         )}
         <Card>
