@@ -35,24 +35,6 @@ export function MyBidsPageClient({
     amount: number;
     auctionTitle: string;
   } | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const handleSyncPayments = async () => {
-    setIsSyncing(true);
-    try {
-      const result = await syncWonItemPayments();
-      if (result.error) {
-        toast.error('Failed to sync payments', { description: result.error });
-      } else {
-        toast.success(result.message);
-        router.refresh();
-      }
-    } catch (error) {
-      toast.error('Failed to sync payments');
-    } finally {
-      setIsSyncing(false);
-    }
-  };
 
   // Check for tab parameter in URL
   useEffect(() => {
