@@ -101,28 +101,43 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
   const handleImageChange = (itemId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image must be less than 5MB');
-        return;
-      }
-      
-      const reader = new FileReader();
-      
-      reader.onerror = () => {
-        toast.error('Failed to read image file');
-      };
-      
-      reader.onloadend = () => {
-        setItems(prevItems => prevItems.map(item => 
-          item.id === itemId 
-            ? { ...item, image_preview: reader.result as string, image_file: file } 
-            : item
-        ));
-      };
-      
-      reader.readAsDataURL(file);
+    if (!file) {
+      console.log('No file selected');
+      return;
     }
+    
+    console.log('File selected:', file.name, 'Size:', file.size);
+    
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onerror = (error) => {
+      console.error('FileReader error:', error);
+      toast.error('Failed to read image file');
+    };
+    
+    reader.onload = () => {
+      console.log('FileReader loaded successfully');
+      const result = reader.result as string;
+      console.log('Setting preview for item:', itemId, 'Preview length:', result?.length);
+      
+      setItems(prevItems => {
+        const updated = prevItems.map(item => 
+          item.id === itemId 
+            ? { ...item, image_preview: result, image_file: file } 
+            : item
+        );
+        console.log('Updated items:', updated.find(i => i.id === itemId));
+        return updated;
+      });
+    };
+    
+    console.log('Starting to read file...');
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
