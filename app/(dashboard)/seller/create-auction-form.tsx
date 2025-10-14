@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Upload, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Upload, Plus, Trash2, GripVertical, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { uploadImage } from '@/utils/supabase/storage/client';
