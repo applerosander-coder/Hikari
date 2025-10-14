@@ -197,13 +197,23 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
               <div>
                 <span className="text-muted-foreground">Start: </span>
                 <span className="font-medium">
-                  {new Date(auction.start_date).toLocaleDateString()}
+                  {new Date(auction.start_date).toLocaleDateString('en-US', { 
+                    timeZone: 'UTC',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
                 </span>
               </div>
               <div>
                 <span className="text-muted-foreground">End: </span>
                 <span className="font-medium">
-                  {new Date(auction.end_date).toLocaleDateString()}
+                  {new Date(auction.end_date).toLocaleDateString('en-US', { 
+                    timeZone: 'UTC',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
                 </span>
               </div>
             </div>
