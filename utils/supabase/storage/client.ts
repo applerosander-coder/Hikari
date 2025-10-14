@@ -10,20 +10,27 @@ type UploadProps = {
   file: File;
   bucket: string;
   folder?: string;
+  filename?: string;
 };
 
-export const uploadImage = async ({ file, bucket, folder }: UploadProps) => {
-  const fileName = file.name;
-  const fileExtension = fileName.slice(fileName.lastIndexOf(".") + 1);
-  const path = `${folder ? folder + "/" : ""}avatar_url.${fileExtension}`;
+export const uploadImage = async ({ file, bucket, folder, filename }: UploadProps) => {
+  const originalFileName = file.name;
+  const fileExtension = originalFileName.slice(originalFileName.lastIndexOf(".") + 1);
+  
+  // Generate unique filename: use provided filename or create one with timestamp
+  const uniqueFilename = filename 
+    ? `${filename}.${fileExtension}`
+    : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
+  
+  const path = `${folder ? folder + "/" : ""}${uniqueFilename}`;
 
-  console.log(`Preparing to upload image: ${fileName} to bucket: ${bucket} in folder: ${folder}`);
+  console.log(`Preparing to upload image: ${originalFileName} to bucket: ${bucket} in folder: ${folder}`);
 
   try {
     file = await imageCompression(file, {
       maxSizeMB: 0.5,
     });
-    console.log(`Image compressed: ${fileName}`);
+    console.log(`Image compressed: ${originalFileName}`);
   } catch (error) {
     console.error("Image compression error:", error);
     return { imageUrl: "", error: "Image compression failed" };

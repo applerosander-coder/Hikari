@@ -44,6 +44,7 @@ export function ImageUpload({ user }: { user: any }) {
         file: imageFile,
         bucket: "avatar",
         folder: user.id,
+        filename: "avatar_url",
       });
       if (error) {
         toast({

@@ -19,7 +19,8 @@
     "supabase:generate-migration": "npx supabase db diff | npx supabase migration new",
     "supabase:generate-seed": "npx supabase db dump --data-only -f supabase/seed.sql",
     "supabase:push": "npx supabase db push",
-    "supabase:pull": "npx supabase db pull"
+    "supabase:pull": "npx supabase db pull",
+    "setup:storage": "tsx scripts/setup-storage-buckets.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.5",
@@ -100,6 +101,7 @@
     "tailwindcss": "^3.4.4",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.180.0",
+    "tsx": "^4.20.6",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
   },

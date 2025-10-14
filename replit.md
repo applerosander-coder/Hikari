@@ -19,6 +19,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 **Technical Implementations:**
 - **Real-time Functionality:** Supabase real-time subscriptions for live auction updates and countdowns.
 - **Database Schema:** Custom tables for `auctions` (containers), `auction_items` (individual items), `bids`, `customers`, `payments`, `watchlist`, `notifications`, and `invitations`. Bids are linked to `auction_items`. **Note:** `auction_items` table does NOT have a `status` column (only `auctions` has status field).
+- **Storage:** Supabase Storage with two buckets: `seller-auctions` (auction item images) and `avatar` (user avatars). Images are automatically compressed to 0.5MB max before upload. Each auction item gets a unique timestamped filename to prevent overwrites.
 - **State Management:** TanStack Query for data fetching and caching, and tRPC for API communication.
 - **Performance Optimizations:** Exponential backoff for polling, `router.refresh()` for targeted data fetching, retry logic for bid verification, and Postgres RPC functions for efficient data aggregation.
 - **Deployment:** Configured for Replit Autoscale, with cron jobs for automated auction ending, winner processing, and draft publishing.
