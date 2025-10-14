@@ -156,9 +156,16 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                 </tr>
               ) : (
                 filteredAndSortedItems.map((item) => {
-                  const highestBid = item.current_bid || item.starting_bid || 0;
                   const endDate = item.auction?.end_date ? new Date(item.auction.end_date) : null;
                   const hasEnded = endDate && endDate <= new Date();
+                  
+                  // Display logic:
+                  // - If active and has current_bid: show current bid
+                  // - If active and no current_bid: show starting bid
+                  // - If ended and has current_bid: show winning bid
+                  // - If ended and no current_bid: show starting bid
+                  const displayBid = item.current_bid || item.starting_bid || 0;
+                  const hasBids = item.current_bid && item.current_bid > 0;
                   
                   return (
                     <tr key={item.id} className={`hover:bg-muted/30 transition-colors ${hasEnded ? 'opacity-60' : ''}`}>
@@ -189,8 +196,17 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                       <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
                         {item.category || 'Uncategorized'}
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold">
-                        ${highestBid.toFixed(2)}
+                      <td className="px-4 py-3 text-right">
+                        <div className="font-semibold">${displayBid.toFixed(2)}</div>
+                        {!hasBids && (
+                          <div className="text-xs text-muted-foreground">Starting bid</div>
+                        )}
+                        {hasBids && hasEnded && (
+                          <div className="text-xs text-muted-foreground">Winning bid</div>
+                        )}
+                        {hasBids && !hasEnded && (
+                          <div className="text-xs text-muted-foreground">Current bid</div>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right text-sm hidden md:table-cell">
                         {getTimeStatus(item)}
