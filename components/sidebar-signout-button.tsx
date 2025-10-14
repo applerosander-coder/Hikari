@@ -1,6 +1,5 @@
 'use client';
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 import {
@@ -8,10 +7,11 @@ import {
   TooltipTrigger,
   TooltipContent
 } from '@/components/ui/tooltip';
+import { createClient } from '@/utils/supabase/client';
 
 export function SidebarSignOutButton() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

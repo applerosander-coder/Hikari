@@ -1,6 +1,5 @@
 'use client';
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -13,9 +12,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Database } from '@/types/db';
 import { User } from '@/types/main'
 import Image from "next/image"
+import { createClient } from '@/utils/supabase/client';
 
 interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: {
@@ -28,7 +27,7 @@ interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function UserAccountNav({ user }: UserAccountNavProps) {
   const router = useRouter()
-  const supabase = createClientComponentClient<Database>()
+  const supabase = createClient()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
