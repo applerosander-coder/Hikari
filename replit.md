@@ -22,7 +22,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **Storage:** Supabase Storage with two buckets: `seller-auctions` (auction item images) and `avatar` (user avatars). Images are automatically compressed to 0.5MB max before upload. Each auction item gets a unique timestamped filename to prevent overwrites.
 - **State Management:** TanStack Query for data fetching and caching, and tRPC for API communication.
 - **Performance Optimizations:** Exponential backoff for polling, `router.refresh()` for targeted data fetching, retry logic for bid verification, and Postgres RPC functions for efficient data aggregation.
-- **Deployment:** Configured for Replit Autoscale, with cron jobs for automated auction ending, winner processing, and draft publishing.
+- **Deployment:** Configured for Replit Autoscale. **Note:** Cron jobs require separate Scheduled Deployments on Replit (not available on Autoscale). Manual trigger available via dev tools for winner processing.
 - **Auction Management:** Draft auction system with preview mode and auto-publishing based on start times.
 - **Winner Processing:** Automated off-session Stripe charging for auction winners with comprehensive failure handling and real-time notifications.
 
@@ -36,7 +36,9 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **My Bids Page:** Tracks active bids, outbid items, won auctions (with payment/shipping status), and a user-curated watchlist. Ended tab displays won auctions first, followed by the 10 most recent lost bids.
 - **Watchlist:** Allows users to track individual auction items.
 - **Loading Indicators:** Page loading spinners and NProgress bar for navigation.
-- **Dev Tools:** Test data creation button available in development for quick testing (creates live auctions, sets winners, adds watchlist items).
+- **Dev Tools:** Development-only buttons in bottom-right corner for quick testing:
+  - **Create Test Data:** Creates live auctions with items, sets winners, and adds watchlist items
+  - **Process Winners:** Manually triggers winner payment processing (charges winning bidders via Stripe after auction ends)
 
 ### External Dependencies
 - **Supabase:** Database, Authentication, Realtime.
