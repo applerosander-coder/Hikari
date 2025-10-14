@@ -44,7 +44,7 @@ export default async function MyBidsPage() {
     .order('created_at', { ascending: false });
 
   // Fetch won auction items (where user is the winner)
-  const { data: wonItemsData, error: wonItemsError } = await supabase
+  const { data: wonItemsData } = await supabase
     .from('auction_items')
     .select(`
       *,
@@ -53,13 +53,6 @@ export default async function MyBidsPage() {
     `)
     .eq('winner_id', user.id)
     .order('created_at', { ascending: false });
-
-  console.log('🏆 Won Items Query Result:', {
-    userId: user.id,
-    count: wonItemsData?.length || 0,
-    items: wonItemsData,
-    error: wonItemsError
-  });
 
   // Fetch won legacy auctions (where user is the winner)
   const { data: wonAuctionsData } = await supabase

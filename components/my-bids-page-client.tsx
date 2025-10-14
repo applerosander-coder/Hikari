@@ -24,13 +24,6 @@ export function MyBidsPageClient({
   wonAuctionsData,
   userId
 }: MyBidsPageClientProps) {
-  console.log('📊 My Bids Data:', {
-    totalBids: userBidsData?.length,
-    wonAuctions: wonAuctionsData?.length,
-    watchlist: watchlistData?.length,
-    wonData: wonAuctionsData
-  });
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,16 +108,6 @@ export function MyBidsPageClient({
     const status = auctionContainer?.status || auction.status;
     const hasEnded = endDate < now;
     const isWinning = bid.bid_amount >= currentBid && status !== 'ended' && !hasEnded;
-    
-    console.log('🔍 Checking bid:', {
-      title: auction.title,
-      isItem,
-      userBid: bid.bid_amount,
-      currentBid,
-      isWinning,
-      status,
-      hasEnded
-    });
     
     return isWinning;
   });

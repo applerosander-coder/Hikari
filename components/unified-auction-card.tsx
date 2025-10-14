@@ -339,11 +339,11 @@ export function UnifiedAuctionCard({
         {variant === 'won' && paymentStatus?.status === 'pending' ? (
           <div className="flex gap-2">
             <Button
-              onClick={() => router.push(`/checkout/${auction.auctionId}`)}
+              onClick={() => router.push('/dashboard/account')}
               className="flex-1"
             >
               <CreditCard className="mr-2 h-4 w-4" />
-              Pay Now
+              Add Payment Method
             </Button>
             <Button
               onClick={() => router.push('/support')}
