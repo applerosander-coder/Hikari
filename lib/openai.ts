@@ -8,10 +8,25 @@ interface GenerateDescriptionParams {
   itemTitle?: string;
 }
 
+interface GenerateDescriptionResponse {
+  description: string;
+  category: string;
+}
+
+const CATEGORIES = [
+  'Electronics',
+  'Fashion & Accessories',
+  'Services & Experiences',
+  'Collectibles & Art',
+  'Home & Living',
+  'Sports & Hobbies',
+  'Other'
+];
+
 export async function generateProductDescription({
   base64Image,
   itemTitle,
-}: GenerateDescriptionParams): Promise<string> {
+}: GenerateDescriptionParams): Promise<GenerateDescriptionResponse> {
   try {
     // Build the content array based on what's available
     const content: any[] = [];
@@ -49,22 +64,40 @@ export async function generateProductDescription({
       messages: [
         {
           role: "system",
-          content: `You are an expert e-commerce product description writer for auction listings. Create compelling, detailed descriptions that:
-- Highlight key features, materials, colors, and condition${base64Image ? ' visible in the image' : ''}
-- Use persuasive language that encourages bidding
-- Stay between 50-100 words
-- Focus on what makes the item valuable and desirable
-${base64Image ? '- Be specific about what you see in the image' : '- Use creative language to make the item appealing'}`,
+          content: `You are an expert e-commerce product description writer for auction listings. 
+
+Your task is to:
+1. Create a compelling description (50-100 words) that:
+   - Highlights key features, materials, colors, and condition${base64Image ? ' visible in the image' : ''}
+   - Uses persuasive language that encourages bidding
+   - Focuses on what makes the item valuable and desirable
+   ${base64Image ? '- Is specific about what you see in the image' : '- Uses creative language to make the item appealing'}
+
+2. Select the most appropriate category from this list:
+   ${CATEGORIES.join(', ')}
+
+Return your response in this exact JSON format:
+{
+  "description": "your compelling description here",
+  "category": "selected category from the list"
+}`,
         },
         {
           role: "user",
           content,
         },
       ],
-      max_tokens: 200,
+      max_tokens: 250,
+      response_format: { type: "json_object" },
     });
 
-    return visionResponse.choices[0]?.message?.content || "";
+    const responseText = visionResponse.choices[0]?.message?.content || "{}";
+    const parsed = JSON.parse(responseText);
+    
+    return {
+      description: parsed.description || "",
+      category: CATEGORIES.includes(parsed.category) ? parsed.category : "Other",
+    };
   } catch (error: any) {
     console.error("OpenAI API error:", error);
     throw new Error(`Failed to generate description: ${error.message}`);

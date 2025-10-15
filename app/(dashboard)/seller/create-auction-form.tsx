@@ -245,10 +245,15 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         throw new Error('No description in response');
       }
       
-      // Update the item's description and mark AI as used
+      // Update the item's description, category, and mark AI as used
       setItems(prevItems => prevItems.map(item => 
         item.id === itemId 
-          ? { ...item, description: data.description, ai_used_for_current_image: true } 
+          ? { 
+              ...item, 
+              description: data.description, 
+              category: data.category || item.category,
+              ai_used_for_current_image: true 
+            } 
           : item
       ));
       

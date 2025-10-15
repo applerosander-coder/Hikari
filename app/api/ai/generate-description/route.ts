@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
       ? base64Image.split("base64,")[1]
       : base64Image;
 
-    const description = await generateProductDescription({
+    const result = await generateProductDescription({
       base64Image: base64Data,
       itemTitle,
     });
 
-    console.log('Generated description:', description);
-    return NextResponse.json({ description });
+    console.log('Generated result:', result);
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Error generating description:", error);
     return NextResponse.json(
