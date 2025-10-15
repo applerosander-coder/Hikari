@@ -149,8 +149,15 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
 
     setIsGettingLocation(true);
 
+    // Create a timeout to stop trying after 10 seconds
+    const timeoutId = setTimeout(() => {
+      setIsGettingLocation(false);
+      toast.error('Location request timed out. Please enter location manually or allow location access in your browser settings.');
+    }, 10000);
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        clearTimeout(timeoutId);
         try {
           // Use reverse geocoding API to get location name
           const { latitude, longitude } = position.coords;
@@ -179,9 +186,25 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         }
       },
       (error) => {
+        clearTimeout(timeoutId);
         console.error('Geolocation error:', error);
-        toast.error('Failed to get your location. Please check your browser permissions.');
+        
+        // Provide specific error messages based on error code
+        if (error.code === error.PERMISSION_DENIED) {
+          toast.error('Location access denied. Please enable location permissions in your browser settings.');
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          toast.error('Location information unavailable. Please enter manually.');
+        } else if (error.code === error.TIMEOUT) {
+          toast.error('Location request timed out. Please try again or enter manually.');
+        } else {
+          toast.error('Failed to get location. Please enter manually.');
+        }
+        
         setIsGettingLocation(false);
+      },
+      {
+        timeout: 10000, // 10 second timeout
+        enableHighAccuracy: false, // Faster response on mobile
       }
     );
   };
