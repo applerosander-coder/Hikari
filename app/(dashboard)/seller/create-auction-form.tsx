@@ -477,10 +477,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     size="sm"
                     onClick={() => handleGenerateDescription(item.id)}
                     disabled={generatingAI === item.id || (!item.image_preview && !item.title.trim())}
-                    className="h-7 text-xs relative overflow-hidden transition-all duration-1000 hover:shadow-[inset_0_0_45px_rgba(192,192,192,0.7),0_0_40px_rgba(192,192,192,0.6)] hover:border-gray-400/60 hover:bg-gray-400/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm animate-[glow_30s_linear_infinite] disabled:animate-none"
-                    style={{
-                      animation: generatingAI === item.id || (!item.image_preview && !item.title.trim()) ? 'none' : undefined
-                    }}
+                    className={`h-7 text-xs relative overflow-hidden transition-all duration-1000 hover:shadow-[inset_0_0_60px_rgba(192,192,192,0.9),0_0_50px_rgba(192,192,192,0.8),0_0_70px_rgba(255,255,255,0.6)] hover:border-gray-400/70 hover:bg-gray-400/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm ${item.image_preview && generatingAI !== item.id ? 'animate-[glow_30s_linear_infinite]' : ''}`}
                   >
                     {generatingAI === item.id ? (
                       <>
