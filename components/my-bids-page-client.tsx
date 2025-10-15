@@ -107,7 +107,7 @@ export function MyBidsPageClient({
     const endDate = new Date(auctionContainer?.end_date || auction.end_date);
     const status = auctionContainer?.status || auction.status;
     const hasEnded = endDate < now;
-    const isWinning = bid.bid_amount >= currentBid && status !== 'ended' && !hasEnded;
+    const isWinning = bid.bid_amount >= currentBid && status === 'active' && !hasEnded;
     
     return isWinning;
   });
@@ -118,7 +118,7 @@ export function MyBidsPageClient({
     const endDate = new Date(auctionContainer?.end_date || auction.end_date);
     const status = auctionContainer?.status || auction.status;
     const hasEnded = endDate < now;
-    return bid.bid_amount < currentBid && status !== 'ended' && !hasEnded;
+    return bid.bid_amount < currentBid && status === 'active' && !hasEnded;
   });
 
   // Get ending soon items (within 24 hours)
@@ -128,16 +128,16 @@ export function MyBidsPageClient({
     const auctionContainer = isItem ? auction.auction : auction;
     const endDate = new Date(auctionContainer?.end_date || auction.end_date);
     const status = auctionContainer?.status || auction.status;
-    return endDate > now && endDate <= twentyFourHoursFromNow && status !== 'ended';
+    return endDate > now && endDate <= twentyFourHoursFromNow && status === 'active';
   });
 
-  // Filter watchlist to only count active items (not ended)
+  // Filter watchlist to only count active items (not ended or draft)
   const activeWatchlistItems = watchlistData.filter((item: any) => {
     const auction = item.auction_items?.auction || item.auctions;
     if (!auction) return false;
     const endDate = new Date(auction.end_date);
     const hasEnded = endDate < now;
-    return auction.status !== 'ended' && !hasEnded;
+    return auction.status === 'active' && !hasEnded;
   });
 
   // Get ended items where user lost (last 10)
