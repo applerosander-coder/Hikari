@@ -3,6 +3,11 @@
 ### Overview
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories, featuring a seller dashboard for auction creation, watchlist functionality, and Netflix-style categorization for browsing. The project focuses on scalability and a rich, interactive user experience.
 
+### Recent Changes (Oct 2025)
+- **My Bids UI Improvements:** Updated watchlist badge text from "Watching" to "Saved" for better clarity. Changed Active tab icon from Heart to TrendingUp (↗) to better represent active bidding. Made all tab icons visible on mobile and desktop for consistent user experience across devices.
+- **Sidebar Navigation Reorganization:** Switched positions of Seller and Leaderboard buttons in fullscreen mode. Navigation order is now: Auctions → My Bids → Leaderboard → Seller. Updated Seller icon from Users2 to Store icon to match mobile view for visual consistency across devices.
+- **My Bids Tab Label Updates:** Renamed tab labels for better clarity: "Soon" → "Ending", "Ended" → "Closed", "Watch" → "Saved". Added red heart icon to Saved tab for visual emphasis.
+
 ### User Preferences
 I prefer the agent to be concise and to the point. When suggesting code changes, provide a brief explanation of the "why" behind the change, not just the "what." I value iterative development and prefer to review smaller, focused pull requests or changes rather than large, monolithic ones. Please ensure all modifications align with the existing monochrome design aesthetic (black, white, gray). Do not make changes to the `docs/` folder.
 
