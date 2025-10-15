@@ -477,19 +477,22 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     size="sm"
                     onClick={() => handleGenerateDescription(item.id)}
                     disabled={generatingAI === item.id || (!item.image_preview && !item.title.trim())}
-                    className="h-7 text-xs"
+                    className="h-7 text-xs relative overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:border-purple-500/50 disabled:hover:shadow-none disabled:hover:border-border group"
                   >
-                    {generatingAI === item.id ? (
-                      <>
-                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-3 w-3 mr-1" />
-                        Type for me
-                      </>
-                    )}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+                    <div className="relative z-10">
+                      {generatingAI === item.id ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-3 w-3 mr-1 text-purple-500 group-hover:text-purple-400 transition-colors" />
+                          Type for me
+                        </>
+                      )}
+                    </div>
                   </Button>
                 </div>
                 <Textarea
