@@ -8,7 +8,8 @@ import {
   Inbox,
   FileText,
   Heart,
-  Gavel
+  Gavel,
+  Store
 } from 'lucide-react';
 
 export interface NavItem {
@@ -26,16 +27,17 @@ export const iconComponents = {
   Users2,
   LineChart,
   Heart,
-  Gavel
+  Gavel,
+  Store
 };
 
 export const navConfig = [
   { href: '/dashboard', icon: 'Gavel', label: 'Auctions' },
   { href: '/mybids', icon: 'Heart', label: 'My Bids' },
-  { href: '/seller', icon: 'Users2', label: 'Seller' },
   {
     href: '/dashboard/leaderboard',
     icon: 'LineChart',
     label: 'Leaderboard'
-  }
+  },
+  { href: '/seller', icon: 'Store', label: 'Seller' }
 ];
