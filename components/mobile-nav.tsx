@@ -13,6 +13,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { SharedMobileMenu } from '@/components/shared-mobile-menu';
+import { useTheme } from 'next-themes';
 
 interface MobileNavProps {
   items: MainNavItem[];
@@ -34,20 +35,27 @@ export function MobileNav({
   open, 
   onOpenChange 
 }: MobileNavProps) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
           <SheetTitle className="flex items-center text-left">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-2 rounded-lg">
+            {mounted && (
               <Image 
-                src="/bidwin-logo-v4.png" 
+                src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
                 alt="BIDWIN" 
                 width={100} 
                 height={50}
-                className="h-8 w-auto"
+                className="h-10 w-auto"
               />
-            </div>
+            )}
           </SheetTitle>
         </SheetHeader>
         

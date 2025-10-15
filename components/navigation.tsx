@@ -13,6 +13,7 @@ import { User } from '@supabase/supabase-js';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { UserAccountNav } from '@/components/user-account-nav';
+import { useTheme } from 'next-themes';
 
 interface CircularNavProps {
   items?: MainNavItem[];
@@ -32,6 +33,12 @@ export default function CircularNavigation({
 }: CircularNavProps) {
   const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
   const [hasShownWelcome, setHasShownWelcome] = React.useState(false);
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (user && !hasShownWelcome) {
@@ -47,16 +54,16 @@ export default function CircularNavigation({
     <>
       <nav className="flex flex-wrap items-center justify-between w-full md:w-fit p-2 md:p-1 gap-4 md:gap-20 md:bg-zinc-50 md:dark:bg-zinc-900 md:rounded-full md:px-8 md:border-2 md:border-muted/30 md:dark:border-muted/80 md:shadow-md mx-auto mt-4 backdrop-blur-sm md:backdrop-blur-none">
         <Link href="/" className="flex items-center">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-2 rounded-lg">
+          {mounted && (
             <Image 
-              src="/bidwin-logo-v4.png" 
+              src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
               alt="BIDWIN" 
               width={140} 
               height={70}
-              className="h-10 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
+              className="h-12 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
               priority
             />
-          </div>
+          )}
         </Link>
         {items?.length ? (
           <div className="hidden md:flex space-x-6">

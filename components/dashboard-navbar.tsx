@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import { SharedMobileMenu } from '@/components/shared-mobile-menu';
+import { useTheme } from 'next-themes';
 
 import { NavItem } from '@/config/dashboard';
 
@@ -18,20 +19,26 @@ export function Navbar({
   navConfig: NavItem[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="flex h-20 items-center gap-4 border-b bg-background px-4 sm:hidden fixed top-0 left-0 right-0 z-20">
       <Link href="/" className="flex items-center" prefetch={false}>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-2 rounded-lg">
+        {mounted && (
           <Image 
-            src="/bidwin-logo-v4.png" 
+            src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
             alt="BIDWIN" 
             width={100} 
             height={50}
-            className="h-8 w-auto"
+            className="h-10 w-auto"
             priority
           />
-        </div>
+        )}
       </Link>
 
       <div className="ml-auto" />

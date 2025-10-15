@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import React from 'react'
 import Image from 'next/image'
 
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { createClient } from '@supabase/supabase-js'
 import { useToast } from "@/components/ui/use-toast"
 import { CoolMode } from "@/components/magicui/cool-mode";
+import { useTheme } from 'next-themes';
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
@@ -24,6 +25,12 @@ const AnimatedUnderline = ({ children, href, className }: { children: React.Reac
 export default function FooterPrimary() {
   const [email, setEmail] = useState('')
   const { toast } = useToast()
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -157,15 +164,15 @@ export default function FooterPrimary() {
         </div>
         <div className="border-t mt-10 pt-6 flex flex-col items-center md:flex-row justify-between">
           <div className="flex items-center">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-2 rounded-lg">
+            {mounted && (
               <Image 
-                src="/bidwin-logo-v4.png" 
+                src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
                 alt="BIDWIN" 
                 width={100} 
                 height={50}
-                className="h-6 w-auto"
+                className="h-8 w-auto"
               />
-            </div>
+            )}
           </div>
           <p className="text-gray-500 mt-4 md:mt-0">© Auctions Inc. 2025</p>
         </div>
