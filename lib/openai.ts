@@ -1,7 +1,6 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-// This is using OpenAI's API, which points to OpenAI's API servers and requires your own API key.
+// Using gpt-4o for faster, cheaper AI descriptions with vision support
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 interface GenerateDescriptionParams {
@@ -45,10 +44,8 @@ export async function generateProductDescription({
       });
     }
 
-    console.log('Sending to OpenAI with content:', JSON.stringify(content, null, 2));
-    
     const visionResponse = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -64,16 +61,10 @@ ${base64Image ? '- Be specific about what you see in the image' : '- Use creativ
           content,
         },
       ],
-      max_completion_tokens: 1000,
+      max_tokens: 200,
     });
 
-    console.log('Full OpenAI response:', JSON.stringify(visionResponse, null, 2));
-    console.log('Message content:', visionResponse.choices[0]?.message?.content);
-    console.log('Choices array:', visionResponse.choices);
-    
-    const responseContent = visionResponse.choices[0]?.message?.content || "";
-    console.log('Returning description:', responseContent);
-    return responseContent;
+    return visionResponse.choices[0]?.message?.content || "";
   } catch (error: any) {
     console.error("OpenAI API error:", error);
     throw new Error(`Failed to generate description: ${error.message}`);
