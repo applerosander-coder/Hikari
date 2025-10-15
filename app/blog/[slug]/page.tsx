@@ -38,7 +38,7 @@ export default function Page({
   return (
     <main className="container max-sm:px-0 md:py-12">
       <div
-        className="rounded-xl border py-12"
+        className="rounded-xl border p-8 md:p-12"
         style={{
           backgroundImage: [
             `linear-gradient(to right, 
