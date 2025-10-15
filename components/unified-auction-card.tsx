@@ -185,7 +185,7 @@ export function UnifiedAuctionCard({
         return (
           <Badge className="absolute top-4 left-4 z-10 bg-black dark:bg-white text-white dark:text-black">
             <Heart className="h-3 w-3 mr-1" />
-            Watching
+            Saved
           </Badge>
         );
       case 'ending-soon':

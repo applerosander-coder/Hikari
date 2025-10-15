@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Search, X, Heart, Clock, XCircle } from 'lucide-react';
+import { Search, X, Heart, Clock, XCircle, TrendingUp } from 'lucide-react';
 import { ActiveBidsSection } from './active-bids-section';
 import { EndingSoonSection } from './ending-soon-section';
 import { WonAuctionsSection } from './won-auctions-section';
@@ -274,7 +274,7 @@ export function MyBidsPageClient({
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="active" className="flex items-center gap-1 sm:gap-2">
-            <Heart className="h-4 w-4 hidden sm:block" />
+            <TrendingUp className="h-4 w-4" />
             <span className="text-xs sm:text-sm">Active</span>
             {activeBidsCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
@@ -283,7 +283,7 @@ export function MyBidsPageClient({
             )}
           </TabsTrigger>
           <TabsTrigger value="ending-soon" className="flex items-center gap-1 sm:gap-2">
-            <Clock className="h-4 w-4 hidden sm:block" />
+            <Clock className="h-4 w-4" />
             <span className="text-xs sm:text-sm">Ending</span>
             {endingSoonCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
@@ -292,7 +292,7 @@ export function MyBidsPageClient({
             )}
           </TabsTrigger>
           <TabsTrigger value="ended" className="flex items-center gap-1 sm:gap-2">
-            <XCircle className="h-4 w-4 hidden sm:block" />
+            <XCircle className="h-4 w-4" />
             <span className="text-xs sm:text-sm">Closed</span>
             {endedCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
@@ -301,7 +301,7 @@ export function MyBidsPageClient({
             )}
           </TabsTrigger>
           <TabsTrigger value="watchlist" className="flex items-center gap-1 sm:gap-2">
-            <Heart className="h-4 w-4 hidden sm:block text-red-600 dark:text-red-400" />
+            <Heart className="h-4 w-4 text-red-600 dark:text-red-400" />
             <span className="text-xs sm:text-sm">Saved</span>
             {watchlistCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
