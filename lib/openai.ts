@@ -67,8 +67,13 @@ ${base64Image ? '- Be specific about what you see in the image' : '- Use creativ
       max_completion_tokens: 300,
     });
 
-    console.log('OpenAI response:', visionResponse.choices[0].message.content);
-    return visionResponse.choices[0].message.content || "";
+    console.log('Full OpenAI response:', JSON.stringify(visionResponse, null, 2));
+    console.log('Message content:', visionResponse.choices[0]?.message?.content);
+    console.log('Choices array:', visionResponse.choices);
+    
+    const responseContent = visionResponse.choices[0]?.message?.content || "";
+    console.log('Returning description:', responseContent);
+    return responseContent;
   } catch (error: any) {
     console.error("OpenAI API error:", error);
     throw new Error(`Failed to generate description: ${error.message}`);
