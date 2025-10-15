@@ -23,195 +23,163 @@ export async function POST() {
   console.log('✅ Data cleared');
 
   const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 1); // Start tomorrow
   const endDate = new Date();
-  endDate.setHours(endDate.getHours() + 2);
+  endDate.setDate(endDate.getDate() + 7); // End in 7 days
 
-  const auction1 = {
-    name: 'Spring Estate Sale 2025',
-    place: 'Downtown Gallery',
-    title: 'Spring Estate Sale',
-    description: 'Premium collection from local estate',
-    category: 'Collectibles',
-    starting_price: 0,
-    start_date: startDate.toISOString(),
-    end_date: endDate.toISOString(),
-    created_by: user.id,
-    status: 'active' as const,
-  };
-
-  const auction2 = {
-    name: 'Vintage Electronics Auction',
-    place: 'Tech Museum',
-    title: 'Vintage Electronics',
-    description: 'Rare vintage electronics and gadgets',
+  const auction = {
+    name: 'Premium Tech & Electronics Collection',
+    place: 'Downtown Tech Hub',
+    title: 'Premium Tech Collection',
+    description: 'Curated collection of high-end electronics, vintage tech, and modern gadgets. All items tested and verified working. Perfect for collectors and enthusiasts.',
     category: 'Electronics',
     starting_price: 0,
     start_date: startDate.toISOString(),
     end_date: endDate.toISOString(),
     created_by: user.id,
-    status: 'active' as const,
+    status: 'draft' as const,
   };
 
-  console.log('📦 Creating Auction 1: Spring Estate Sale...');
-  const { data: auction1Data, error: error1 } = await supabase
+  console.log('📦 Creating auction: Premium Tech & Electronics Collection...');
+  const { data: auctionData, error: auctionError } = await supabase
     .from('auctions')
-    .insert([auction1])
+    .insert([auction])
     .select()
     .single();
 
-  if (error1) {
-    console.error('❌ Error creating auction 1:', error1);
-    return NextResponse.json({ error: 'Failed to create auction 1', details: error1 }, { status: 500 });
+  if (auctionError) {
+    console.error('❌ Error creating auction:', auctionError);
+    return NextResponse.json({ error: 'Failed to create auction', details: auctionError }, { status: 500 });
   }
 
-  console.log('✅ Auction 1 created:', auction1Data.id);
+  console.log('✅ Auction created:', auctionData.id);
 
-  const items1 = [
+  const items = [
     {
-      auction_id: auction1Data.id,
-      title: 'Vintage Rolex Watch',
-      description: '1960s Rolex Submariner in excellent condition',
-      starting_price: 500000,
-      reserve_price: 800000,
-      current_bid: 500000,
-      image_url: 'https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?w=400',
-    },
-    {
-      auction_id: auction1Data.id,
-      title: 'Antique Persian Rug',
-      description: 'Hand-woven Persian rug from the 1920s',
-      starting_price: 300000,
-      reserve_price: 500000,
-      current_bid: 300000,
-      image_url: 'https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=400',
-
-    },
-    {
-      auction_id: auction1Data.id,
-      title: 'Victorian Oil Painting',
-      description: 'Original Victorian-era landscape painting',
-      starting_price: 150000,
-      reserve_price: 250000,
-      current_bid: 150000,
-      image_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400',
-
-    },
-    {
-      auction_id: auction1Data.id,
-      title: 'Antique Mahogany Desk',
-      description: 'Early 1900s mahogany writing desk',
-      starting_price: 200000,
-      reserve_price: 350000,
-      current_bid: 200000,
-      image_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400',
-
-    },
-  ];
-
-  const { data: items1Data, error: items1Error } = await supabase
-    .from('auction_items')
-    .insert(items1)
-    .select();
-
-  if (items1Error) {
-    console.error('❌ Error creating items for auction 1:', items1Error);
-    return NextResponse.json({ error: 'Failed to create items for auction 1', details: items1Error }, { status: 500 });
-  }
-
-  console.log(`✅ Created ${items1Data.length} items for Auction 1`);
-
-  console.log('📦 Creating Auction 2: Vintage Electronics...');
-  const { data: auction2Data, error: error2 } = await supabase
-    .from('auctions')
-    .insert([auction2])
-    .select()
-    .single();
-
-  if (error2) {
-    console.error('❌ Error creating auction 2:', error2);
-    return NextResponse.json({ error: 'Failed to create auction 2', details: error2 }, { status: 500 });
-  }
-
-  console.log('✅ Auction 2 created:', auction2Data.id);
-
-  const items2 = [
-    {
-      auction_id: auction2Data.id,
-      title: 'Original Apple Macintosh 128K',
-      description: 'Working 1984 Macintosh with original box',
-      starting_price: 250000,
+      auction_id: auctionData.id,
+      title: 'MacBook Pro 16" M3 Max',
+      description: 'Brand new MacBook Pro 16" with M3 Max chip, 64GB RAM, 2TB SSD. Space Black. Still sealed in box with Apple warranty. Perfect for professionals and content creators.',
+      starting_price: 350000,
       reserve_price: 400000,
-      current_bid: 250000,
-      image_url: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400',
-
+      category: 'Electronics',
+      position: 1,
+      image_url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400',
     },
     {
-      auction_id: auction2Data.id,
-      title: 'Sony Walkman TPS-L2',
-      description: 'First generation Walkman from 1979',
-      starting_price: 80000,
+      auction_id: auctionData.id,
+      title: 'Sony A7R V Camera Body',
+      description: 'Professional full-frame mirrorless camera with 61MP sensor. Includes original box, charger, batteries, and 2-year warranty. Used only for 3 months. Excellent condition.',
+      starting_price: 280000,
+      reserve_price: 350000,
+      category: 'Electronics',
+      position: 2,
+      image_url: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400',
+    },
+    {
+      auction_id: auctionData.id,
+      title: 'iPad Pro 12.9" M2 1TB',
+      description: 'iPad Pro 12.9" with M2 chip, 1TB storage, Space Gray. Includes Magic Keyboard, Apple Pencil 2nd Gen, and AppleCare+. Perfect for digital artists and professionals.',
+      starting_price: 180000,
+      reserve_price: 220000,
+      category: 'Electronics',
+      position: 3,
+      image_url: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400',
+    },
+    {
+      auction_id: auctionData.id,
+      title: 'PlayStation 5 Pro Bundle',
+      description: 'PS5 Pro with 2TB SSD, DualSense Edge controller, PlayStation VR2, and 10 AAA games including Spider-Man 2, God of War Ragnarok. All items mint condition.',
+      starting_price: 120000,
       reserve_price: 150000,
-      current_bid: 80000,
-      image_url: 'https://images.unsplash.com/photo-1558584673-c834fb1cc3ca?w=400',
-
+      category: 'Electronics',
+      position: 4,
+      image_url: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=400',
     },
     {
-      auction_id: auction2Data.id,
-      title: 'Atari 2600 Console',
-      description: 'Complete Atari 2600 system with 10 games',
-      starting_price: 50000,
-      reserve_price: 100000,
-      current_bid: 50000,
-      image_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400',
-
+      auction_id: auctionData.id,
+      title: 'Bose QuietComfort Ultra Headphones',
+      description: 'Top-of-the-line noise cancelling headphones. Black color with premium carrying case. Barely used, includes all original accessories and 1-year warranty remaining.',
+      starting_price: 35000,
+      reserve_price: 42000,
+      category: 'Electronics',
+      position: 5,
+      image_url: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400',
     },
     {
-      auction_id: auction2Data.id,
-      title: 'Vintage Polaroid SX-70',
-      description: 'Classic SX-70 instant camera in mint condition',
-      starting_price: 40000,
-      reserve_price: 80000,
-      current_bid: 40000,
-      image_url: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400',
-
+      auction_id: auctionData.id,
+      title: 'DJI Mavic 3 Pro Cine Premium',
+      description: 'Professional drone with Hasselblad camera, 1TB SSD, Fly More Kit including 3 batteries, ND filters, charging hub, and carrying case. Perfect for aerial photography.',
+      starting_price: 250000,
+      reserve_price: 300000,
+      category: 'Electronics',
+      position: 6,
+      image_url: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=400',
     },
     {
-      auction_id: auction2Data.id,
-      title: 'Nintendo Game Boy (1989)',
-      description: 'Original Game Boy with Tetris',
-      starting_price: 30000,
-      reserve_price: 60000,
-      current_bid: 30000,
-      image_url: 'https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?w=400',
-
+      auction_id: auctionData.id,
+      title: 'Apple Watch Ultra 2 Titanium',
+      description: 'Premium titanium smartwatch with Ocean Band and Trail Loop. GPS + Cellular, 49mm. Perfect condition with AppleCare+ for 2 years. Ideal for athletes and adventurers.',
+      starting_price: 70000,
+      reserve_price: 85000,
+      category: 'Electronics',
+      position: 7,
+      image_url: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=400',
+    },
+    {
+      auction_id: auctionData.id,
+      title: 'Samsung 55" OLED 4K Smart TV',
+      description: 'Quantum Dot OLED display with 120Hz refresh rate. Perfect for gaming and movies. Includes wall mount and soundbar. Only 6 months old, like new condition.',
+      starting_price: 140000,
+      reserve_price: 180000,
+      category: 'Electronics',
+      position: 8,
+      image_url: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400',
+    },
+    {
+      auction_id: auctionData.id,
+      title: 'Mechanical Gaming Keyboard Set',
+      description: 'Premium mechanical keyboard with Cherry MX switches, RGB lighting, and wireless gaming mouse. Includes custom keycaps and wrist rest. Perfect for gamers and typists.',
+      starting_price: 25000,
+      reserve_price: 35000,
+      category: 'Electronics',
+      position: 9,
+      image_url: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400',
+    },
+    {
+      auction_id: auctionData.id,
+      title: 'Vintage Stereo System',
+      description: '1980s high-fidelity stereo system with turntable, receiver, and speakers. Fully restored and working perfectly. A classic piece for audiophiles and collectors.',
+      starting_price: 45000,
+      reserve_price: 65000,
+      category: 'Electronics',
+      position: 10,
+      image_url: 'https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=400',
     },
   ];
 
-  const { data: items2Data, error: items2Error } = await supabase
+  const { data: itemsData, error: itemsError } = await supabase
     .from('auction_items')
-    .insert(items2)
+    .insert(items)
     .select();
 
-  if (items2Error) {
-    console.error('❌ Error creating items for auction 2:', items2Error);
-    return NextResponse.json({ error: 'Failed to create items for auction 2', details: items2Error }, { status: 500 });
+  if (itemsError) {
+    console.error('❌ Error creating items:', itemsError);
+    return NextResponse.json({ error: 'Failed to create items', details: itemsError }, { status: 500 });
   }
 
-  console.log(`✅ Created ${items2Data.length} items for Auction 2`);
+  console.log(`✅ Created ${itemsData.length} items for auction`);
 
   return NextResponse.json({
     success: true,
-    message: 'Test data created successfully',
+    message: `Test data created: ${itemsData.length} items in draft auction (editable)`,
     summary: {
-      auction1: {
-        id: auction1Data.id,
-        name: auction1Data.name,
-        itemCount: items1Data.length,
-      },
-      auction2: {
-        id: auction2Data.id,
-        name: auction2Data.name,
-        itemCount: items2Data.length,
+      auction: {
+        id: auctionData.id,
+        name: auctionData.name,
+        status: auctionData.status,
+        itemCount: itemsData.length,
+        startDate: auctionData.start_date,
+        endDate: auctionData.end_date,
       },
     },
   });
