@@ -420,6 +420,53 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                 />
               </div>
 
+              {/* Image Upload */}
+              <div>
+                <Label htmlFor={`image-${item.id}`}>Item Image</Label>
+                <div className="mt-2">
+                  {item.image_preview ? (
+                    <div className="relative w-full h-32 border rounded-lg overflow-hidden">
+                      <Image
+                        src={item.image_preview}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setItems(prevItems => prevItems.map(i => 
+                            i.id === item.id 
+                              ? { ...i, image_preview: null, image_file: null } 
+                              : i
+                          ));
+                        }}
+                        className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor={`image-${item.id}`}
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    >
+                      <Upload className="h-8 w-8 text-muted-foreground mb-1" />
+                      <span className="text-xs text-muted-foreground">
+                        Click to upload (Max 10MB)
+                      </span>
+                      <input
+                        id={`image-${item.id}`}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleImageChange(item.id, e)}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
               {/* Description */}
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -499,53 +546,6 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     onChange={(e) => handleItemChange(item.id, 'reserve_price', e.target.value)}
                     placeholder="0.00"
                   />
-                </div>
-              </div>
-
-              {/* Image Upload */}
-              <div>
-                <Label htmlFor={`image-${item.id}`}>Item Image</Label>
-                <div className="mt-2">
-                  {item.image_preview ? (
-                    <div className="relative w-full h-32 border rounded-lg overflow-hidden">
-                      <Image
-                        src={item.image_preview}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setItems(prevItems => prevItems.map(i => 
-                            i.id === item.id 
-                              ? { ...i, image_preview: null, image_file: null } 
-                              : i
-                          ));
-                        }}
-                        className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ) : (
-                    <label
-                      htmlFor={`image-${item.id}`}
-                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                    >
-                      <Upload className="h-8 w-8 text-muted-foreground mb-1" />
-                      <span className="text-xs text-muted-foreground">
-                        Click to upload (Max 10MB)
-                      </span>
-                      <input
-                        id={`image-${item.id}`}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handleImageChange(item.id, e)}
-                      />
-                    </label>
-                  )}
                 </div>
               </div>
             </CardContent>
