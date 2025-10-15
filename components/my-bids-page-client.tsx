@@ -284,7 +284,7 @@ export function MyBidsPageClient({
           </TabsTrigger>
           <TabsTrigger value="ending-soon" className="flex items-center gap-1 sm:gap-2">
             <Clock className="h-4 w-4 hidden sm:block" />
-            <span className="text-xs sm:text-sm">Soon</span>
+            <span className="text-xs sm:text-sm">Ending</span>
             {endingSoonCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
                 {endingSoonCount}
@@ -293,7 +293,7 @@ export function MyBidsPageClient({
           </TabsTrigger>
           <TabsTrigger value="ended" className="flex items-center gap-1 sm:gap-2">
             <XCircle className="h-4 w-4 hidden sm:block" />
-            <span className="text-xs sm:text-sm">Ended</span>
+            <span className="text-xs sm:text-sm">Closed</span>
             {endedCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
                 {endedCount}
@@ -301,8 +301,8 @@ export function MyBidsPageClient({
             )}
           </TabsTrigger>
           <TabsTrigger value="watchlist" className="flex items-center gap-1 sm:gap-2">
-            <Heart className="h-4 w-4 hidden sm:block" />
-            <span className="text-xs sm:text-sm">Watch</span>
+            <Heart className="h-4 w-4 hidden sm:block text-red-600 dark:text-red-400" />
+            <span className="text-xs sm:text-sm">Saved</span>
             {watchlistCount > 0 && (
               <span className="rounded-full bg-black dark:bg-white text-white dark:text-black px-1.5 sm:px-2 py-0.5 text-xs font-bold">
                 {watchlistCount}
