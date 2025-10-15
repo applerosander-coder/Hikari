@@ -7,6 +7,16 @@ import { useTheme } from 'next-themes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sun, Moon, LogOut } from 'lucide-react';
 import { mobileNavItems } from '@/config/navigation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface SharedMobileMenuProps {
   user?: any;
@@ -22,6 +32,7 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const [showSignOutDialog, setShowSignOutDialog] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
@@ -41,6 +52,7 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
     const { createClient } = await import('@/utils/supabase/client');
     const supabase = createClient();
     await supabase.auth.signOut();
+    setShowSignOutDialog(false);
     onClose();
     router.push('/signin');
   };
@@ -123,13 +135,30 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
 
       {/* Sign Out (only if user is logged in) */}
       {user && (
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-        >
-          <LogOut className="h-5 w-5" />
-          Sign Out
-        </button>
+        <>
+          <button
+            onClick={() => setShowSignOutDialog(true)}
+            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-5 w-5" />
+            Sign Out
+          </button>
+
+          <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You'll need to sign in again to access your account and continue bidding.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleSignOut}>Sign Out</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       )}
     </nav>
   );
