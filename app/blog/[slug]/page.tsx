@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import { blog } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
@@ -22,24 +23,62 @@ export default function Page({
 
   if (!page) notFound();
 
+  const svg = `<svg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'>
+  <filter id='noiseFilter'>
+    <feTurbulence 
+      type='fractalNoise' 
+      baseFrequency='0.65' 
+      numOctaves='3' 
+      stitchTiles='stitch'/>
+  </filter>
+  
+  <rect width='100%' height='100%' filter='url(#noiseFilter)'/>
+</svg>`;
+
   return (
     <>
       <div
         className="container rounded-xl border py-12 md:px-8"
         style={{
-          backgroundColor: 'black',
           backgroundImage: [
-            'linear-gradient(140deg, hsla(274,94%,54%,0.3), transparent 50%)',
-            'linear-gradient(to left top, hsla(260,90%,50%,0.8), transparent 50%)',
-            'radial-gradient(circle at 100% 100%, hsla(240,100%,82%,1), hsla(240,40%,40%,1) 17%, hsla(240,40%,40%,0.5) 20%, transparent)'
-          ].join(', '),
-          backgroundBlendMode: 'difference, difference, normal'
+            `linear-gradient(to right, 
+              rgba(0, 0, 0, 0.1),
+              hsl(var(--background) / 0.9) 40%,
+              hsl(var(--background)) 50%,
+              hsl(var(--background) / 0.9) 60%,
+              rgba(0, 0, 0, 0.1)
+            ),
+            radial-gradient(
+              circle at center,
+              hsl(var(--background)) 80%,
+              rgba(0, 0, 0, 0.1) 100%
+            )`,
+            `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
+          ].join(', ')
         }}
       >
-        <h1 className="mb-2 text-3xl font-bold text-white">
+        <div className="mb-6">
+          <Image 
+            src="/bidwin-logo-light.png"
+            alt="BIDWIN" 
+            width={140} 
+            height={70}
+            className="h-12 w-auto dark:hidden"
+            priority
+          />
+          <Image 
+            src="/bidwin-logo-dark.png"
+            alt="BIDWIN" 
+            width={140} 
+            height={70}
+            className="h-12 w-auto hidden dark:block"
+            priority
+          />
+        </div>
+        <h1 className="mb-2 text-3xl font-bold">
           {page.data.title}
         </h1>
-        <p className="mb-4 text-white/80">{page.data.description}</p>
+        <p className="mb-4 text-muted-foreground">{page.data.description}</p>
         <Link
           href="/blog"
           className={buttonVariants({ size: 'sm', variant: 'secondary' })}
