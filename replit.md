@@ -4,6 +4,7 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories, featuring a seller dashboard for auction creation, watchlist functionality, and Netflix-style categorization for browsing. The project focuses on scalability and a rich, interactive user experience.
 
 ### Recent Changes (Oct 2025)
+- **AI-Powered Description Generator:** Added "Type for me" button on seller page that uses OpenAI's Vision API (GPT-5) to automatically generate compelling product descriptions. The feature analyzes uploaded product images and item titles to create engaging 50-100 word descriptions highlighting key features, materials, colors, and selling points. Button includes Sparkles icon, loading state with spinner, and is disabled until both image and title are provided. API endpoint is secured with Supabase authentication to prevent unauthorized access. Provides instant AI assistance to sellers for creating professional auction listings.
 - **Legal Acknowledgment Signup Flow:** Implemented mandatory legal acknowledgment dialog for all new user signups. Users must now confirm: (1) age verification (18+ or legal majority), (2) acceptance of Terms of Service, (3) acceptance of Privacy Policy, (4) acceptance of Bidding Guidelines. The dialog appears before account creation for both email/password and GitHub OAuth flows. All checkboxes must be checked to proceed, and legal documents open in new tabs for review. This ensures all users acknowledge BIDWIN's marketplace facilitator role and binding bid commitments before participating.
 - **Legal & Informational Pages:** Created comprehensive legal documentation to protect BIDWIN platform owners. Added 5 new pages: (1) Terms of Service with liability caps, arbitration clauses, and platform facilitator language, (2) Privacy Policy with data protection and third-party disclaimers, (3) Bidding Guidelines with binding bid commitments and seller responsibility clauses, (4) About Auctions explaining silent auction mechanics, (5) Enhanced How It Works with full bidder/seller workflows. Updated footer links to point to all new pages. All legal content emphasizes BIDWIN as marketplace facilitator only, with sellers responsible for fulfillment and buyers/sellers handling disputes directly.
 - **Blog Post Page Styling Unification:** Updated individual blog post pages to use the same elegant noise filter gradient background as the main blog listing page. Replaced colorful gradients with monochrome theme-aware design. Added BIDWIN logo to post headers for consistent branding across all blog pages. Text colors now use theme variables for proper light/dark mode support.
@@ -39,7 +40,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **Live Auctions:** Real-time updates, countdowns, and categorized listings of individual auction items.
 - **Dashboard Display:** Active auctions prominently featured; recently ended auctions displayed at bottom.
 - **User Accounts:** Secure authentication, profile management, and avatar selection.
-- **Seller Dashboard:** Form for creating multi-item auctions with image upload and real-time preview, and management of draft auctions including deletion.
+- **Seller Dashboard:** Form for creating multi-item auctions with image upload and real-time preview, and management of draft auctions including deletion. Includes AI-powered "Type for me" button that generates product descriptions from uploaded images.
 - **Payment Processing:** Secure bidding, saved payment methods, and automated off-session charging via Stripe for winners.
 - **Mobile Optimization:** Accessible and usable across all devices.
 - **My Bids Page:** Tracks active bids, outbid items, won auctions (with payment/shipping status), and a user-curated watchlist. Includes filtering for "Won" and "Lost" ended auctions.
@@ -51,6 +52,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 ### External Dependencies
 - **Supabase:** Database, Authentication, Realtime, Storage.
 - **Stripe:** Payment processing.
+- **OpenAI:** Vision API (GPT-5) for AI-powered product description generation.
 - **Next.js 14:** Web framework.
 - **React:** UI library.
 - **Tailwind CSS:** Utility-first CSS framework.
