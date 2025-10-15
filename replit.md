@@ -68,7 +68,7 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **Watchlist:** Allows users to track individual auction items.
 - **Loading Indicators:** Page loading spinners and NProgress bar for navigation.
 - **Dev Tools:** Development-only buttons in bottom-right corner for quick testing:
-  - **Create Test Data:** Creates live auctions with items, sets winners, and adds watchlist items
+  - **Create Test Data:** Creates one draft auction with 10 fully-detailed items (editable). Each item includes complete information: title, detailed description, starting price, reserve price, category (Electronics), and images. Auction starts tomorrow and ends in 7 days.
   - **Process Winners:** Manually triggers winner payment processing (charges winning bidders via Stripe after auction ends)
 
 ### External Dependencies
