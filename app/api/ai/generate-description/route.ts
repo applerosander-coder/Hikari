@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
 import { generateProductDescription } from "@/lib/openai";
 
 export async function POST(request: NextRequest) {
   try {
     // Check if the user is authenticated
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -18,15 +17,16 @@ export async function POST(request: NextRequest) {
 
     const { base64Image, itemTitle } = await request.json();
 
-    if (!base64Image || !itemTitle) {
+    // Require at least one of image or title
+    if (!base64Image && !itemTitle) {
       return NextResponse.json(
-        { error: "Missing required fields: base64Image and itemTitle" },
+        { error: "Please provide either an image or item title" },
         { status: 400 }
       );
     }
 
-    // Remove data URL prefix if present
-    const base64Data = base64Image.includes("base64,")
+    // Remove data URL prefix if present (only if image exists)
+    const base64Data = base64Image && base64Image.includes("base64,")
       ? base64Image.split("base64,")[1]
       : base64Image;
 

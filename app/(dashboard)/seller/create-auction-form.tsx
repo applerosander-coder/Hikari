@@ -140,13 +140,9 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
     
     if (!item) return;
     
-    if (!item.image_preview) {
-      toast.error('Please upload an image first');
-      return;
-    }
-    
-    if (!item.title.trim()) {
-      toast.error('Please enter an item title first');
+    // Require at least one of image or title
+    if (!item.image_preview && !item.title.trim()) {
+      toast.error('Please upload an image or enter a title first');
       return;
     }
     
@@ -157,8 +153,8 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          base64Image: item.image_preview,
-          itemTitle: item.title,
+          base64Image: item.image_preview || undefined,
+          itemTitle: item.title.trim() || undefined,
         }),
       });
       
@@ -428,7 +424,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleGenerateDescription(item.id)}
-                    disabled={generatingAI === item.id || !item.image_preview || !item.title.trim()}
+                    disabled={generatingAI === item.id || (!item.image_preview && !item.title.trim())}
                     className="h-7 text-xs"
                   >
                     {generatingAI === item.id ? (
