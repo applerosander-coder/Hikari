@@ -163,10 +163,15 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         throw new Error(error.error || 'Failed to generate description');
       }
       
-      const { description } = await response.json();
+      const data = await response.json();
+      console.log('Received data from API:', data);
+      
+      if (!data.description) {
+        throw new Error('No description in response');
+      }
       
       // Update the item's description
-      handleItemChange(itemId, 'description', description);
+      handleItemChange(itemId, 'description', data.description);
       
       toast.success('Description generated successfully!');
     } catch (error: any) {

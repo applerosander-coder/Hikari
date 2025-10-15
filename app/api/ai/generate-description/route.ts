@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
       itemTitle,
     });
 
+    console.log('Generated description:', description);
     return NextResponse.json({ description });
   } catch (error: any) {
     console.error("Error generating description:", error);
