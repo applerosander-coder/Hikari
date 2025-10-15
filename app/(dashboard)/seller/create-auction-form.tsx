@@ -52,6 +52,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
   const [generatingAI, setGeneratingAI] = useState<string | null>(null); // Track which item is generating
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [useNowForStartDate, setUseNowForStartDate] = useState(false);
+  const [use24hForEndDate, setUse24hForEndDate] = useState(false);
 
   // Auction container fields
   const [auctionData, setAuctionData] = useState({
@@ -477,12 +478,44 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="end_date">End Date *</Label>
+              <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="end_date">End Date *</Label>
+                <div className="flex items-center gap-1.5">
+                  <Checkbox
+                    id="24h-checkbox"
+                    checked={use24hForEndDate}
+                    onCheckedChange={(checked) => {
+                      setUse24hForEndDate(checked as boolean);
+                      if (checked) {
+                        // Use start date if available, otherwise use current time
+                        const baseTime = auctionData.start_date 
+                          ? new Date(auctionData.start_date)
+                          : new Date();
+                        
+                        // Add 24 hours (24 * 60 * 60 * 1000 milliseconds)
+                        const endTime = new Date(baseTime.getTime() + 24 * 60 * 60 * 1000);
+                        
+                        // Convert to local datetime-local format
+                        const offset = endTime.getTimezoneOffset() * 60000;
+                        const localISOTime = new Date(endTime.getTime() - offset).toISOString().slice(0, 16);
+                        
+                        setAuctionData({ ...auctionData, end_date: localISOTime });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="24h-checkbox" className="text-sm font-normal cursor-pointer">
+                    24h
+                  </Label>
+                </div>
+              </div>
               <Input
                 id="end_date"
                 type="datetime-local"
                 value={auctionData.end_date}
-                onChange={(e) => setAuctionData({ ...auctionData, end_date: e.target.value })}
+                onChange={(e) => {
+                  setAuctionData({ ...auctionData, end_date: e.target.value });
+                  setUse24hForEndDate(false);
+                }}
                 required
               />
             </div>
