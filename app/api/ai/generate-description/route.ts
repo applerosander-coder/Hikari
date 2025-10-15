@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import { generateProductDescription } from "@/lib/openai";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if the user is authenticated
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - please sign in to use AI features' },
+        { status: 401 }
+      );
+    }
+
     const { base64Image, itemTitle } = await request.json();
 
     if (!base64Image || !itemTitle) {
