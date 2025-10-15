@@ -45,6 +45,8 @@ export async function generateProductDescription({
       });
     }
 
+    console.log('Sending to OpenAI with content:', JSON.stringify(content, null, 2));
+    
     const visionResponse = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [
@@ -65,6 +67,7 @@ ${base64Image ? '- Be specific about what you see in the image' : '- Use creativ
       max_completion_tokens: 300,
     });
 
+    console.log('OpenAI response:', visionResponse.choices[0].message.content);
     return visionResponse.choices[0].message.content || "";
   } catch (error: any) {
     console.error("OpenAI API error:", error);
