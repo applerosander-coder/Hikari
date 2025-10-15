@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Trophy } from 'lucide-react';
 import { UnifiedAuctionCard } from './unified-auction-card';
+import { Button } from '@/components/ui/button';
 
 interface WonAuctionsSectionProps {
   wonAuctions: any[];
@@ -11,6 +13,7 @@ interface WonAuctionsSectionProps {
 }
 
 export function WonAuctionsSection({ wonAuctions, endedLostBids, searchQuery }: WonAuctionsSectionProps) {
+  const [view, setView] = useState<'won' | 'lost'>('won');
   const filterWonAuctions = (auctions: any[]) => {
     if (!searchQuery.trim()) return auctions;
     const query = searchQuery.toLowerCase();
@@ -47,7 +50,11 @@ export function WonAuctionsSection({ wonAuctions, endedLostBids, searchQuery }: 
   const filteredWon = filterWonAuctions(wonAuctions);
   const filteredLost = filterLostBids(endedLostBids);
 
-  if (filteredWon.length === 0 && filteredLost.length === 0) {
+  const currentItems = view === 'won' ? filteredWon : filteredLost;
+  const hasWon = filteredWon.length > 0;
+  const hasLost = filteredLost.length > 0;
+
+  if (!hasWon && !hasLost) {
     return (
       <div className="text-center py-12">
         <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -60,8 +67,31 @@ export function WonAuctionsSection({ wonAuctions, endedLostBids, searchQuery }: 
   }
 
   return (
-    <div className="space-y-8">
-      {filteredWon.length > 0 && (
+    <div className="space-y-6">
+      {/* Toggle Buttons */}
+      <div className="flex gap-2 border-b border-border pb-4">
+        <Button
+          variant={view === 'won' ? 'default' : 'outline'}
+          onClick={() => setView('won')}
+          className="flex items-center gap-2"
+          disabled={!hasWon}
+        >
+          <Trophy className="h-4 w-4" />
+          Won ({filteredWon.length})
+        </Button>
+        <Button
+          variant={view === 'lost' ? 'default' : 'outline'}
+          onClick={() => setView('lost')}
+          className="flex items-center gap-2"
+          disabled={!hasLost}
+        >
+          <Trophy className="h-4 w-4" />
+          Lost ({filteredLost.length})
+        </Button>
+      </div>
+
+      {/* Content based on selected view */}
+      {view === 'won' && hasWon && (
         <div>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -82,7 +112,7 @@ export function WonAuctionsSection({ wonAuctions, endedLostBids, searchQuery }: 
         </div>
       )}
 
-      {filteredLost.length > 0 && (
+      {view === 'lost' && hasLost && (
         <div>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-red-600 dark:text-red-400" />
