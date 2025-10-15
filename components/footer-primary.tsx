@@ -89,12 +89,12 @@ export default function FooterPrimary() {
             <h3 className="text-lg font-bold mb-4">Company</h3>
             <ul className="space-y-2">
               <li>
-                <AnimatedUnderline href="#" className="text-primary">
+                <AnimatedUnderline href="/about-auctions" className="text-primary">
                   About Auctions
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="/documentation" className="text-primary">
+                <AnimatedUnderline href="/how-it-works" className="text-primary">
                   How It Works
                 </AnimatedUnderline>
               </li>
@@ -114,17 +114,17 @@ export default function FooterPrimary() {
             <h3 className="text-lg font-bold mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <AnimatedUnderline href="#" className="text-primary">
+                <AnimatedUnderline href="/terms-of-service" className="text-primary">
                   Terms of Service
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="#" className="text-primary">
+                <AnimatedUnderline href="/privacy-policy" className="text-primary">
                   Privacy Policy
                 </AnimatedUnderline>
               </li>
               <li>
-                <AnimatedUnderline href="#" className="text-primary">
+                <AnimatedUnderline href="/bidding-guidelines" className="text-primary">
                   Bidding Guidelines
                 </AnimatedUnderline>
               </li>
