@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Upload, Plus, Trash2, GripVertical, Loader2 } from 'lucide-react';
+import { Upload, Plus, Trash2, GripVertical, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { uploadImage } from '@/utils/supabase/storage/client';
@@ -47,6 +47,7 @@ interface CreateAuctionFormProps {
 export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState<string | null>(null); // Track which item is generating
 
   // Auction container fields
   const [auctionData, setAuctionData] = useState({
@@ -132,6 +133,52 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
     };
     
     reader.readAsDataURL(file);
+  };
+
+  const handleGenerateDescription = async (itemId: string) => {
+    const item = items.find(i => i.id === itemId);
+    
+    if (!item) return;
+    
+    if (!item.image_preview) {
+      toast.error('Please upload an image first');
+      return;
+    }
+    
+    if (!item.title.trim()) {
+      toast.error('Please enter an item title first');
+      return;
+    }
+    
+    setGeneratingAI(itemId);
+    
+    try {
+      const response = await fetch('/api/ai/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          base64Image: item.image_preview,
+          itemTitle: item.title,
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate description');
+      }
+      
+      const { description } = await response.json();
+      
+      // Update the item's description
+      handleItemChange(itemId, 'description', description);
+      
+      toast.success('Description generated successfully!');
+    } catch (error: any) {
+      console.error('Error generating description:', error);
+      toast.error(error.message || 'Failed to generate description');
+    } finally {
+      setGeneratingAI(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -374,7 +421,29 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
 
               {/* Description */}
               <div>
-                <Label htmlFor={`description-${item.id}`}>Description</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor={`description-${item.id}`}>Description</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleGenerateDescription(item.id)}
+                    disabled={generatingAI === item.id || !item.image_preview || !item.title.trim()}
+                    className="h-7 text-xs"
+                  >
+                    {generatingAI === item.id ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Type for me
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <Textarea
                   id={`description-${item.id}`}
                   value={item.description}
