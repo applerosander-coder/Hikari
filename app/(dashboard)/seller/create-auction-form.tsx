@@ -477,7 +477,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     size="sm"
                     onClick={() => handleGenerateDescription(item.id)}
                     disabled={generatingAI === item.id || (!item.image_preview && !item.title.trim())}
-                    className="h-7 text-xs relative overflow-hidden transition-all duration-500 hover:shadow-[inset_0_0_25px_rgba(139,92,246,0.4),0_0_20px_rgba(139,92,246,0.3)] hover:border-purple-500/40 hover:bg-purple-500/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm animate-[glow_3s_ease-in-out_infinite] disabled:animate-none"
+                    className="h-7 text-xs relative overflow-hidden transition-all duration-500 hover:shadow-[inset_0_0_30px_rgba(212,175,55,0.5),0_0_25px_rgba(212,175,55,0.4)] hover:border-amber-500/40 hover:bg-amber-500/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm animate-[glow_6s_ease-in-out_infinite] disabled:animate-none"
                     style={{
                       animation: generatingAI === item.id || (!item.image_preview && !item.title.trim()) ? 'none' : undefined
                     }}
@@ -489,7 +489,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                       </>
                     ) : (
                       <>
-                        <Sparkles className="h-3 w-3 mr-1 text-purple-500 transition-all duration-500" />
+                        <Sparkles className="h-3 w-3 mr-1 text-amber-500 transition-all duration-500" />
                         Type for me
                       </>
                     )}
