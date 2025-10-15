@@ -477,7 +477,10 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     size="sm"
                     onClick={() => handleGenerateDescription(item.id)}
                     disabled={generatingAI === item.id || (!item.image_preview && !item.title.trim())}
-                    className="h-7 text-xs relative overflow-hidden transition-all duration-500 hover:shadow-[inset_0_0_20px_rgba(139,92,246,0.3),0_0_15px_rgba(139,92,246,0.2)] hover:border-purple-500/30 hover:bg-purple-500/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm"
+                    className="h-7 text-xs relative overflow-hidden transition-all duration-500 hover:shadow-[inset_0_0_25px_rgba(139,92,246,0.4),0_0_20px_rgba(139,92,246,0.3)] hover:border-purple-500/40 hover:bg-purple-500/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm animate-[glow_3s_ease-in-out_infinite] disabled:animate-none"
+                    style={{
+                      animation: generatingAI === item.id || (!item.image_preview && !item.title.trim()) ? 'none' : undefined
+                    }}
                   >
                     {generatingAI === item.id ? (
                       <>
