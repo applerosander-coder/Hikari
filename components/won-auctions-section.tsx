@@ -116,7 +116,7 @@ export function WonAuctionsSection({ wonAuctions, endedLostBids, searchQuery }: 
         <div>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-red-600 dark:text-red-400" />
-            Lost - Recent 10 ({filteredLost.length})
+            Lost ({filteredLost.length})
           </h2>
           <p className="text-muted-foreground mb-4">
             Your most recent ended auctions where you didn't win.
