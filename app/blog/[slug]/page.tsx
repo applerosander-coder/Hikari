@@ -36,9 +36,9 @@ export default function Page({
 </svg>`;
 
   return (
-    <>
+    <main className="container max-sm:px-0 md:py-12">
       <div
-        className="container max-sm:px-0 rounded-xl border py-12 md:mt-12"
+        className="rounded-xl border py-12"
         style={{
           backgroundImage: [
             `linear-gradient(to right, 
@@ -86,7 +86,7 @@ export default function Page({
           Back
         </Link>
       </div>
-      <article className="container grid grid-cols-1 px-0 py-8 lg:grid-cols-[2fr_1fr] lg:px-4">
+      <article className="grid grid-cols-1 px-0 py-8 lg:grid-cols-[2fr_1fr] lg:px-4">
         <div className="prose p-4">
           <InlineTOC items={page.data.exports.toc} />
           <page.data.exports.default />
@@ -105,7 +105,7 @@ export default function Page({
           <Control url={page.url} />
         </div>
       </article>
-    </>
+    </main>
   );
 }
 
