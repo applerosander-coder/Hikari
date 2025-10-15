@@ -274,9 +274,17 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
       }
 
       // Validate at least one item with required fields
-      const validItems = items.filter(item => item.title && item.starting_price);
+      const validItems = items.filter(item => item.title && item.starting_price && item.category);
       if (validItems.length === 0) {
-        toast.error('Please add at least one item with title and starting price');
+        toast.error('Please add at least one item with title, starting price, and category');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Check if any items are missing category
+      const missingCategory = items.some(item => item.title && !item.category);
+      if (missingCategory) {
+        toast.error('Please select a category for all items');
         setIsSubmitting(false);
         return;
       }
@@ -653,10 +661,11 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
 
               {/* Category */}
               <div>
-                <Label htmlFor={`category-${item.id}`}>Category</Label>
+                <Label htmlFor={`category-${item.id}`}>Category *</Label>
                 <Select
                   value={item.category}
                   onValueChange={(value) => handleItemChange(item.id, 'category', value)}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
