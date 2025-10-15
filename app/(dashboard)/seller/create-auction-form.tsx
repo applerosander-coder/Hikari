@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Upload, Plus, Trash2, GripVertical, Loader2, Sparkles } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Upload, Plus, Trash2, GripVertical, Loader2, Sparkles, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { uploadImage } from '@/utils/supabase/storage/client';
@@ -49,6 +50,8 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatingAI, setGeneratingAI] = useState<string | null>(null); // Track which item is generating
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [useNowForStartDate, setUseNowForStartDate] = useState(false);
 
   // Auction container fields
   const [auctionData, setAuctionData] = useState({
@@ -136,6 +139,51 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
     };
     
     reader.readAsDataURL(file);
+  };
+
+  const handleGetLocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsGettingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          // Use reverse geocoding API to get location name
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+          );
+          
+          if (!response.ok) {
+            throw new Error('Failed to get location');
+          }
+
+          const data = await response.json();
+          const city = data.address.city || data.address.town || data.address.village || '';
+          const state = data.address.state || '';
+          const country = data.address.country || '';
+          
+          const locationString = [city, state].filter(Boolean).join(', ') || country;
+          
+          setAuctionData({ ...auctionData, place: locationString });
+          toast.success('Location detected!');
+        } catch (error) {
+          console.error('Error getting location:', error);
+          toast.error('Failed to get location name');
+        } finally {
+          setIsGettingLocation(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        toast.error('Failed to get your location. Please check your browser permissions.');
+        setIsGettingLocation(false);
+      }
+    );
   };
 
   const handleGenerateDescription = async (itemId: string) => {
@@ -347,23 +395,62 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
           {/* Place */}
           <div>
             <Label htmlFor="place">Location</Label>
-            <Input
-              id="place"
-              value={auctionData.place}
-              onChange={(e) => setAuctionData({ ...auctionData, place: e.target.value })}
-              placeholder="e.g., Los Angeles, CA or Online"
-            />
+            <div className="flex gap-2">
+              <Input
+                id="place"
+                value={auctionData.place}
+                onChange={(e) => setAuctionData({ ...auctionData, place: e.target.value })}
+                placeholder="e.g., Los Angeles, CA or Online"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleGetLocation}
+                disabled={isGettingLocation}
+                title="Use my location"
+              >
+                {isGettingLocation ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MapPin className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="start_date">Start Date</Label>
+              <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="start_date">Start Date</Label>
+                <div className="flex items-center gap-1.5">
+                  <Checkbox
+                    id="now-checkbox"
+                    checked={useNowForStartDate}
+                    onCheckedChange={(checked) => {
+                      setUseNowForStartDate(checked as boolean);
+                      if (checked) {
+                        const now = new Date();
+                        const offset = now.getTimezoneOffset() * 60000;
+                        const localISOTime = new Date(now.getTime() - offset).toISOString().slice(0, 16);
+                        setAuctionData({ ...auctionData, start_date: localISOTime });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="now-checkbox" className="text-sm font-normal cursor-pointer">
+                    Now
+                  </Label>
+                </div>
+              </div>
               <Input
                 id="start_date"
                 type="datetime-local"
                 value={auctionData.start_date}
-                onChange={(e) => setAuctionData({ ...auctionData, start_date: e.target.value })}
+                onChange={(e) => {
+                  setAuctionData({ ...auctionData, start_date: e.target.value });
+                  setUseNowForStartDate(false);
+                }}
               />
             </div>
             <div>
