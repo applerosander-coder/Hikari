@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { blog } from '@/utils/source';
 
 export default function Page(): React.ReactElement {
@@ -24,7 +25,7 @@ export default function Page(): React.ReactElement {
     <main className="container max-sm:px-0 md:py-12">
       <div className="rounded-lg overflow-hidden">
         <div
-          className="h-[300px] p-8 md:h-[400px] md:p-12"
+          className="h-[300px] p-8 md:h-[400px] md:p-12 flex flex-col justify-center"
           style={{
             backgroundImage: [
               `linear-gradient(to right, 
@@ -43,11 +44,29 @@ export default function Page(): React.ReactElement {
             ].join(', ')
           }}
         >
+          <div className="mb-6">
+            <Image 
+              src="/bidwin-logo-light.png"
+              alt="BIDWIN" 
+              width={200} 
+              height={100}
+              className="h-16 w-auto dark:hidden"
+              priority
+            />
+            <Image 
+              src="/bidwin-logo-dark.png"
+              alt="BIDWIN" 
+              width={200} 
+              height={100}
+              className="h-16 w-auto hidden dark:block"
+              priority
+            />
+          </div>
           <h1 className="mb-4 border-b-4 border-foreground pb-2 text-4xl font-bold md:text-5xl">
-            Hikari Blog
+            Success Stories
           </h1>
           <p className="text-sm md:text-base">
-            Design language and easability of use
+            Empowering communities through innovative auction fundraising
           </p>
         </div>
         <div className="mt-2 grid grid-cols-1 border md:grid-cols-3 lg:grid-cols-4 rounded-b-lg">
