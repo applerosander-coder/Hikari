@@ -38,6 +38,7 @@ interface AuctionItem {
   category: string;
   image_preview: string | null;
   image_file: File | null;
+  ai_used_for_current_image: boolean;
 }
 
 interface CreateAuctionFormProps {
@@ -68,6 +69,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
       category: '',
       image_preview: null,
       image_file: null,
+      ai_used_for_current_image: false,
     }
   ]);
 
@@ -81,6 +83,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
       category: '',
       image_preview: null,
       image_file: null,
+      ai_used_for_current_image: false,
     };
     setItems([...items, newItem]);
   };
@@ -127,7 +130,7 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
       
       setItems(prevItems => prevItems.map(item => 
         item.id === itemId 
-          ? { ...item, image_preview: result, image_file: file } 
+          ? { ...item, image_preview: result, image_file: file, ai_used_for_current_image: false } 
           : item
       ));
     };
@@ -170,8 +173,12 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
         throw new Error('No description in response');
       }
       
-      // Update the item's description
-      handleItemChange(itemId, 'description', data.description);
+      // Update the item's description and mark AI as used
+      setItems(prevItems => prevItems.map(item => 
+        item.id === itemId 
+          ? { ...item, description: data.description, ai_used_for_current_image: true } 
+          : item
+      ));
       
       toast.success('Description generated successfully!');
     } catch (error: any) {
@@ -476,8 +483,8 @@ export default function CreateAuctionForm({ userId }: CreateAuctionFormProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleGenerateDescription(item.id)}
-                    disabled={generatingAI === item.id || (!item.image_preview && !item.title.trim())}
-                    className={`h-7 text-xs relative overflow-hidden transition-all duration-1000 hover:shadow-[inset_0_0_60px_rgba(192,192,192,0.9),0_0_50px_rgba(192,192,192,0.8),0_0_70px_rgba(255,255,255,0.6)] hover:border-gray-400/70 hover:bg-gray-400/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm ${item.image_preview && generatingAI !== item.id ? 'animate-[glow_30s_linear_infinite]' : ''}`}
+                    disabled={generatingAI === item.id || (!item.image_preview && !item.title.trim()) || item.ai_used_for_current_image}
+                    className={`h-7 text-xs relative overflow-hidden transition-all duration-1000 hover:shadow-[inset_0_0_60px_rgba(192,192,192,0.9),0_0_50px_rgba(192,192,192,0.8),0_0_70px_rgba(255,255,255,0.6)] hover:border-gray-400/70 hover:bg-gray-400/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm ${item.image_preview && generatingAI !== item.id && !item.ai_used_for_current_image ? 'animate-[glow_30s_linear_infinite]' : ''}`}
                   >
                     {generatingAI === item.id ? (
                       <>
