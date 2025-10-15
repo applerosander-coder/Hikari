@@ -4,7 +4,7 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories, featuring a seller dashboard for auction creation, watchlist functionality, and Netflix-style categorization for browsing. The project focuses on scalability and a rich, interactive user experience.
 
 ### Recent Changes (Oct 2025)
-- **Updated BIDWIN Logo Across All Pages:** Replaced the gavel icon with custom BIDWIN logo featuring an outlined gavel with stars and BIDWIN branding on a beige/golden background. The logo now displays consistently across:
+- **Updated BIDWIN Logo Across All Pages:** Replaced all gavel icons with custom BIDWIN logo featuring white outlined gavel with "BIDWIN" text on a dark gradient background. The logo displays with a matching gradient container for optimal visibility in both light and dark modes. Updated locations:
   - Landing page navigation bar (links to homepage)
   - Dashboard mobile header (visible on mobile devices)
   - Mobile navigation menu

@@ -39,13 +39,15 @@ export function MobileNav({
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
           <SheetTitle className="flex items-center text-left">
-            <Image 
-              src="/bidwin-logo-v3.png" 
-              alt="BIDWIN" 
-              width={100} 
-              height={50}
-              className="h-10 w-auto"
-            />
+            <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-2 rounded-lg">
+              <Image 
+                src="/bidwin-logo-v4.png" 
+                alt="BIDWIN" 
+                width={100} 
+                height={50}
+                className="h-8 w-auto"
+              />
+            </div>
           </SheetTitle>
         </SheetHeader>
         

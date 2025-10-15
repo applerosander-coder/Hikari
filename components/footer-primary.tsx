@@ -157,13 +157,15 @@ export default function FooterPrimary() {
         </div>
         <div className="border-t mt-10 pt-6 flex flex-col items-center md:flex-row justify-between">
           <div className="flex items-center">
-            <Image 
-              src="/bidwin-logo-v3.png" 
-              alt="BIDWIN" 
-              width={100} 
-              height={50}
-              className="h-8 w-auto"
-            />
+            <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-2 rounded-lg">
+              <Image 
+                src="/bidwin-logo-v4.png" 
+                alt="BIDWIN" 
+                width={100} 
+                height={50}
+                className="h-6 w-auto"
+              />
+            </div>
           </div>
           <p className="text-gray-500 mt-4 md:mt-0">© Auctions Inc. 2025</p>
         </div>

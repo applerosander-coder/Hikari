@@ -22,14 +22,16 @@ export function Navbar({
   return (
     <header className="flex h-20 items-center gap-4 border-b bg-background px-4 sm:hidden fixed top-0 left-0 right-0 z-20">
       <Link href="/" className="flex items-center" prefetch={false}>
-        <Image 
-          src="/bidwin-logo-v3.png" 
-          alt="BIDWIN" 
-          width={100} 
-          height={50}
-          className="h-10 w-auto"
-          priority
-        />
+        <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-2 rounded-lg">
+          <Image 
+            src="/bidwin-logo-v4.png" 
+            alt="BIDWIN" 
+            width={100} 
+            height={50}
+            className="h-8 w-auto"
+            priority
+          />
+        </div>
       </Link>
 
       <div className="ml-auto" />
