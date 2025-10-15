@@ -64,7 +64,7 @@ ${base64Image ? '- Be specific about what you see in the image' : '- Use creativ
           content,
         },
       ],
-      max_completion_tokens: 300,
+      max_completion_tokens: 1000,
     });
 
     console.log('Full OpenAI response:', JSON.stringify(visionResponse, null, 2));
