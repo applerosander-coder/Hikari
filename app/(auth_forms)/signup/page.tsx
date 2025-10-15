@@ -19,14 +19,45 @@ import { Separator } from '@/components/ui/separator';
 import { signUp } from '@/utils/auth-helpers/server';
 import { handleRequest, signInWithOAuth } from '@/utils/auth-helpers/client';
 import { useState } from 'react';
+import { LegalAcknowledgmentDialog } from '@/components/legal-acknowledgment-dialog';
 
 export default function SignUp() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLegalDialog, setShowLegalDialog] = useState(false);
+  const [pendingFormEvent, setPendingFormEvent] = useState<React.FormEvent<HTMLFormElement> | null>(null);
+  const [legalTermsAccepted, setLegalTermsAccepted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    setIsSubmitting(true); // Disable the button while the request is being handled
+    e.preventDefault();
+    
+    if (!legalTermsAccepted) {
+      setPendingFormEvent(e);
+      setShowLegalDialog(true);
+      return;
+    }
+    
+    setIsSubmitting(true);
     await handleRequest(e, signUp);
     setIsSubmitting(false);
+  };
+
+  const handleLegalAccept = async () => {
+    setLegalTermsAccepted(true);
+    
+    if (pendingFormEvent) {
+      setIsSubmitting(true);
+      await handleRequest(pendingFormEvent, signUp);
+      setIsSubmitting(false);
+      setPendingFormEvent(null);
+    }
+  };
+
+  const handleGithubSignup = () => {
+    if (!legalTermsAccepted) {
+      setShowLegalDialog(true);
+      return;
+    }
+    handleGithubOAuth();
   };
 
   return (
@@ -104,7 +135,7 @@ export default function SignUp() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={handleGithubOAuth}
+                onClick={handleGithubSignup}
               >
                 <GithubIcon className="mr-2 h-4 w-4" />
                 Sign up with GitHub
@@ -120,6 +151,12 @@ export default function SignUp() {
           </CardContent>
         </Card>
       </div>
+      
+      <LegalAcknowledgmentDialog
+        open={showLegalDialog}
+        onOpenChange={setShowLegalDialog}
+        onAccept={handleLegalAccept}
+      />
     </div>
   );
 }
