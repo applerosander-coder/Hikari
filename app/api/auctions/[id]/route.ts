@@ -289,6 +289,46 @@ export async function DELETE(
       );
     }
 
+    // Get all auction items to delete their images
+    const { data: auctionItems } = await supabase
+      .from('auction_items')
+      .select('image_url')
+      .eq('auction_id', params.id);
+
+    // Delete auction items first (foreign key constraint)
+    const { error: itemsError } = await supabase
+      .from('auction_items')
+      .delete()
+      .eq('auction_id', params.id);
+
+    if (itemsError) {
+      console.error('Error deleting auction items:', itemsError);
+      return NextResponse.json(
+        { error: 'Failed to delete auction items' },
+        { status: 500 }
+      );
+    }
+
+    // Delete images from storage if they exist
+    if (auctionItems && auctionItems.length > 0) {
+      const imageUrls = auctionItems
+        .map(item => item.image_url)
+        .filter((url): url is string => url !== null);
+
+      for (const imageUrl of imageUrls) {
+        try {
+          const path = imageUrl.split('/seller-auctions/')[1];
+          if (path) {
+            await supabase.storage
+              .from('seller-auctions')
+              .remove([path]);
+          }
+        } catch (error) {
+          console.error('Error deleting image:', error);
+        }
+      }
+    }
+
     // Delete the auction
     const { error } = await supabase
       .from('auctions')

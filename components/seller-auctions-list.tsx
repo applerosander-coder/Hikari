@@ -4,10 +4,20 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Package } from 'lucide-react';
+import { Package, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface AuctionItem {
   id: string;
@@ -41,6 +51,8 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
   const router = useRouter();
   const [publishingStates, setPublishingStates] = useState<Record<string, boolean>>({});
   const [optimisticStatuses, setOptimisticStatuses] = useState<Record<string, string>>({});
+  const [deletingStates, setDeletingStates] = useState<Record<string, boolean>>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
 
   if (auctions.length === 0) {
     return (
@@ -98,6 +110,30 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
     return optimisticStatuses[auction.id] || auction.status;
   };
 
+  const handleDeleteAuction = async (auctionId: string) => {
+    setDeletingStates(prev => ({ ...prev, [auctionId]: true }));
+
+    try {
+      const response = await fetch(`/api/auctions/${auctionId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete auction');
+      }
+
+      toast.success('Auction deleted successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting auction:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete auction');
+    } finally {
+      setDeletingStates(prev => ({ ...prev, [auctionId]: false }));
+      setDeleteDialogOpen(null);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {auctions.map((auction) => {
@@ -133,13 +169,25 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
                 >
                   {displayStatus}
                 </Badge>
-                <div onClick={(e) => e.stopPropagation()}>
+                <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2">
                   <Switch
                     checked={displayStatus !== 'draft'}
                     onCheckedChange={(checked) => handlePublishToggle(auction.id, auction.status, checked)}
                     disabled={publishingStates[auction.id]}
                     className="data-[state=checked]:bg-black"
                   />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteDialogOpen(auction.id);
+                    }}
+                    disabled={deletingStates[auction.id]}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -247,6 +295,27 @@ export function SellerAuctionsList({ auctions }: SellerAuctionsListProps) {
           </div>
         );
       })}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen !== null} onOpenChange={(open) => !open && setDeleteDialogOpen(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this auction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the auction and all of its items.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteDialogOpen && handleDeleteAuction(deleteDialogOpen)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
