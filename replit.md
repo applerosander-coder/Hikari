@@ -4,7 +4,11 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It transforms a SaaS template into a specialized marketplace, offering real-time bidding, countdowns, a swipeable item carousel, and integrated payment processing with instant bidding and auto-charge functionalities. The platform aims to provide a seamless and engaging auction experience across various categories, featuring a seller dashboard for auction creation, watchlist functionality, and Netflix-style categorization for browsing. The project focuses on scalability and a rich, interactive user experience.
 
 ### Recent Changes (Oct 2025)
-- **Updated Landing Page Logo:** Replaced the gavel icon with custom BIDWIN logo featuring an outlined gavel with stars and BIDWIN branding on a beige/golden background. The logo is displayed in the navigation bar and links to the homepage.
+- **Updated BIDWIN Logo Across All Pages:** Replaced the gavel icon with custom BIDWIN logo featuring an outlined gavel with stars and BIDWIN branding on a beige/golden background. The logo now displays consistently across:
+  - Landing page navigation bar (links to homepage)
+  - Dashboard mobile header (visible on mobile devices)
+  - Mobile navigation menu
+  - Footer section (landing page)
 - **Free Participant Plan Display on Account Page:** Updated account page to show active Participant Plan subscription for all users. Instead of "No Active Subscription", users now see their Participant Plan with $0/month pricing, Active status, and an option to upgrade to premium plans. Paid subscribers continue to see their actual subscription details.
 - **Free Participant Plan for All Users:** All signed-up users are automatically subscribed to the free Participant Plan. The pricing page now shows "Subscribed" for all logged-in users on the Participant Plan, with the subscribe button disabled since they already have access.
 - **Removed Top Bar from Dashboard Pages:** Removed the top navigation bar (with Auctions logo and avatar) from all dashboard pages on desktop/fullscreen mode for a cleaner, more immersive experience. The top bar is still present on the landing page and on mobile devices (where it provides the menu toggle button). Dashboard pages now have full-height content starting from the top on desktop.

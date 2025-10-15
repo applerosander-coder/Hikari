@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MainNavItem } from 'types';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import { Gavel } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -38,11 +38,14 @@ export function MobileNav({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
-          <SheetTitle className="flex items-center space-x-2 text-left">
-            <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded-full">
-              <Gavel className="size-5" />
-            </div>
-            <span className="text-xl font-extrabold">Auctions</span>
+          <SheetTitle className="flex items-center text-left">
+            <Image 
+              src="/bidwin-logo-v3.png" 
+              alt="BIDWIN" 
+              width={100} 
+              height={50}
+              className="h-10 w-auto"
+            />
           </SheetTitle>
         </SheetHeader>
         

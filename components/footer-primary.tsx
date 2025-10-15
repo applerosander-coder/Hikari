@@ -1,13 +1,13 @@
 'use client'
 import { useState } from "react"
 import React from 'react'
+import Image from 'next/image'
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@supabase/supabase-js'
 import { useToast } from "@/components/ui/use-toast"
 import { CoolMode } from "@/components/magicui/cool-mode";
-import { Gavel } from 'lucide-react';
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
@@ -156,9 +156,14 @@ export default function FooterPrimary() {
           </div>
         </div>
         <div className="border-t mt-10 pt-6 flex flex-col items-center md:flex-row justify-between">
-          <div className="flex items-center space-x-2">
-            <Gavel className="h-6 w-6" />
-            <span className="text-xl font-bold">Auctions.</span>
+          <div className="flex items-center">
+            <Image 
+              src="/bidwin-logo-v3.png" 
+              alt="BIDWIN" 
+              width={100} 
+              height={50}
+              className="h-8 w-auto"
+            />
           </div>
           <p className="text-gray-500 mt-4 md:mt-0">© Auctions Inc. 2025</p>
         </div>
