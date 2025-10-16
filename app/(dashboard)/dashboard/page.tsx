@@ -161,39 +161,23 @@ export default async function DashboardPage() {
   }));
 
   // Get list of all auctions for filter dropdown
-  const { data: allAuctions, error: auctionsError } = await supabase
+  const { data: allAuctions } = await supabase
     .from('auctions')
-    .select('id, name, place, status, created_by')
+    .select('id, name, place, status')
     .in('status', ['active', 'upcoming', 'ended'])
     .order('created_at', { ascending: false });
-  
-  // Fetch creator info for each auction
-  const auctionsWithCreators = await Promise.all(
-    (allAuctions || []).map(async (auction) => {
-      const { data: creator } = await supabase
-        .from('users')
-        .select('id, full_name, avatar_url')
-        .eq('id', auction.created_by)
-        .single();
-      
-      return {
-        ...auction,
-        creator
-      };
-    })
-  );
 
   return (
     <>
       <div className="w-full px-4 sm:px-6 pt-4 sm:pt-8">
-        <div className="hidden sm:block">
+        <div className="mb-6 hidden sm:block">
           <h1 className="text-3xl font-bold">Auctions</h1>
         </div>
       </div>
       <CategorizedAuctionBrowser
         items={itemsWithBidCounts}
         endedItems={endedItemsWithBidCounts}
-        auctions={auctionsWithCreators}
+        auctions={allAuctions || []}
         userBidItemIds={userBidItemIds}
         userBidAmounts={userBidAmounts}
         userId={user.id}

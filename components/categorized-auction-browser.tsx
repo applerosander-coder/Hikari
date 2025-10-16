@@ -5,14 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AuctionItemCard } from './auction-item-card';
-import { Search, X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import Image from 'next/image';
+import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AuctionItem {
   id: string;
@@ -39,11 +32,6 @@ interface Auction {
   id: string;
   name: string;
   place: string;
-  creator?: {
-    id: string;
-    full_name: string | null;
-    avatar_url: string | null;
-  } | null;
 }
 
 interface CategorizedAuctionBrowserProps {
@@ -221,7 +209,7 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Filter Pills - Auctions Only */}
+        {/* Filter Pills */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
           {/* All Items Pill */}
           <button
@@ -237,8 +225,33 @@ export function CategorizedAuctionBrowser({
               }
             `}
           >
-            Auction Items ({items.length + endedItems.length})
+            All Items ({items.length + endedItems.length})
           </button>
+
+          {/* Category Pills */}
+          {CATEGORIES.map((category) => {
+            const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
+            if (categoryCount === 0) return null;
+            
+            return (
+              <button
+                key={category}
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setSelectedAuction('all');
+                }}
+                className={`
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                  ${selectedCategory === category
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }
+                `}
+              >
+                {category} ({categoryCount})
+              </button>
+            );
+          })}
 
           {/* Auction Pills */}
           {(() => {
@@ -285,94 +298,38 @@ export function CategorizedAuctionBrowser({
                   setSelectedCategory('all');
                 }}
                 className={`
-                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
                   ${selectedAuction === auction.id
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }
                 `}
               >
-                {auction.creator?.avatar_url && (
-                  <Image
-                    src={auction.creator.avatar_url}
-                    alt={auction.creator.full_name || 'Creator'}
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                    unoptimized
-                  />
-                )}
                 {auction.name} ({totalCount})
               </button>
             ));
           })()}
         </div>
 
-        {/* Search Bar and Category Filter */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search items, auctions, or locations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 bg-background"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-
-          {/* Category Filter Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="flex-shrink-0 gap-2"
-              >
-                <Filter className="h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {selectedCategory === 'all' ? 'Category' : selectedCategory}
-                </span>
-                <span className="sm:hidden">
-                  {selectedCategory === 'all' ? 'Filter' : selectedCategory}
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem
-                onClick={() => setSelectedCategory('all')}
-                className={selectedCategory === 'all' ? 'bg-muted' : ''}
-              >
-                All Categories
-              </DropdownMenuItem>
-              {CATEGORIES.map((category) => {
-                const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
-                if (categoryCount === 0) return null;
-                
-                return (
-                  <DropdownMenuItem
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category);
-                      setSelectedAuction('all');
-                    }}
-                    className={selectedCategory === category ? 'bg-muted' : ''}
-                  >
-                    <span className="flex-1">{category}</span>
-                    <span className="text-xs text-muted-foreground ml-2">({categoryCount})</span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search items, auctions, or locations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-10 bg-background"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 

@@ -2,16 +2,9 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { Clock, Trophy, Filter } from 'lucide-react';
+import { Clock, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 
 const CATEGORIES = [
   'Electronics',
@@ -106,7 +99,7 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
 
       {/* Filter Pills */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4">
-        {/* All Auction Items Pill */}
+        {/* All Items Pill */}
         <button
           onClick={() => {
             setSelectedAuction('all');
@@ -114,16 +107,41 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
           }}
           className={`
             flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
-            ${selectedAuction === 'all'
+            ${selectedAuction === 'all' && selectedCategory === 'all'
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }
           `}
         >
-          All Auction Items ({items.length})
+          All Items ({items.length})
         </button>
 
-        {/* Auction Pills with Avatars */}
+        {/* Category Pills */}
+        {CATEGORIES.map((category) => {
+          const categoryCount = items.filter(item => item.category === category).length;
+          if (categoryCount === 0) return null;
+          
+          return (
+            <button
+              key={category}
+              onClick={() => {
+                setSelectedCategory(category);
+                setSelectedAuction('all');
+              }}
+              className={`
+                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                ${selectedCategory === category
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }
+              `}
+            >
+              {category} ({categoryCount})
+            </button>
+          );
+        })}
+
+        {/* Auction Pills */}
         {(() => {
           const now = new Date();
           
@@ -162,29 +180,20 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                 setSelectedCategory('all');
               }}
               className={`
-                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2
+                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
                 ${selectedAuction === auction.id
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 }
               `}
             >
-              {(auction as any).creator_avatar && (
-                <Image
-                  src={(auction as any).creator_avatar}
-                  alt={`${auction.name} creator`}
-                  width={20}
-                  height={20}
-                  className="rounded-full object-cover"
-                />
-              )}
               {auction.name} ({itemCount})
             </button>
           ));
         })()}
       </div>
 
-      {/* Sort and Filter Controls */}
+      {/* Sort Dropdown */}
       <div className="flex items-center gap-3 mb-6">
         <span className="text-sm text-muted-foreground">Sort by:</span>
         <select
@@ -195,41 +204,6 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
           <option value="latest">Latest Bid First</option>
           <option value="highest">Highest Bid First</option>
         </select>
-
-        {/* Category Filter Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="default" className="gap-2">
-              <Filter className="h-4 w-4" />
-              {selectedCategory === 'all' ? 'Category' : selectedCategory}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem
-              onClick={() => setSelectedCategory('all')}
-              className={selectedCategory === 'all' ? 'bg-muted' : ''}
-            >
-              All Categories ({items.length})
-            </DropdownMenuItem>
-            {CATEGORIES.map((category) => {
-              const categoryCount = items.filter(item => item.category === category).length;
-              if (categoryCount === 0) return null;
-              
-              return (
-                <DropdownMenuItem
-                  key={category}
-                  onClick={() => {
-                    setSelectedCategory(category);
-                    setSelectedAuction('all');
-                  }}
-                  className={selectedCategory === category ? 'bg-muted' : ''}
-                >
-                  {category} ({categoryCount})
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Results count */}
