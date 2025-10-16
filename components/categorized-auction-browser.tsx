@@ -221,25 +221,8 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Filter Pills - Auction Items and All Auctions */}
+        {/* Filter Pills - Auctions Only */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-          {/* All Items Pill */}
-          <button
-            onClick={() => {
-              setSelectedAuction('all');
-              setSelectedCategory('all');
-            }}
-            className={`
-              flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
-              ${selectedAuction === 'all' && selectedCategory === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }
-            `}
-          >
-            All Items ({items.length + endedItems.length})
-          </button>
-
           {/* Individual Auction Pills with Creator Avatar */}
           {auctions.map((auction) => {
             const auctionItemCount = [...items, ...endedItems].filter(item => item.auction_id === auction.id).length;
