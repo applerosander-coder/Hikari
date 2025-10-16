@@ -94,8 +94,7 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Leaderboard</h1>
-        <p className="text-muted-foreground">Track all auction items and their bidding activity</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Leaderboard</h1>
       </div>
 
       {/* Filter Pills */}
