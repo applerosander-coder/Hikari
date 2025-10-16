@@ -2,6 +2,15 @@
 -- This script adds notifications, messages, and user connections (follows) to BIDWIN
 -- Run this in your Supabase SQL Editor
 
+-- DROP EXISTING TABLES IF THEY EXIST (clean slate)
+DROP TABLE IF EXISTS public.follows CASCADE;
+DROP TABLE IF EXISTS public.notifications CASCADE;
+DROP TABLE IF EXISTS public.messages CASCADE;
+
+-- DROP EXISTING TRIGGER AND FUNCTION IF THEY EXIST
+DROP TRIGGER IF EXISTS trigger_notify_outbid ON bids;
+DROP FUNCTION IF EXISTS notify_outbid();
+
 -- 1. CREATE FOLLOWS TABLE (User Connections)
 CREATE TABLE IF NOT EXISTS public.follows (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
