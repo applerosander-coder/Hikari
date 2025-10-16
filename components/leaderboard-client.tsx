@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Clock, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import { AutoHideSubtitle } from './AutoHideSubtitle';
 
 const CATEGORIES = [
   'Electronics',
@@ -94,11 +93,9 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
-      <div>
+      <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">Leaderboard</h1>
-        <AutoHideSubtitle>
-          Track all auction items and their bidding activity
-        </AutoHideSubtitle>
+        <p className="text-muted-foreground">Track all auction items and their bidding activity</p>
       </div>
 
       {/* Filter Pills */}
