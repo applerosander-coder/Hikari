@@ -160,10 +160,20 @@ export default async function DashboardPage() {
     bid_count: bidCountMap.get(item.id) || 0
   }));
 
-  // Get list of all auctions for filter dropdown
+  // Get list of all auctions for filter dropdown with creator info
   const { data: allAuctions } = await supabase
     .from('auctions')
-    .select('id, name, place, status')
+    .select(`
+      id, 
+      name, 
+      place, 
+      status,
+      creator:users!created_by (
+        id,
+        full_name,
+        avatar_url
+      )
+    `)
     .in('status', ['active', 'upcoming', 'ended'])
     .order('created_at', { ascending: false });
 

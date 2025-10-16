@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import Image from 'next/image';
 
 interface AuctionItem {
   id: string;
@@ -38,6 +39,11 @@ interface Auction {
   id: string;
   name: string;
   place: string;
+  creator?: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 interface CategorizedAuctionBrowserProps {
@@ -231,7 +237,7 @@ export function CategorizedAuctionBrowser({
               }
             `}
           >
-            All Items ({items.length + endedItems.length})
+            Auction Items ({items.length + endedItems.length})
           </button>
 
           {/* Auction Pills */}
@@ -279,13 +285,23 @@ export function CategorizedAuctionBrowser({
                   setSelectedCategory('all');
                 }}
                 className={`
-                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2
                   ${selectedAuction === auction.id
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }
                 `}
               >
+                {auction.creator?.avatar_url && (
+                  <Image
+                    src={auction.creator.avatar_url}
+                    alt={auction.creator.full_name || 'Creator'}
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                    unoptimized
+                  />
+                )}
                 {auction.name} ({totalCount})
               </button>
             ));
