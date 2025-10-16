@@ -80,23 +80,25 @@ const applyParticleEffect = (
     const particle = document.createElement("div");
 
     if (particleType === "circle") {
-      const svgNS = "http://www.w3.org/2000/svg";
-      const circleSVG = document.createElementNS(svgNS, "svg");
-      const circle = document.createElementNS(svgNS, "circle");
-      circle.setAttributeNS(null, "cx", (size / 2).toString());
-      circle.setAttributeNS(null, "cy", (size / 2).toString());
-      circle.setAttributeNS(null, "r", (size / 2).toString());
-      circle.setAttributeNS(
-        null,
-        "fill",
-        `hsl(${Math.random() * 360}, 70%, 50%)`,
-      );
-
-      circleSVG.appendChild(circle);
-      circleSVG.setAttribute("width", size.toString());
-      circleSVG.setAttribute("height", size.toString());
-
-      particle.appendChild(circleSVG);
+      // Confetti colors matching background particles
+      const confettiColors = [
+        '#FFD700', // Gold
+        '#E5E4E2', // Platinum
+        '#C0C0C0', // Silver
+        '#FFFFFF', // White
+        '#D4AF37', // Metallic gold
+        '#B8860B', // Dark goldenrod
+      ];
+      const color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      
+      // Random shape - mix of circles and rectangles for confetti variety
+      const isCircle = Math.random() > 0.5;
+      
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.background = color;
+      particle.style.borderRadius = isCircle ? '50%' : '2px';
+      particle.style.boxShadow = `0 0 ${size}px ${size / 2}px ${color}`;
     } else {
       particle.innerHTML = `<img src="${particleType}" width="${size}" height="${size}" style="border-radius: 50%">`;
     }
