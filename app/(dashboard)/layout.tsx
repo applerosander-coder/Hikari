@@ -82,7 +82,7 @@ export default async function DashboardLayout({
       </aside>
       <div className="flex flex-col sm:pl-14">
         <Navbar userDetails={userDetails} navConfig={navConfig as NavItem[]} />
-        <main className="flex-1 w-full overflow-x-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] sm:pt-0 safe-bottom">
+        <main className="flex-1 w-full overflow-x-hidden pt-14 sm:pt-0 safe-bottom">
           {children}
         </main>
       </div>

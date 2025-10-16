@@ -5,20 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AuctionItemCard } from './auction-item-card';
-import { Search, X, ChevronLeft, ChevronRight, ChevronDown, Grid3x3 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AuctionItem {
   id: string;
@@ -219,152 +206,113 @@ export function CategorizedAuctionBrowser({
     }
   };
 
-  // Calculate auction options for dropdown
-  const auctionOptions = React.useMemo(() => {
-    const now = new Date();
-    
-    const mappedAuctions = auctions.map((auction) => {
-      const activeCount = items.filter(i => i.auction_id === auction.id).length;
-      const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
-      const totalCount = activeCount + endedCount;
-      
-      const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
-      const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
-      const hasEnded = endDate && endDate <= now;
-      
-      return {
-        id: auction.id,
-        name: auction.name,
-        place: auction.place,
-        totalCount,
-        hasEnded
-      };
-    });
-    
-    return mappedAuctions.filter(a => a.totalCount > 0);
-  }, [auctions, items, endedItems]);
-
-  const selectedAuctionData = auctionOptions.find(a => a.id === selectedAuction);
-  const totalItemCount = items.length + endedItems.length;
-
   return (
-    <div className="w-full">
-      {/* Sticky Two-Part Toolbar */}
-      <div className="sticky top-[56px] sm:top-0 z-30 bg-background border-b border-border">
-        <div className="flex items-center gap-2 px-4 sm:px-6 h-9">
-          {/* Left: Auction Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-9 px-3 text-sm font-medium rounded-full flex-shrink-0"
-              >
-                <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                  {selectedAuction === 'all' 
-                    ? `Items (${totalItemCount})` 
-                    : `${selectedAuctionData?.name || 'Auction'} (${selectedAuctionData?.totalCount || 0})`
-                  }
-                </span>
-                <ChevronDown className="ml-1 h-3 w-3 flex-shrink-0" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto">
-              <DropdownMenuItem
+    <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
+      <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
+        {/* Filter Pills */}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+          {/* All Items Pill */}
+          <button
+            onClick={() => {
+              setSelectedAuction('all');
+              setSelectedCategory('all');
+            }}
+            className={`
+              flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
+              ${selectedAuction === 'all' && selectedCategory === 'all'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }
+            `}
+          >
+            All Items ({items.length + endedItems.length})
+          </button>
+
+          {/* Category Pills */}
+          {CATEGORIES.map((category) => {
+            const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
+            if (categoryCount === 0) return null;
+            
+            return (
+              <button
+                key={category}
                 onClick={() => {
+                  setSelectedCategory(category);
                   setSelectedAuction('all');
+                }}
+                className={`
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                  ${selectedCategory === category
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }
+                `}
+              >
+                {category} ({categoryCount})
+              </button>
+            );
+          })}
+
+          {/* Auction Pills */}
+          {(() => {
+            const now = new Date();
+            
+            // Map all auctions with their metadata
+            const mappedAuctions = auctions.map((auction) => {
+              const activeCount = items.filter(i => i.auction_id === auction.id).length;
+              const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
+              const totalCount = activeCount + endedCount;
+              
+              // Check if auction has ended by time
+              const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
+              const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
+              const hasEnded = endDate && endDate <= now;
+              
+              const isActive = !hasEnded && activeCount > 0;
+              
+              return {
+                auction,
+                totalCount,
+                isActive,
+                endDate
+              };
+            });
+            
+            // Separate live and ended auctions
+            const liveAuctions = mappedAuctions.filter(a => a.isActive && a.totalCount > 0);
+            const endedAuctions = mappedAuctions
+              .filter(a => !a.isActive && a.totalCount > 0)
+              .sort((a, b) => {
+                if (!a.endDate) return 1;
+                if (!b.endDate) return -1;
+                return b.endDate.getTime() - a.endDate.getTime();
+              })
+              .slice(0, 3); // Limit to 3 most recent ended auctions
+            
+            // Combine: live auctions first, then limited ended auctions
+            return [...liveAuctions, ...endedAuctions].map(({ auction, totalCount }) => (
+              <button
+                key={auction.id}
+                onClick={() => {
+                  setSelectedAuction(auction.id);
                   setSelectedCategory('all');
                 }}
-                className={selectedAuction === 'all' ? 'bg-accent' : ''}
+                className={`
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                  ${selectedAuction === auction.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }
+                `}
               >
-                All Items ({totalItemCount})
-              </DropdownMenuItem>
-              {auctionOptions.map((auction) => (
-                <DropdownMenuItem
-                  key={auction.id}
-                  onClick={() => {
-                    setSelectedAuction(auction.id);
-                    setSelectedCategory('all');
-                  }}
-                  className={selectedAuction === auction.id ? 'bg-accent' : ''}
-                >
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium">{auction.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {auction.place} • {auction.totalCount} items{auction.hasEnded ? ' • Ended' : ''}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Right: Category Bottom Sheet */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-9 px-3 text-sm font-medium rounded-full flex-shrink-0"
-              >
-                <Grid3x3 className="h-3 w-3 mr-1.5" />
-                <span className="truncate max-w-[100px] sm:max-w-[150px]">
-                  {selectedCategory === 'all' ? 'Categories' : selectedCategory}
-                </span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[70vh] pb-safe-bottom">
-              <SheetHeader>
-                <SheetTitle>Filter by Category</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-2">
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setSelectedAuction('all');
-                  }}
-                  className={`
-                    w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors
-                    ${selectedAuction === 'all' && selectedCategory === 'all'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted hover:bg-muted/80'
-                    }
-                  `}
-                >
-                  All Items ({totalItemCount})
-                </button>
-                {CATEGORIES.map((category) => {
-                  const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
-                  if (categoryCount === 0) return null;
-                  
-                  return (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setSelectedAuction('all');
-                      }}
-                      className={`
-                        w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors
-                        ${selectedCategory === category
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                        }
-                      `}
-                    >
-                      {category} ({categoryCount})
-                    </button>
-                  );
-                })}
-              </div>
-            </SheetContent>
-          </Sheet>
+                {auction.name} ({totalCount})
+              </button>
+            ));
+          })()}
         </div>
-      </div>
 
-      {/* Search Bar */}
-      <div className="px-4 sm:px-6 pt-4 pb-2">
-        <div className="relative max-w-5xl mx-auto">
+        {/* Search Bar */}
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
@@ -385,9 +333,7 @@ export function CategorizedAuctionBrowser({
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="px-4 sm:px-6 py-4 sm:py-8">
-        {filteredItems.length === 0 && filteredEndedItems.length === 0 ? (
+      {filteredItems.length === 0 && filteredEndedItems.length === 0 ? (
         <div className="text-center py-12 max-w-5xl mx-auto">
           <p className="text-xl text-muted-foreground">
             {searchQuery ? `No items found for "${searchQuery}"` : 'No auction items at the moment.'}
@@ -484,8 +430,7 @@ export function CategorizedAuctionBrowser({
             </>
           )}
         </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
