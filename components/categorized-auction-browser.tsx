@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AuctionItemCard } from './auction-item-card';
-import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface AuctionItem {
   id: string;
@@ -209,9 +214,9 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Filter Pills */}
+        {/* Filter Pill - Auction Items Only */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-          {/* All Items Pill */}
+          {/* Auction Items Pill */}
           <button
             onClick={() => {
               setSelectedAuction('all');
@@ -225,111 +230,78 @@ export function CategorizedAuctionBrowser({
               }
             `}
           >
-            All Items ({items.length + endedItems.length})
+            Auction Items ({items.length + endedItems.length})
           </button>
-
-          {/* Category Pills */}
-          {CATEGORIES.map((category) => {
-            const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
-            if (categoryCount === 0) return null;
-            
-            return (
-              <button
-                key={category}
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setSelectedAuction('all');
-                }}
-                className={`
-                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                  ${selectedCategory === category
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }
-                `}
-              >
-                {category} ({categoryCount})
-              </button>
-            );
-          })}
-
-          {/* Auction Pills */}
-          {(() => {
-            const now = new Date();
-            
-            // Map all auctions with their metadata
-            const mappedAuctions = auctions.map((auction) => {
-              const activeCount = items.filter(i => i.auction_id === auction.id).length;
-              const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
-              const totalCount = activeCount + endedCount;
-              
-              // Check if auction has ended by time
-              const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
-              const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
-              const hasEnded = endDate && endDate <= now;
-              
-              const isActive = !hasEnded && activeCount > 0;
-              
-              return {
-                auction,
-                totalCount,
-                isActive,
-                endDate
-              };
-            });
-            
-            // Separate live and ended auctions
-            const liveAuctions = mappedAuctions.filter(a => a.isActive && a.totalCount > 0);
-            const endedAuctions = mappedAuctions
-              .filter(a => !a.isActive && a.totalCount > 0)
-              .sort((a, b) => {
-                if (!a.endDate) return 1;
-                if (!b.endDate) return -1;
-                return b.endDate.getTime() - a.endDate.getTime();
-              })
-              .slice(0, 3); // Limit to 3 most recent ended auctions
-            
-            // Combine: live auctions first, then limited ended auctions
-            return [...liveAuctions, ...endedAuctions].map(({ auction, totalCount }) => (
-              <button
-                key={auction.id}
-                onClick={() => {
-                  setSelectedAuction(auction.id);
-                  setSelectedCategory('all');
-                }}
-                className={`
-                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                  ${selectedAuction === auction.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }
-                `}
-              >
-                {auction.name} ({totalCount})
-              </button>
-            ));
-          })()}
         </div>
 
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search items, auctions, or locations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 bg-background"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+        {/* Search Bar with Category Filter */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search items, auctions, or locations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 bg-background"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Category Filter Button */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="default"
+                className={`flex-shrink-0 ${selectedCategory !== 'all' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}`}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                {selectedCategory !== 'all' ? selectedCategory : 'Categories'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="end">
+              <div className="space-y-1">
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                    selectedCategory === 'all'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                >
+                  All Categories
+                </button>
+                {CATEGORIES.map((category) => {
+                  const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
+                  if (categoryCount === 0) return null;
+                  
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center justify-between ${
+                        selectedCategory === category
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      <span>{category}</span>
+                      <span className="text-xs opacity-70">({categoryCount})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
