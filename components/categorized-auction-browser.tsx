@@ -250,7 +250,7 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full">
       {/* Sticky Two-Part Toolbar */}
-      <div className="sticky top-14 z-20 bg-background border-b border-border pt-safe-top">
+      <div className="sticky top-[56px] sm:top-0 z-30 bg-background border-b border-border">
         <div className="flex items-center gap-2 px-4 sm:px-6 h-9">
           {/* Left: Auction Dropdown */}
           <DropdownMenu>
