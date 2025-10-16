@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import { SharedMobileMenu } from '@/components/shared-mobile-menu';
 import { useTheme } from 'next-themes';
+import { usePathname } from 'next/navigation';
 
 import { NavItem } from '@/config/dashboard';
 
@@ -21,10 +22,19 @@ export function Navbar({
   const [isOpen, setIsOpen] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Get page title based on pathname
+  const getPageTitle = () => {
+    if (pathname === '/dashboard/leaderboard') return 'Leaderboard';
+    return null;
+  };
+
+  const pageTitle = getPageTitle();
 
   return (
     <header className="flex h-14 items-center gap-3 border-b bg-background px-3 sm:hidden fixed top-0 left-0 right-0 z-20 safe-top">
@@ -41,7 +51,11 @@ export function Navbar({
         )}
       </Link>
 
-      <div className="ml-auto" />
+      {pageTitle && (
+        <h1 className="flex-1 text-center text-lg font-bold">{pageTitle}</h1>
+      )}
+
+      {!pageTitle && <div className="ml-auto" />}
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>

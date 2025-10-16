@@ -93,7 +93,7 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
-      <div className="mb-6">
+      <div className="mb-6 hidden sm:block">
         <h1 className="text-2xl sm:text-3xl font-bold">Leaderboard</h1>
       </div>
 
