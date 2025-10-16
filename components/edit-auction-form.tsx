@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Upload, ArrowLeft, Trash2, Plus, GripVertical, Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Upload, ArrowLeft, Trash2, Plus, GripVertical, Loader2, Sparkles, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { uploadImage } from '@/utils/supabase/storage/client';
@@ -67,6 +68,7 @@ interface AuctionItem {
   image_preview: string | null;
   image_file: File | null;
   position: number;
+  ai_used_for_current_image: boolean;
 }
 
 interface EditAuctionFormProps {
@@ -79,8 +81,11 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState<string | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [useNowForStartDate, setUseNowForStartDate] = useState(false);
+  const [use24hForEndDate, setUse24hForEndDate] = useState(false);
 
-  // Format dates for datetime-local input
   const formatDateForInput = (dateString: string) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -98,7 +103,6 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
     end_date: formatDateForInput(auction.end_date),
   });
 
-  // Convert existing auction items to form format
   const [items, setItems] = useState<AuctionItem[]>(() => {
     if (auctionItems.length > 0) {
       return auctionItems.map(item => ({
@@ -112,6 +116,7 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
         image_preview: item.image_url,
         image_file: null,
         position: item.position,
+        ai_used_for_current_image: false,
       }));
     } else {
       return [{
@@ -124,6 +129,7 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
         image_preview: auction.image_url,
         image_file: null,
         position: 1,
+        ai_used_for_current_image: false,
       }];
     }
   });
@@ -139,6 +145,7 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
       image_preview: null,
       image_file: null,
       position: items.length + 1,
+      ai_used_for_current_image: false,
     };
     setItems([...items, newItem]);
   };
@@ -185,12 +192,122 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
       
       setItems(prevItems => prevItems.map(item => 
         item.id === itemId 
-          ? { ...item, image_preview: result, image_file: file } 
+          ? { ...item, image_preview: result, image_file: file, ai_used_for_current_image: false } 
           : item
       ));
     };
     
     reader.readAsDataURL(file);
+  };
+
+  const handleGetLocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsGettingLocation(true);
+    const timeoutId = setTimeout(() => {
+      setIsGettingLocation(false);
+      toast.error('Location request timed out. Please enable location access or enter manually.');
+    }, 10000);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        clearTimeout(timeoutId);
+        
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          
+          const city = data.address?.city || data.address?.town || data.address?.village || '';
+          const state = data.address?.state || '';
+          const locationString = [city, state].filter(Boolean).join(', ');
+          
+          if (locationString) {
+            setAuctionData({ ...auctionData, place: locationString });
+            toast.success('Location detected!');
+          } else {
+            toast.error('Could not determine location. Please enter manually.');
+          }
+        } catch (error) {
+          console.error('Geocoding error:', error);
+          toast.error('Failed to get location. Please enter manually.');
+        } finally {
+          setIsGettingLocation(false);
+        }
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        setIsGettingLocation(false);
+        
+        if (error.code === error.PERMISSION_DENIED) {
+          toast.error('Location access denied. Please enable location permissions or enter manually.');
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          toast.error('Location unavailable. Please enter manually.');
+        } else {
+          toast.error('Location request failed. Please enter manually.');
+        }
+      }
+    );
+  };
+
+  const handleGenerateDescription = async (itemId: string) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+
+    if (!item.image_preview && !item.title) {
+      toast.error('Please add an image or title first');
+      return;
+    }
+
+    setGeneratingAI(itemId);
+
+    try {
+      const response = await fetch('/api/ai/generate-description', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          base64Image: item.image_preview,
+          itemTitle: item.title,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate description');
+      }
+      
+      const data = await response.json();
+      console.log('Received data from API:', data);
+      
+      if (!data.description) {
+        throw new Error('No description in response');
+      }
+      
+      setItems(prevItems => prevItems.map(item => 
+        item.id === itemId 
+          ? { 
+              ...item, 
+              description: data.description, 
+              category: data.category || item.category,
+              ai_used_for_current_image: true 
+            } 
+          : item
+      ));
+      
+      toast.success('Description generated successfully!');
+    } catch (error: any) {
+      console.error('Error generating description:', error);
+      toast.error(error.message || 'Failed to generate description');
+    } finally {
+      setGeneratingAI(null);
+    }
   };
 
   const handleDelete = async () => {
@@ -230,14 +347,19 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
         return;
       }
 
-      const validItems = items.filter(item => item.title && item.starting_price);
+      const validItems = items.filter(item => item.title && item.starting_price && item.category);
       if (validItems.length === 0) {
-        toast.error('Please add at least one item with title and starting price');
+        toast.error('Please add at least one item with title, starting price, and category');
         setIsSubmitting(false);
         return;
       }
 
-      // Upload new images to Supabase Storage
+      if (items.some(item => item.title && item.starting_price && !item.category)) {
+        toast.error('Please select a category for all items');
+        setIsSubmitting(false);
+        return;
+      }
+
       const uploadPromises = validItems.map(async (item) => {
         if (item.image_file) {
           const { imageUrl, error } = await uploadImage({
@@ -269,7 +391,6 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
         : new Date().toISOString();
       const endDateISO = new Date(auctionData.end_date).toISOString();
 
-      // Prepare items data
       const itemsData = validItems.map((item, index) => ({
         id: item.dbId,
         title: item.title,
@@ -388,12 +509,29 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
 
             <div>
               <Label htmlFor="place">Location</Label>
-              <Input
-                id="place"
-                value={auctionData.place}
-                onChange={(e) => setAuctionData({ ...auctionData, place: e.target.value })}
-                placeholder="e.g., Los Angeles, CA or Online"
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="place"
+                  value={auctionData.place}
+                  onChange={(e) => setAuctionData({ ...auctionData, place: e.target.value })}
+                  placeholder="e.g., Los Angeles, CA or Online"
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleGetLocation}
+                  disabled={isGettingLocation}
+                  title="Detect my location"
+                >
+                  {isGettingLocation ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -403,8 +541,28 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                   id="start_date"
                   type="datetime-local"
                   value={auctionData.start_date}
-                  onChange={(e) => setAuctionData({ ...auctionData, start_date: e.target.value })}
+                  onChange={(e) => {
+                    setAuctionData({ ...auctionData, start_date: e.target.value });
+                    setUseNowForStartDate(false);
+                  }}
                 />
+                <div className="flex items-center gap-2 mt-2">
+                  <Checkbox
+                    id="use-now"
+                    checked={useNowForStartDate}
+                    onCheckedChange={(checked) => {
+                      setUseNowForStartDate(checked as boolean);
+                      if (checked) {
+                        const now = new Date();
+                        const formatted = formatDateForInput(now.toISOString());
+                        setAuctionData({ ...auctionData, start_date: formatted });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="use-now" className="text-sm font-normal cursor-pointer">
+                    Now
+                  </Label>
+                </div>
               </div>
               <div>
                 <Label htmlFor="end_date">End Date *</Label>
@@ -412,9 +570,32 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                   id="end_date"
                   type="datetime-local"
                   value={auctionData.end_date}
-                  onChange={(e) => setAuctionData({ ...auctionData, end_date: e.target.value })}
+                  onChange={(e) => {
+                    setAuctionData({ ...auctionData, end_date: e.target.value });
+                    setUse24hForEndDate(false);
+                  }}
                   required
                 />
+                <div className="flex items-center gap-2 mt-2">
+                  <Checkbox
+                    id="use-24h"
+                    checked={use24hForEndDate}
+                    onCheckedChange={(checked) => {
+                      setUse24hForEndDate(checked as boolean);
+                      if (checked) {
+                        const startDate = auctionData.start_date 
+                          ? new Date(auctionData.start_date) 
+                          : new Date();
+                        const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
+                        const formatted = formatDateForInput(endDate.toISOString());
+                        setAuctionData({ ...auctionData, end_date: formatted });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="use-24h" className="text-sm font-normal cursor-pointer">
+                    24h
+                  </Label>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -466,21 +647,90 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                 </div>
 
                 <div>
-                  <Label htmlFor={`description-${item.id}`}>Description</Label>
+                  <Label htmlFor={`image-${item.id}`}>Item Image</Label>
+                  <div className="mt-2">
+                    {item.image_preview ? (
+                      <div className="relative w-full h-32 border rounded-lg overflow-hidden">
+                        <Image
+                          src={item.image_preview}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setItems(prevItems => prevItems.map(i => 
+                              i.id === item.id 
+                                ? { ...i, image_preview: null, image_file: null, ai_used_for_current_image: false } 
+                                : i
+                            ));
+                          }}
+                          className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor={`image-${item.id}`}
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                      >
+                        <Upload className="h-8 w-8 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground">
+                          Click to upload (Max 10MB)
+                        </span>
+                        <input
+                          id={`image-${item.id}`}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleImageChange(item.id, e)}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor={`description-${item.id}`}>Description</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleGenerateDescription(item.id)}
+                      disabled={generatingAI === item.id || (!item.image_preview && !item.title) || (item.ai_used_for_current_image && item.image_preview !== null)}
+                      className="ai-generate-btn relative overflow-hidden"
+                    >
+                      {generatingAI === item.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Type for me
+                        </>
+                      )}
+                    </Button>
+                  </div>
                   <Textarea
                     id={`description-${item.id}`}
                     value={item.description}
                     onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
                     placeholder="Describe this item..."
-                    rows={2}
+                    rows={3}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor={`category-${item.id}`}>Category</Label>
+                  <Label htmlFor={`category-${item.id}`}>Category *</Label>
                   <Select
                     value={item.category}
                     onValueChange={(value) => handleItemChange(item.id, 'category', value)}
+                    required
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
@@ -519,52 +769,6 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                       onChange={(e) => handleItemChange(item.id, 'reserve_price', e.target.value)}
                       placeholder="0.00"
                     />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor={`image-${item.id}`}>Item Image</Label>
-                  <div className="mt-2">
-                    {item.image_preview ? (
-                      <div className="relative w-full h-32 border rounded-lg overflow-hidden">
-                        <Image
-                          src={item.image_preview}
-                          alt="Preview"
-                          fill
-                          className="object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setItems(prevItems => prevItems.map(i => 
-                              i.id === item.id 
-                                ? { ...i, image_preview: null, image_file: null } 
-                                : i
-                            ));
-                          }}
-                          className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ) : (
-                      <label
-                        htmlFor={`image-${item.id}`}
-                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                      >
-                        <Upload className="h-8 w-8 text-muted-foreground mb-1" />
-                        <span className="text-xs text-muted-foreground">
-                          Click to upload (Max 10MB)
-                        </span>
-                        <input
-                          id={`image-${item.id}`}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => handleImageChange(item.id, e)}
-                        />
-                      </label>
-                    )}
                   </div>
                 </div>
               </CardContent>
