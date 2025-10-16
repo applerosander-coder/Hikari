@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface AuctionItem {
   id: string;
@@ -37,6 +38,12 @@ interface Auction {
   id: string;
   name: string;
   place: string;
+  status?: string;
+  created_by?: string;
+  users?: {
+    avatar_url: string | null;
+    full_name: string | null;
+  } | null;
 }
 
 interface CategorizedAuctionBrowserProps {
@@ -214,7 +221,7 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Filter Pill - Auction Items Only */}
+        {/* Filter Pills - Auction Items and All Auctions */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
           {/* Auction Items Pill */}
           <button
@@ -232,6 +239,61 @@ export function CategorizedAuctionBrowser({
           >
             Auction Items ({items.length + endedItems.length})
           </button>
+
+          {/* Individual Auction Pills with Creator Avatar */}
+          {auctions.map((auction) => {
+            const auctionItemCount = [...items, ...endedItems].filter(item => item.auction_id === auction.id).length;
+            if (auctionItemCount === 0) return null;
+
+            const getAvatarUrl = (avatarUrl: string | null | undefined) => {
+              if (avatarUrl) {
+                if (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')) {
+                  return avatarUrl;
+                }
+              }
+              return undefined;
+            };
+
+            const getInitials = (fullName: string | null | undefined) => {
+              if (fullName) {
+                return fullName
+                  .split(' ')
+                  .map((n: string) => n[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2);
+              }
+              return 'A';
+            };
+
+            return (
+              <button
+                key={auction.id}
+                onClick={() => {
+                  setSelectedAuction(auction.id);
+                  setSelectedCategory('all');
+                }}
+                className={`
+                  flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2
+                  ${selectedAuction === auction.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }
+                `}
+              >
+                <Avatar className="h-6 w-6">
+                  <AvatarImage 
+                    src={getAvatarUrl(auction.users?.avatar_url)} 
+                    alt={auction.users?.full_name || 'Creator'} 
+                  />
+                  <AvatarFallback className="text-xs">
+                    {getInitials(auction.users?.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span>{auction.name} ({auctionItemCount})</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Search Bar with Category Filter */}

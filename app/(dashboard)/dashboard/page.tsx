@@ -160,10 +160,20 @@ export default async function DashboardPage() {
     bid_count: bidCountMap.get(item.id) || 0
   }));
 
-  // Get list of all auctions for filter dropdown
+  // Get list of all auctions for filter dropdown with seller info
   const { data: allAuctions } = await supabase
     .from('auctions')
-    .select('id, name, place, status')
+    .select(`
+      id, 
+      name, 
+      place, 
+      status,
+      created_by,
+      users:created_by (
+        avatar_url,
+        full_name
+      )
+    `)
     .in('status', ['active', 'upcoming', 'ended'])
     .order('created_at', { ascending: false });
 
