@@ -6,6 +6,10 @@ Auctions is a live auction and bidding platform built with Next.js 14 and Supaba
 ## User Preferences
 I prefer the agent to be concise and to the point. When suggesting code changes, provide a brief explanation of the "why" behind the change, not just the "what." I value iterative development and prefer to review smaller, focused pull requests or changes rather than large, monolithic ones. Please ensure all modifications align with the existing monochrome design aesthetic (black, white, gray). Do not make changes to the `docs/` folder.
 
+## Recent Changes (Oct 2025)
+- **Avatar Display & Persistence Fix:** Fixed critical avatar issues: (1) Added cache invalidation using revalidatePath to ensure avatar updates immediately reflect across all pages - previously cached getUserDetails served stale data. (2) Fixed avatar image rendering in mobile menu by conditionally rendering AvatarImage only when avatar_url exists - previously empty strings caused fallback initials to always display.
+- **Unified Mobile Menu:** Standardized mobile navigation menus across landing and dashboard pages. Removed logo from landing mobile menu. Fixed dashboard mobile menu to display user avatar and sign out button by correctly passing both user and userDetails props. Both menus now use SharedMobileMenu component consistently.
+
 ## System Architecture
 The application uses Next.js 14 with the App Router and Supabase for PostgreSQL database and authentication. Stripe is integrated for payment processing. The system supports multi-item auctions, where `auctions` act as containers for individual `auction_items`.
 
