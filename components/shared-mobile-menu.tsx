@@ -133,33 +133,32 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         </span>
       </button>
 
-      {/* Sign Out (only if user is logged in) */}
+      {/* Sign Out */}
       {user && (
-        <>
-          <button
-            onClick={() => setShowSignOutDialog(true)}
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-5 w-5" />
-            Sign Out
-          </button>
-
-          <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  You'll need to sign in again to access your account and continue bidding.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleSignOut}>Sign Out</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
+        <button
+          onClick={() => setShowSignOutDialog(true)}
+          className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+        >
+          <LogOut className="h-5 w-5" />
+          Sign Out
+        </button>
       )}
+
+      {/* Sign Out Confirmation Dialog */}
+      <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You'll need to sign in again to access your account and continue bidding.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSignOut}>Sign Out</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 }

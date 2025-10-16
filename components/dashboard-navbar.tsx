@@ -40,8 +40,20 @@ export function Navbar({
   const pageTitle = getPageTitle();
 
   return (
-    <header className="flex h-14 items-center gap-2 border-b bg-background px-3 sm:hidden fixed top-0 left-0 right-0 z-20 safe-top">
-      {/* Left: Hamburger Menu */}
+    <header className="flex h-14 items-center justify-between gap-2 border-b bg-background px-3 sm:hidden fixed top-0 left-0 right-0 z-20 safe-top">
+      {/* Left: Logo */}
+      <Link href="/">
+        <Image
+          src={mounted && resolvedTheme === 'dark' ? '/bidwin-logo-white.svg' : '/bidwin-logo.svg'}
+          alt="BIDWIN"
+          width={80}
+          height={32}
+          className="h-8 w-auto"
+          priority
+        />
+      </Link>
+
+      {/* Right: Hamburger Menu */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button size="icon" variant="ghost">
@@ -57,24 +69,6 @@ export function Navbar({
           />
         </SheetContent>
       </Sheet>
-
-      {/* Center: Page Title or Logo */}
-      {pageTitle ? (
-        <h1 className="flex-1 text-center text-lg font-bold">{pageTitle}</h1>
-      ) : (
-        <div className="flex-1 flex justify-center">
-          <Link href="/">
-            <Image
-              src={mounted && resolvedTheme === 'dark' ? '/bidwin-logo-white.svg' : '/bidwin-logo.svg'}
-              alt="BIDWIN"
-              width={80}
-              height={32}
-              className="h-8 w-auto"
-              priority
-            />
-          </Link>
-        </div>
-      )}
     </header>
   );
 }
