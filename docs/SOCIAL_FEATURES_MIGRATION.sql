@@ -1,6 +1,4 @@
--- =========================================
 -- BIDWIN SOCIAL FEATURES DATABASE MIGRATION
--- =========================================
 -- This script adds notifications, messages, and user connections (follows) to BIDWIN
 -- Run this in your Supabase SQL Editor
 
@@ -44,17 +42,16 @@ CREATE INDEX IF NOT EXISTS idx_follows_follower ON public.follows(follower_id);
 CREATE INDEX IF NOT EXISTS idx_follows_following ON public.follows(following_id);
 CREATE INDEX IF NOT EXISTS idx_follows_status ON public.follows(status);
 
-CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON public.notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_read ON public.notifications(read);
-CREATE INDEX IF NOT EXISTS idx_notifications_type ON public.notifications(type);
-CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_created ON public.notifications(created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_messages_from_user ON public.messages(from_user_id);
 CREATE INDEX IF NOT EXISTS idx_messages_to_user ON public.messages(to_user_id);
+CREATE INDEX IF NOT EXISTS idx_messages_from_user ON public.messages(from_user_id);
 CREATE INDEX IF NOT EXISTS idx_messages_read ON public.messages(read);
-CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_created ON public.messages(created_at DESC);
 
--- 5. ENABLE ROW LEVEL SECURITY (RLS)
+-- 5. ENABLE ROW LEVEL SECURITY
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
@@ -75,13 +72,16 @@ CREATE POLICY "Users can create follow requests"
   ON public.follows FOR INSERT 
   WITH CHECK (auth.uid() = follower_id);
 
--- Users can update follows where they are involved
-CREATE POLICY "Users can update their follows" 
+-- Users can update follows they are involved in (for accepting/rejecting requests)
+CREATE POLICY "Users can update their follow status" 
   ON public.follows FOR UPDATE 
-  USING (auth.uid() = follower_id OR auth.uid() = following_id);
+  USING (
+    auth.uid() = follower_id OR 
+    auth.uid() = following_id
+  );
 
--- Users can delete their own follow requests
-CREATE POLICY "Users can delete their follow requests" 
+-- Users can delete follows they initiated
+CREATE POLICY "Users can delete follows they created" 
   ON public.follows FOR DELETE 
   USING (auth.uid() = follower_id);
 
@@ -91,12 +91,12 @@ CREATE POLICY "Users can view their own notifications"
   ON public.notifications FOR SELECT 
   USING (auth.uid() = user_id);
 
--- System can insert notifications (for auction events)
-CREATE POLICY "Anyone can insert notifications" 
+-- System can create notifications for any user
+CREATE POLICY "Anyone can create notifications" 
   ON public.notifications FOR INSERT 
   WITH CHECK (true);
 
--- Users can update their own notifications (mark as read)
+-- Users can update (mark as read) their own notifications
 CREATE POLICY "Users can update their own notifications" 
   ON public.notifications FOR UPDATE 
   USING (auth.uid() = user_id);
@@ -108,9 +108,12 @@ CREATE POLICY "Users can delete their own notifications"
 
 -- MESSAGES POLICIES
 -- Users can view messages they sent or received
-CREATE POLICY "Users can view their messages" 
+CREATE POLICY "Users can view their own messages" 
   ON public.messages FOR SELECT 
-  USING (auth.uid() = from_user_id OR auth.uid() = to_user_id);
+  USING (
+    auth.uid() = from_user_id OR 
+    auth.uid() = to_user_id
+  );
 
 -- Users can send messages
 CREATE POLICY "Users can send messages" 
@@ -122,57 +125,59 @@ CREATE POLICY "Users can update received messages"
   ON public.messages FOR UPDATE 
   USING (auth.uid() = to_user_id);
 
--- Users can delete messages they sent or received
-CREATE POLICY "Users can delete their messages" 
-  ON public.messages FOR DELETE 
-  USING (auth.uid() = from_user_id OR auth.uid() = to_user_id);
+-- 7. CREATE DATABASE TRIGGER FOR AUTOMATIC OUTBID NOTIFICATIONS
+-- This trigger automatically creates a notification when a user is outbid
 
--- 7. CREATE FUNCTION TO AUTO-CREATE OUTBID NOTIFICATIONS
-CREATE OR REPLACE FUNCTION create_outbid_notification()
+CREATE OR REPLACE FUNCTION notify_outbid()
 RETURNS TRIGGER AS $$
 DECLARE
-  previous_bidder_id TEXT;
-  auction_item_title TEXT;
+  previous_high_bidder TEXT;
+  auction_item_record RECORD;
 BEGIN
-  -- Get the previous highest bidder (if exists and not the current bidder)
-  SELECT b.user_id INTO previous_bidder_id
-  FROM bids b
-  WHERE b.auction_item_id = NEW.auction_item_id
-    AND b.user_id != NEW.user_id
-    AND b.bid_amount < NEW.bid_amount
-  ORDER BY b.bid_amount DESC, b.created_at DESC
-  LIMIT 1;
-
-  -- Get the auction item title
-  SELECT title INTO auction_item_title
-  FROM auction_items
+  -- Get the auction item details
+  SELECT * INTO auction_item_record 
+  FROM auction_items 
   WHERE id = NEW.auction_item_id;
 
+  -- Find the previous high bidder (if any)
+  SELECT user_id INTO previous_high_bidder
+  FROM bids
+  WHERE auction_item_id = NEW.auction_item_id
+    AND user_id != NEW.user_id
+    AND id != NEW.id
+  ORDER BY amount DESC
+  LIMIT 1;
+
   -- If there was a previous bidder, notify them
-  IF previous_bidder_id IS NOT NULL THEN
-    INSERT INTO notifications (user_id, type, title, message, data)
-    VALUES (
-      previous_bidder_id,
+  IF previous_high_bidder IS NOT NULL THEN
+    INSERT INTO notifications (
+      user_id,
+      type,
+      title,
+      message,
+      data
+    ) VALUES (
+      previous_high_bidder,
       'outbid',
-      'You''ve been outbid!',
-      'Someone placed a higher bid on "' || auction_item_title || '"',
+      'You have been outbid!',
+      'Someone placed a higher bid on ' || COALESCE(auction_item_record.title, 'an item'),
       jsonb_build_object(
         'auction_item_id', NEW.auction_item_id,
-        'new_bid_amount', NEW.bid_amount
+        'new_bid_amount', NEW.amount
       )
     );
   END IF;
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 8. CREATE TRIGGER FOR OUTBID NOTIFICATIONS
-DROP TRIGGER IF EXISTS trigger_outbid_notification ON bids;
-CREATE TRIGGER trigger_outbid_notification
+-- Create the trigger
+DROP TRIGGER IF EXISTS trigger_notify_outbid ON bids;
+CREATE TRIGGER trigger_notify_outbid
   AFTER INSERT ON bids
   FOR EACH ROW
-  EXECUTE FUNCTION create_outbid_notification();
+  EXECUTE FUNCTION notify_outbid();
 
 -- Migration complete!
--- Remember to regenerate TypeScript types from Supabase Dashboard
+-- Next step: Regenerate TypeScript types to include the new tables
