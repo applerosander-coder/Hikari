@@ -13,11 +13,9 @@ import { usePathname } from 'next/navigation';
 import { NavItem } from '@/config/dashboard';
 
 export function Navbar({
-  user,
   userDetails,
   navConfig
 }: {
-  user: any;
   userDetails: any;
   navConfig: NavItem[];
 }) {
@@ -71,7 +69,7 @@ export function Navbar({
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs">
           <SharedMobileMenu 
-            user={user} 
+            user={userDetails} 
             userDetails={userDetails} 
             onClose={() => setIsOpen(false)} 
           />

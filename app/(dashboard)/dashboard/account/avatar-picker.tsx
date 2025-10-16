@@ -8,15 +8,14 @@ import { toast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
 const AVATAR_OPTIONS = [
-  `${SUPABASE_URL}/storage/v1/object/public/avatar/avatar-1.jpg`,
-  `${SUPABASE_URL}/storage/v1/object/public/avatar/avatar-2.jpg`,
-  `${SUPABASE_URL}/storage/v1/object/public/avatar/avatar-3.jpg`,
-  `${SUPABASE_URL}/storage/v1/object/public/avatar/avatar-4.jpg`,
-  `${SUPABASE_URL}/storage/v1/object/public/avatar/avatar-5.jpg`,
-  `${SUPABASE_URL}/storage/v1/object/public/avatar/avatar-6.jpg`,
+  '/avatars/default-avatar.svg',
+  '/avatars/avatar-1.jpg',
+  '/avatars/avatar-2.jpg',
+  '/avatars/avatar-3.jpg',
+  '/avatars/avatar-4.jpg',
+  '/avatars/avatar-5.jpg',
+  '/avatars/avatar-6.jpg',
 ];
 
 interface AvatarPickerProps {
@@ -26,7 +25,7 @@ interface AvatarPickerProps {
 
 export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
   const [selectedAvatar, setSelectedAvatar] = useState(
-    currentAvatar || AVATAR_OPTIONS[0]
+    currentAvatar || '/avatars/default-avatar.svg'
   );
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -64,7 +63,7 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
     });
   };
 
-  const hasChanged = selectedAvatar !== (currentAvatar || AVATAR_OPTIONS[0]);
+  const hasChanged = selectedAvatar !== (currentAvatar || '/avatars/default-avatar.svg');
 
   return (
     <div className="space-y-4 py-6">

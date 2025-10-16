@@ -41,14 +41,10 @@ export const getPlans = cache(async (supabase: SupabaseClient) => {
   return plans;
 });
 
-export const getUserDetails = async (supabase: SupabaseClient) => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  
+export const getUserDetails = cache(async (supabase: SupabaseClient) => {
   const { data: userDetails } = await supabase
     .from('users')
     .select('*')
-    .eq('id', user.id)
     .single();
   return userDetails;
-};
+});
