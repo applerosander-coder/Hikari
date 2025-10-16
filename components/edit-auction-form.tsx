@@ -701,7 +701,7 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                     ) : (
                       <>
                         <Sparkles className="h-4 w-4 mr-2 text-gray-400 transition-all duration-500" />
-                        Generate title, description & category from photo
+                        Generate below
                       </>
                     )}
                   </Button>
@@ -760,18 +760,6 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                       min="0"
                       value={item.starting_price}
                       onChange={(e) => handleItemChange(item.id, 'starting_price', e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`reserve_price-${item.id}`}>Reserve Price ($)</Label>
-                    <Input
-                      id={`reserve_price-${item.id}`}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={item.reserve_price}
-                      onChange={(e) => handleItemChange(item.id, 'reserve_price', e.target.value)}
                       placeholder="0.00"
                     />
                   </div>
