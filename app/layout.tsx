@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { ThemeProvider } from '@/components/theme-provider';
 import { NavigationProgress } from '@/components/navigation-progress';
+import { DynamicThemeColor } from '@/components/dynamic-theme-color';
 import { Inter as FontSans } from 'next/font/google';
 import localFont from 'next/font/local';
 import type { Viewport } from 'next';
@@ -14,10 +15,6 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import { TRPCReactProvider } from '@/trpc/react';
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' }
-  ],
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover'
@@ -84,7 +81,9 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
+      <head>
+        <meta name="theme-color" content="#ffffff" />
+      </head>
       <body
         className={cn(
           'min-h-screen bg-background font-mono antialiased',
@@ -93,6 +92,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <DynamicThemeColor />
           <NavigationProgress />
           <RootProvider>
             <TRPCReactProvider>{children}</TRPCReactProvider>
