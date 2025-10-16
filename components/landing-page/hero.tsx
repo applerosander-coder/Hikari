@@ -13,6 +13,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import ParticleFieldCSS from '@/components/particle-field-css'
+import { CoolMode } from '@/components/magicui/cool-mode'
+import { Button } from '@/components/ui/button'
 
 export default function HeroSection() {
   const { theme } = useTheme();
@@ -60,12 +62,15 @@ export default function HeroSection() {
             <Link href="/dashboard" className={cn(buttonVariants({ size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-bold text-white')}>
               Browse Auctions
             </Link>
-            <Link
-              href="/dashboard"
-              className={cn(buttonVariants({ variant: 'outline', size: 'xl' }), 'rounded-full border-2 border-primary dark:border-white text-semibold')}
-            >
-              Start Bidding Today
-            </Link>
+            <CoolMode>
+              <Button
+                variant="outline"
+                size="xl"
+                className="rounded-full border-2 border-primary dark:border-white text-semibold"
+              >
+                Start Bidding Today
+              </Button>
+            </CoolMode>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2 w-full">
             <AvatarCircles numPeople={1247} avatarUrls={avatarUrls} />
