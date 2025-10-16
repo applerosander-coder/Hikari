@@ -258,7 +258,7 @@ export default function AuctionItemDetailPage() {
                     {formatPrice(item.current_bid || item.starting_price)}
                   </p>
                   {userIsHighestBidder && !isAuctionEnded && (
-                    <p className="text-sm font-medium text-green-600 mt-1">✓ You're winning!</p>
+                    <span className="text-sm font-medium text-green-600 mt-1 block">✓ You're winning!</span>
                   )}
                 </div>
                 <TrendingUp className={`h-8 w-8 ${userIsHighestBidder && !isAuctionEnded ? 'text-green-600' : 'text-muted-foreground'}`} />
