@@ -5,10 +5,7 @@ import {
   Store,
   DollarSign,
   HelpCircle,
-  Settings,
-  MessageCircle,
-  Bell,
-  Users
+  Settings
 } from 'lucide-react';
 
 export interface MobileNavItem {
@@ -23,9 +20,6 @@ export const mobileNavItems: MobileNavItem[] = [
   { href: '/mybids', icon: Heart, label: 'My Bids' },
   { href: '/dashboard/leaderboard', icon: LineChart, label: 'Leaderboard' },
   { href: '/seller', icon: Store, label: 'Seller' },
-  { href: '/messages', icon: MessageCircle, label: 'Messages' },
-  { href: '/notifications', icon: Bell, label: 'Notifications' },
-  { href: '/connections', icon: Users, label: 'Connections' },
   { href: '/pricing', icon: DollarSign, label: 'Pricing' },
   { href: '/how-it-works', icon: HelpCircle, label: 'How it Works' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' }

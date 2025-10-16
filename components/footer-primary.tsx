@@ -166,7 +166,7 @@ export default function FooterPrimary() {
           <div className="flex items-center">
             {mounted && (
               <Image 
-                src={resolvedTheme === 'dark' ? '/bidwin-logo-white.svg' : '/bidwin-logo.svg'}
+                src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
                 alt="BIDWIN" 
                 width={100} 
                 height={50}

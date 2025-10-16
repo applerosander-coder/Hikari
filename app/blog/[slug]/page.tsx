@@ -59,7 +59,7 @@ export default function Page({
       >
         <div className="mb-6">
           <Image 
-            src="/bidwin-logo.svg"
+            src="/bidwin-logo-light.png"
             alt="BIDWIN" 
             width={140} 
             height={70}
@@ -67,7 +67,7 @@ export default function Page({
             priority
           />
           <Image 
-            src="/bidwin-logo-white.svg"
+            src="/bidwin-logo-dark.png"
             alt="BIDWIN" 
             width={140} 
             height={70}
