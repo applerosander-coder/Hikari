@@ -69,7 +69,12 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
     }
 
     // Create bid record (NO PAYMENT YET - payment only happens when auction ends if user wins)
-    if (isAuctionItem && parentAuctionId) {
+    if (isAuctionItem) {
+      if (!parentAuctionId) {
+        console.error('parentAuctionId is missing for auction item');
+        return { error: 'Failed to place bid - auction configuration error' };
+      }
+      
       // Insert bid for auction item
       const { error: bidError } = await supabase.from('bids').insert({
         auction_item_id: auctionId,
