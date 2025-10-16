@@ -166,7 +166,6 @@ export default async function DashboardPage() {
     .select(`
       id, 
       title, 
-      location, 
       status,
       created_by
     `)
@@ -197,12 +196,18 @@ export default async function DashboardPage() {
     }
   }
 
-  // Map to match expected interface (name -> title, place -> location)
+  // Map to match expected interface (name -> title, no location for now)
   const auctionsWithMapping = auctionsWithSellers.map(auction => ({
     ...auction,
     name: auction.title,
-    place: auction.location
+    place: '' // Remove location since column doesn't exist in production
   }));
+
+  // Debug logging
+  console.log('Auctions fetched:', auctionsWithMapping.length);
+  console.log('Sample auction:', auctionsWithMapping[0]);
+  console.log('Items count:', itemsWithBidCounts.length);
+  console.log('Sample item auction_id:', itemsWithBidCounts[0]?.auction_id);
 
   return (
     <>
