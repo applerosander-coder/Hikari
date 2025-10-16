@@ -13,14 +13,23 @@ export interface Database {
         Row: {
           id: string
           stripe_customer_id: string | null
+          created_at: string
+          updated_at: string
+          payment_method: Json | null
         }
         Insert: {
           id: string
           stripe_customer_id?: string | null
+          created_at?: string
+          updated_at?: string
+          payment_method?: Json | null
         }
         Update: {
           id?: string
           stripe_customer_id?: string | null
+          created_at?: string
+          updated_at?: string
+          payment_method?: Json | null
         }
         Relationships: [
           {
