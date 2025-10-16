@@ -98,46 +98,109 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
         <p className="text-muted-foreground">Track all auction items and their bidding activity</p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <select
-          value={selectedAuction}
-          onChange={(e) => setSelectedAuction(e.target.value)}
-          className="w-auto max-w-[280px] sm:max-w-none px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+      {/* Filter Pills */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4">
+        {/* All Items Pill */}
+        <button
+          onClick={() => {
+            setSelectedAuction('all');
+            setSelectedCategory('all');
+          }}
+          className={`
+            flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
+            ${selectedAuction === 'all' && selectedCategory === 'all'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }
+          `}
         >
-          <option value="all">All Auctions ({items.length} items)</option>
-          {auctions.map((auction) => {
+          All Items ({items.length})
+        </button>
+
+        {/* Category Pills */}
+        {CATEGORIES.map((category) => {
+          const categoryCount = items.filter(item => item.category === category).length;
+          if (categoryCount === 0) return null;
+          
+          return (
+            <button
+              key={category}
+              onClick={() => {
+                setSelectedCategory(category);
+                setSelectedAuction('all');
+              }}
+              className={`
+                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                ${selectedCategory === category
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }
+              `}
+            >
+              {category} ({categoryCount})
+            </button>
+          );
+        })}
+
+        {/* Auction Pills */}
+        {(() => {
+          const now = new Date();
+          
+          // Map all auctions with their metadata
+          const mappedAuctions = auctions.map((auction) => {
             const auctionItems = items.filter(i => i.auction_id === auction.id);
-            const now = new Date();
             const endDate = auction.end_date ? new Date(auction.end_date) : null;
             const hasEnded = endDate && endDate <= now;
-            const statusLabel = hasEnded ? 'Ended' : 'Live';
+            const isActive = !hasEnded && auctionItems.length > 0;
             
-            return (
-              <option key={auction.id} value={auction.id}>
-                {auction.name} - {auction.place} ({auctionItems.length} items • {statusLabel})
-              </option>
-            );
-          })}
-        </select>
+            return {
+              auction,
+              itemCount: auctionItems.length,
+              isActive,
+              endDate
+            };
+          });
+          
+          // Separate live and ended auctions
+          const liveAuctions = mappedAuctions.filter(a => a.isActive);
+          const endedAuctions = mappedAuctions
+            .filter(a => !a.isActive && a.itemCount > 0)
+            .sort((a, b) => {
+              if (!a.endDate) return 1;
+              if (!b.endDate) return -1;
+              return b.endDate.getTime() - a.endDate.getTime();
+            })
+            .slice(0, 3); // Limit to 3 most recent ended auctions
+          
+          // Combine: live auctions first, then limited ended auctions
+          return [...liveAuctions, ...endedAuctions].map(({ auction, itemCount }) => (
+            <button
+              key={auction.id}
+              onClick={() => {
+                setSelectedAuction(auction.id);
+                setSelectedCategory('all');
+              }}
+              className={`
+                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                ${selectedAuction === auction.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }
+              `}
+            >
+              {auction.name} ({itemCount})
+            </button>
+          ));
+        })()}
+      </div>
 
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-auto max-w-[280px] sm:max-w-none px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          <option value="all">All Categories</option>
-          {CATEGORIES.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-
+      {/* Sort Dropdown */}
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-sm text-muted-foreground">Sort by:</span>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as SortType)}
-          className="w-auto max-w-[280px] sm:max-w-none px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-auto px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="latest">Latest Bid First</option>
           <option value="highest">Highest Bid First</option>
