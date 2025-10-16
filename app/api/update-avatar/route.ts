@@ -48,7 +48,8 @@ export async function POST(request: Request) {
 
   console.log('Avatar updated successfully:', data);
   
-  // Revalidate all paths that use user data
+  // Revalidate the account page and layout
+  revalidatePath('/dashboard/account');
   revalidatePath('/', 'layout');
   
   return NextResponse.json({ data });

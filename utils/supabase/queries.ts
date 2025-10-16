@@ -41,10 +41,10 @@ export const getPlans = cache(async (supabase: SupabaseClient) => {
   return plans;
 });
 
-export const getUserDetails = cache(async (supabase: SupabaseClient) => {
+export const getUserDetails = async (supabase: SupabaseClient) => {
   const { data: userDetails } = await supabase
     .from('users')
     .select('*')
     .single();
   return userDetails;
-});
+};
