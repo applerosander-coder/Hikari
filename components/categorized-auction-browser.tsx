@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AuctionItemCard } from './auction-item-card';
+import { AuctionCategoryNav } from './auction-category-nav';
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AuctionItem {
@@ -68,6 +69,77 @@ export function CategorizedAuctionBrowser({
   const [selectedAuction, setSelectedAuction] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showArchive, setShowArchive] = useState(false);
+
+  // Build auction options for the nav
+  const auctionOptions = useMemo(() => {
+    const now = new Date();
+    
+    // Start with "All Items"
+    const options = [
+      { label: `Items (${items.length + endedItems.length})`, value: 'all' }
+    ];
+    
+    // Map all auctions with their metadata
+    const mappedAuctions = auctions.map((auction) => {
+      const activeCount = items.filter(i => i.auction_id === auction.id).length;
+      const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
+      const totalCount = activeCount + endedCount;
+      
+      // Check if auction has ended by time
+      const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
+      const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
+      const hasEnded = endDate && endDate <= now;
+      
+      const isActive = !hasEnded && activeCount > 0;
+      
+      return {
+        auction,
+        totalCount,
+        isActive,
+        endDate
+      };
+    });
+    
+    // Separate live and ended auctions
+    const liveAuctions = mappedAuctions.filter(a => a.isActive && a.totalCount > 0);
+    const endedAuctions = mappedAuctions
+      .filter(a => !a.isActive && a.totalCount > 0)
+      .sort((a, b) => {
+        if (!a.endDate) return 1;
+        if (!b.endDate) return -1;
+        return b.endDate.getTime() - a.endDate.getTime();
+      })
+      .slice(0, 3); // Limit to 3 most recent ended auctions
+    
+    // Combine: live auctions first, then limited ended auctions
+    [...liveAuctions, ...endedAuctions].forEach(({ auction, totalCount }) => {
+      options.push({
+        label: `${auction.name} (${totalCount})`,
+        value: auction.id
+      });
+    });
+    
+    return options;
+  }, [items, endedItems, auctions]);
+
+  // Build category options for the nav
+  const categoryOptions = useMemo(() => {
+    const options = [
+      { label: 'All', value: 'all' }
+    ];
+    
+    CATEGORIES.forEach((category) => {
+      const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
+      if (categoryCount > 0) {
+        options.push({
+          label: `${category} (${categoryCount})`,
+          value: category
+        });
+      }
+    });
+    
+    return options;
+  }, [items, endedItems]);
 
   const filteredItems = React.useMemo(() => {
     const now = new Date();
@@ -207,131 +279,40 @@ export function CategorizedAuctionBrowser({
   };
 
   return (
-    <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
-      <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Filter Pills */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-          {/* All Items Pill */}
-          <button
-            onClick={() => {
-              setSelectedAuction('all');
-              setSelectedCategory('all');
-            }}
-            className={`
-              flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
-              ${selectedAuction === 'all' && selectedCategory === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }
-            `}
-          >
-            All Items ({items.length + endedItems.length})
-          </button>
+    <>
+      {/* Two-Tier Navigation */}
+      <AuctionCategoryNav
+        auctionOptions={auctionOptions}
+        categoryOptions={categoryOptions}
+        valueAuction={selectedAuction}
+        valueCategory={selectedCategory}
+        onChangeAuction={setSelectedAuction}
+        onChangeCategory={setSelectedCategory}
+      />
 
-          {/* Category Pills */}
-          {CATEGORIES.map((category) => {
-            const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
-            if (categoryCount === 0) return null;
-            
-            return (
+      <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search items, auctions, or locations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 bg-background"
+            />
+            {searchQuery && (
               <button
-                key={category}
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setSelectedAuction('all');
-                }}
-                className={`
-                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                  ${selectedCategory === category
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }
-                `}
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear search"
               >
-                {category} ({categoryCount})
+                <X className="h-4 w-4" />
               </button>
-            );
-          })}
-
-          {/* Auction Pills */}
-          {(() => {
-            const now = new Date();
-            
-            // Map all auctions with their metadata
-            const mappedAuctions = auctions.map((auction) => {
-              const activeCount = items.filter(i => i.auction_id === auction.id).length;
-              const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
-              const totalCount = activeCount + endedCount;
-              
-              // Check if auction has ended by time
-              const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
-              const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
-              const hasEnded = endDate && endDate <= now;
-              
-              const isActive = !hasEnded && activeCount > 0;
-              
-              return {
-                auction,
-                totalCount,
-                isActive,
-                endDate
-              };
-            });
-            
-            // Separate live and ended auctions
-            const liveAuctions = mappedAuctions.filter(a => a.isActive && a.totalCount > 0);
-            const endedAuctions = mappedAuctions
-              .filter(a => !a.isActive && a.totalCount > 0)
-              .sort((a, b) => {
-                if (!a.endDate) return 1;
-                if (!b.endDate) return -1;
-                return b.endDate.getTime() - a.endDate.getTime();
-              })
-              .slice(0, 3); // Limit to 3 most recent ended auctions
-            
-            // Combine: live auctions first, then limited ended auctions
-            return [...liveAuctions, ...endedAuctions].map(({ auction, totalCount }) => (
-              <button
-                key={auction.id}
-                onClick={() => {
-                  setSelectedAuction(auction.id);
-                  setSelectedCategory('all');
-                }}
-                className={`
-                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                  ${selectedAuction === auction.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }
-                `}
-              >
-                {auction.name} ({totalCount})
-              </button>
-            ));
-          })()}
+            )}
+          </div>
         </div>
-
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search items, auctions, or locations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 bg-background"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
 
       {filteredItems.length === 0 && filteredEndedItems.length === 0 ? (
         <div className="text-center py-12 max-w-5xl mx-auto">
@@ -431,7 +412,8 @@ export function CategorizedAuctionBrowser({
           )}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
