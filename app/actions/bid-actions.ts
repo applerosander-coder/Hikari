@@ -15,11 +15,11 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
     // Check if user has a payment method on file (required for auction participation)
     const { data: customer } = await supabase
       .from('customers')
-      .select('payment_method')
+      .select('*')
       .eq('id', user.id)
       .single();
 
-    const paymentMethod = customer?.payment_method as { id: string; brand?: string; last4?: string } | null;
+    const paymentMethod = (customer as any)?.payment_method as { id: string; brand?: string; last4?: string } | null;
     
     if (!paymentMethod?.id) {
       return { error: 'no_payment_method' };
@@ -72,7 +72,7 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
       // Insert bid for auction item
       const { error: bidError } = await supabase.from('bids').insert({
         auction_item_id: auctionId,
-        auction_id: parentAuctionId,
+        auction_id: parentAuctionId!,
         user_id: user.id,
         bid_amount: bidAmount,
       });
