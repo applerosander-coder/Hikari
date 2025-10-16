@@ -5,8 +5,8 @@
 -- 1. CREATE FOLLOWS TABLE (User Connections)
 CREATE TABLE IF NOT EXISTS public.follows (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  follower_id TEXT NOT NULL,  -- User who is following
-  following_id TEXT NOT NULL,  -- User being followed
+  follower_id uuid NOT NULL,  -- User who is following
+  following_id uuid NOT NULL,  -- User being followed
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.follows (
 -- Types: 'outbid', 'auction_ended', 'follow_request', 'follow_accepted', 'message'
 CREATE TABLE IF NOT EXISTS public.notifications (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id TEXT NOT NULL,  -- Recipient of the notification
+  user_id uuid NOT NULL,  -- Recipient of the notification
   type TEXT NOT NULL CHECK (type IN ('outbid', 'auction_ended', 'follow_request', 'follow_accepted', 'message')),
   title TEXT NOT NULL,
   message TEXT NOT NULL,
@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 -- 3. CREATE MESSAGES TABLE
 CREATE TABLE IF NOT EXISTS public.messages (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  from_user_id TEXT NOT NULL,
-  to_user_id TEXT NOT NULL,
+  from_user_id uuid NOT NULL,
+  to_user_id uuid NOT NULL,
   subject TEXT,
   message TEXT NOT NULL,
   read BOOLEAN DEFAULT FALSE,
