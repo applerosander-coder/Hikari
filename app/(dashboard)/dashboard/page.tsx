@@ -160,22 +160,28 @@ export default async function DashboardPage() {
     bid_count: bidCountMap.get(item.id) || 0
   }));
 
-  // Get list of all auctions for filter dropdown with creator info
-  const { data: allAuctions } = await supabase
+  // Get list of all auctions for filter dropdown
+  const { data: allAuctions, error: auctionsError } = await supabase
     .from('auctions')
-    .select(`
-      id, 
-      name, 
-      place, 
-      status,
-      creator:users!created_by (
-        id,
-        full_name,
-        avatar_url
-      )
-    `)
+    .select('id, name, place, status, created_by')
     .in('status', ['active', 'upcoming', 'ended'])
     .order('created_at', { ascending: false });
+  
+  // Fetch creator info for each auction
+  const auctionsWithCreators = await Promise.all(
+    (allAuctions || []).map(async (auction) => {
+      const { data: creator } = await supabase
+        .from('users')
+        .select('id, full_name, avatar_url')
+        .eq('id', auction.created_by)
+        .single();
+      
+      return {
+        ...auction,
+        creator
+      };
+    })
+  );
 
   return (
     <>
@@ -187,7 +193,7 @@ export default async function DashboardPage() {
       <CategorizedAuctionBrowser
         items={itemsWithBidCounts}
         endedItems={endedItemsWithBidCounts}
-        auctions={allAuctions || []}
+        auctions={auctionsWithCreators}
         userBidItemIds={userBidItemIds}
         userBidAmounts={userBidAmounts}
         userId={user.id}
