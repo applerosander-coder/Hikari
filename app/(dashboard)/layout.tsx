@@ -45,9 +45,9 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <NotificationProvider />
-      <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+      <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex safe-left safe-y">
         <Sidebar navConfig={navConfig as NavItem[]} />
-        <nav className="mt-auto flex flex-col items-center gap-2 px-2 sm:py-5">
+        <nav className="mt-auto flex flex-col items-center gap-2 px-2 sm:py-5 safe-bottom">
           <TooltipProvider>
             <SidebarThemeToggle />
             <Tooltip>
@@ -82,7 +82,7 @@ export default async function DashboardLayout({
       </aside>
       <div className="flex flex-col sm:pl-14">
         <Navbar userDetails={userDetails} navConfig={navConfig as NavItem[]} />
-        <main className="flex-1 w-full overflow-x-hidden pt-20 sm:pt-0">
+        <main className="flex-1 w-full overflow-x-hidden pt-20 sm:pt-0 safe-bottom">
           {children}
         </main>
       </div>

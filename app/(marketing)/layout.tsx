@@ -22,7 +22,7 @@ export default async function MarketingLayout({
   return (
     <div className="flex min-h-screen flex-col items-center w-full overflow-x-hidden">
       <CircularNavigation items={marketingConfig.mainNav} user={user} userDetails={userDetails} />
-      <main className="flex-1 w-full overflow-x-hidden">{children}</main>
+      <main className="flex-1 w-full overflow-x-hidden safe-x">{children}</main>
       <FooterPrimary />
     </div>
   );
