@@ -209,77 +209,106 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Filter Dropdowns */}
-        <div className="flex flex-wrap gap-3">
-          <select
-            value={selectedAuction}
-            onChange={(e) => setSelectedAuction(e.target.value)}
-            className="w-auto max-w-[280px] sm:max-w-none px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+        {/* Filter Pills */}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+          {/* All Items Pill */}
+          <button
+            onClick={() => {
+              setSelectedAuction('all');
+              setSelectedCategory('all');
+            }}
+            className={`
+              flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
+              ${selectedAuction === 'all' && selectedCategory === 'all'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }
+            `}
           >
-            <option value="all">All Auctions ({items.length + endedItems.length} items)</option>
-            {(() => {
-              const now = new Date();
-              
-              // Map all auctions with their metadata
-              const mappedAuctions = auctions.map((auction) => {
-                const activeCount = items.filter(i => i.auction_id === auction.id).length;
-                const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
-                const totalCount = activeCount + endedCount;
-                
-                // Check if auction has ended by time
-                const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
-                const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
-                const hasEnded = endDate && endDate <= now;
-                
-                const statusLabel = hasEnded || activeCount === 0 ? 'Ended' : 'Live';
-                const isActive = !hasEnded && activeCount > 0;
-                
-                return {
-                  auction,
-                  activeCount,
-                  endedCount,
-                  totalCount,
-                  statusLabel,
-                  isActive,
-                  endDate
-                };
-              });
-              
-              // Separate live and ended auctions
-              const liveAuctions = mappedAuctions.filter(a => a.isActive);
-              const endedAuctions = mappedAuctions
-                .filter(a => !a.isActive)
-                .sort((a, b) => {
-                  // Sort ended auctions by end date (most recent first)
-                  if (!a.endDate) return 1;
-                  if (!b.endDate) return -1;
-                  return b.endDate.getTime() - a.endDate.getTime();
-                })
-                .slice(0, 5); // Limit to 5 most recent ended auctions
-              
-              // Combine: live auctions first, then limited ended auctions
-              return [...liveAuctions, ...endedAuctions].map(({ auction, totalCount, statusLabel }) => (
-                <option key={auction.id} value={auction.id}>
-                  {auction.name} - {auction.place} ({totalCount} items • {statusLabel})
-                </option>
-              ));
-            })()}
-          
-          </select>
+            All Items ({items.length + endedItems.length})
+          </button>
 
-          {/* Category Filter Dropdown */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-auto max-w-[280px] sm:max-w-none px-4 py-2 rounded-md border border-input bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="all">All Categories</option>
-            {CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+          {/* Category Pills */}
+          {CATEGORIES.map((category) => {
+            const categoryCount = [...items, ...endedItems].filter(item => item.category === category).length;
+            if (categoryCount === 0) return null;
+            
+            return (
+              <button
+                key={category}
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setSelectedAuction('all');
+                }}
+                className={`
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                  ${selectedCategory === category
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }
+                `}
+              >
+                {category} ({categoryCount})
+              </button>
+            );
+          })}
+
+          {/* Auction Pills */}
+          {(() => {
+            const now = new Date();
+            
+            // Map all auctions with their metadata
+            const mappedAuctions = auctions.map((auction) => {
+              const activeCount = items.filter(i => i.auction_id === auction.id).length;
+              const endedCount = endedItems.filter(i => i.auction_id === auction.id).length;
+              const totalCount = activeCount + endedCount;
+              
+              // Check if auction has ended by time
+              const auctionItem = [...items, ...endedItems].find(i => i.auction_id === auction.id);
+              const endDate = auctionItem?.auction?.end_date ? new Date(auctionItem.auction.end_date) : null;
+              const hasEnded = endDate && endDate <= now;
+              
+              const isActive = !hasEnded && activeCount > 0;
+              
+              return {
+                auction,
+                totalCount,
+                isActive,
+                endDate
+              };
+            });
+            
+            // Separate live and ended auctions
+            const liveAuctions = mappedAuctions.filter(a => a.isActive && a.totalCount > 0);
+            const endedAuctions = mappedAuctions
+              .filter(a => !a.isActive && a.totalCount > 0)
+              .sort((a, b) => {
+                if (!a.endDate) return 1;
+                if (!b.endDate) return -1;
+                return b.endDate.getTime() - a.endDate.getTime();
+              })
+              .slice(0, 3); // Limit to 3 most recent ended auctions
+            
+            // Combine: live auctions first, then limited ended auctions
+            return [...liveAuctions, ...endedAuctions].map(({ auction, totalCount }) => (
+              <button
+                key={auction.id}
+                onClick={() => {
+                  setSelectedAuction(auction.id);
+                  setSelectedCategory('all');
+                }}
+                className={`
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                  ${selectedAuction === auction.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }
+                `}
+              >
+                {auction.name} ({totalCount})
+              </button>
+            ));
+          })()}
         </div>
 
         {/* Search Bar */}
