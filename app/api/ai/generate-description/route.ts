@@ -15,24 +15,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { base64Image, itemTitle } = await request.json();
+    const { base64Image } = await request.json();
 
-    // Require at least one of image or title
-    if (!base64Image && !itemTitle) {
+    if (!base64Image) {
       return NextResponse.json(
-        { error: "Please provide either an image or item title" },
+        { error: "Please upload an image to generate auction details" },
         { status: 400 }
       );
     }
 
-    // Remove data URL prefix if present (only if image exists)
-    const base64Data = base64Image && base64Image.includes("base64,")
+    const base64Data = base64Image.includes("base64,")
       ? base64Image.split("base64,")[1]
       : base64Image;
 
     const result = await generateProductDescription({
       base64Image: base64Data,
-      itemTitle,
+      itemTitle: undefined,
     });
 
     console.log('Generated result:', result);

@@ -9,6 +9,7 @@ interface GenerateDescriptionParams {
 }
 
 interface GenerateDescriptionResponse {
+  title: string;
   description: string;
   category: string;
 }
@@ -28,36 +29,22 @@ export async function generateProductDescription({
   itemTitle,
 }: GenerateDescriptionParams): Promise<GenerateDescriptionResponse> {
   try {
-    // Build the content array based on what's available
-    const content: any[] = [];
-
-    // Add text prompt
-    if (itemTitle && base64Image) {
-      content.push({
-        type: "text",
-        text: `Generate a compelling auction description for this item titled: "${itemTitle}". Analyze the image and describe what makes this item special and worth bidding on.`,
-      });
-    } else if (itemTitle) {
-      content.push({
-        type: "text",
-        text: `Generate a compelling auction description for an item titled: "${itemTitle}". Create an engaging description based on the title that encourages bidding.`,
-      });
-    } else if (base64Image) {
-      content.push({
-        type: "text",
-        text: `Analyze this image and generate a compelling auction description. Describe what makes this item special and worth bidding on.`,
-      });
+    if (!base64Image) {
+      throw new Error('Image is required for AI generation');
     }
 
-    // Add image if available
-    if (base64Image) {
-      content.push({
+    const content: any[] = [
+      {
+        type: "text",
+        text: `Analyze this product image and generate auction listing details. Be specific about what you see in the image.`,
+      },
+      {
         type: "image_url",
         image_url: {
           url: `data:image/jpeg;base64,${base64Image}`,
         },
-      });
-    }
+      }
+    ];
 
     const visionResponse = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -66,18 +53,25 @@ export async function generateProductDescription({
           role: "system",
           content: `You are an expert e-commerce product description writer for auction listings. 
 
-Your task is to:
-1. Create a compelling description (50-100 words) that:
-   - Highlights key features, materials, colors, and condition${base64Image ? ' visible in the image' : ''}
+Analyze the product image and generate:
+
+1. A concise, descriptive title (3-8 words) that identifies the item clearly
+   - Be specific about what you see (brand, model, style, material, color)
+   - Make it searchable and clear
+   - Examples: "Vintage Leather Handbag Brown", "Apple MacBook Pro 16-inch", "Modern Glass Coffee Table"
+
+2. A compelling description (50-100 words) that:
+   - Highlights key features, materials, colors, and condition visible in the image
    - Uses persuasive language that encourages bidding
    - Focuses on what makes the item valuable and desirable
-   ${base64Image ? '- Is specific about what you see in the image' : '- Uses creative language to make the item appealing'}
+   - Is specific about what you see in the image
 
-2. Select the most appropriate category from this list:
+3. The most appropriate category from this list:
    ${CATEGORIES.join(', ')}
 
 Return your response in this exact JSON format:
 {
+  "title": "your descriptive title here",
   "description": "your compelling description here",
   "category": "selected category from the list"
 }`,
@@ -87,7 +81,7 @@ Return your response in this exact JSON format:
           content,
         },
       ],
-      max_tokens: 250,
+      max_tokens: 300,
       response_format: { type: "json_object" },
     });
 
@@ -95,6 +89,7 @@ Return your response in this exact JSON format:
     const parsed = JSON.parse(responseText);
     
     return {
+      title: parsed.title || "",
       description: parsed.description || "",
       category: CATEGORIES.includes(parsed.category) ? parsed.category : "Other",
     };

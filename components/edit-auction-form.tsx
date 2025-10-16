@@ -259,8 +259,8 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
     const item = items.find(i => i.id === itemId);
     if (!item) return;
 
-    if (!item.image_preview && !item.title) {
-      toast.error('Please add an image or title first');
+    if (!item.image_preview) {
+      toast.error('Please upload an image first to generate auction details');
       return;
     }
 
@@ -274,37 +274,37 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
         },
         body: JSON.stringify({
           base64Image: item.image_preview,
-          itemTitle: item.title,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to generate description');
+        throw new Error(error.error || 'Failed to generate auction details');
       }
       
       const data = await response.json();
       console.log('Received data from API:', data);
       
-      if (!data.description) {
-        throw new Error('No description in response');
+      if (!data.title || !data.description || !data.category) {
+        throw new Error('Incomplete response from AI');
       }
       
       setItems(prevItems => prevItems.map(item => 
         item.id === itemId 
           ? { 
               ...item, 
+              title: data.title,
               description: data.description, 
-              category: data.category || item.category,
+              category: data.category,
               ai_used_for_current_image: true 
             } 
           : item
       ));
       
-      toast.success('Description generated successfully!');
+      toast.success('Auction details generated successfully!');
     } catch (error: any) {
-      console.error('Error generating description:', error);
-      toast.error(error.message || 'Failed to generate description');
+      console.error('Error generating auction details:', error);
+      toast.error(error.message || 'Failed to generate auction details');
     } finally {
       setGeneratingAI(null);
     }
@@ -636,21 +636,12 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor={`title-${item.id}`}>Item Title *</Label>
-                  <Input
-                    id={`title-${item.id}`}
-                    value={item.title}
-                    onChange={(e) => handleItemChange(item.id, 'title', e.target.value)}
-                    placeholder="Enter item title"
-                  />
-                </div>
-
+                {/* Image Upload - Now First */}
                 <div>
                   <Label htmlFor={`image-${item.id}`}>Item Image</Label>
                   <div className="mt-2">
                     {item.image_preview ? (
-                      <div className="relative w-full h-32 border rounded-lg overflow-hidden">
+                      <div className="relative w-full h-48 border rounded-lg overflow-hidden">
                         <Image
                           src={item.image_preview}
                           alt="Preview"
@@ -674,48 +665,62 @@ export function EditAuctionForm({ auction, auctionItems, userId }: EditAuctionFo
                     ) : (
                       <label
                         htmlFor={`image-${item.id}`}
-                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                        className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
                       >
                         <Upload className="h-8 w-8 text-muted-foreground mb-1" />
                         <span className="text-xs text-muted-foreground">
-                          Click to upload (Max 10MB)
+                          Click to upload item photo (Max 10MB)
                         </span>
-                        <input
-                          id={`image-${item.id}`}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => handleImageChange(item.id, e)}
-                        />
                       </label>
                     )}
+                    <input
+                      id={`image-${item.id}`}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageChange(item.id, e)}
+                    />
                   </div>
                 </div>
 
+                {/* AI Generate Button - Only show for newly uploaded photos (base64) */}
+                {item.image_preview && item.image_preview.startsWith('data:image/') && !item.ai_used_for_current_image && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleGenerateDescription(item.id)}
+                    disabled={generatingAI === item.id}
+                    className="w-full h-9 relative overflow-hidden transition-all duration-1000 hover:shadow-[inset_0_0_60px_rgba(192,192,192,0.9),0_0_50px_rgba(192,192,192,0.8),0_0_70px_rgba(255,255,255,0.6)] hover:border-gray-400/70 hover:bg-gray-400/5 disabled:hover:shadow-none disabled:hover:border-border disabled:hover:bg-transparent backdrop-blur-sm animate-[glow_30s_linear_infinite]"
+                  >
+                    {generatingAI === item.id ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Analyzing photo & generating details...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2 text-gray-400 transition-all duration-500" />
+                        Generate title, description & category from photo
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {/* Title */}
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label htmlFor={`description-${item.id}`}>Description</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleGenerateDescription(item.id)}
-                      disabled={generatingAI === item.id || (!item.image_preview && !item.title) || (item.ai_used_for_current_image && item.image_preview !== null)}
-                      className="ai-generate-btn relative overflow-hidden"
-                    >
-                      {generatingAI === item.id ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Type for me
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  <Label htmlFor={`title-${item.id}`}>Item Title *</Label>
+                  <Input
+                    id={`title-${item.id}`}
+                    value={item.title}
+                    onChange={(e) => handleItemChange(item.id, 'title', e.target.value)}
+                    placeholder="Enter item title"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <Label htmlFor={`description-${item.id}`}>Description</Label>
                   <Textarea
                     id={`description-${item.id}`}
                     value={item.description}
