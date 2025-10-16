@@ -161,21 +161,48 @@ export default async function DashboardPage() {
   }));
 
   // Get list of all auctions for filter dropdown with seller info
-  const { data: allAuctions } = await supabase
+  const { data: allAuctions, error: auctionsError } = await supabase
     .from('auctions')
     .select(`
       id, 
-      name, 
-      place, 
+      title, 
+      location, 
       status,
-      created_by,
-      users:created_by (
-        avatar_url,
-        full_name
-      )
+      created_by
     `)
     .in('status', ['active', 'upcoming', 'ended'])
     .order('created_at', { ascending: false });
+
+  if (auctionsError) {
+    console.error('Error fetching auctions:', auctionsError);
+  }
+
+  // Fetch seller info for each auction separately to avoid RLS issues
+  let auctionsWithSellers = allAuctions || [];
+  if (allAuctions && allAuctions.length > 0) {
+    const sellerIds = [...new Set(allAuctions.map(a => a.created_by).filter(Boolean))];
+    
+    if (sellerIds.length > 0) {
+      const { data: sellers } = await supabase
+        .from('users')
+        .select('id, avatar_url, full_name')
+        .in('id', sellerIds);
+      
+      const sellerMap = new Map(sellers?.map(s => [s.id, s]) || []);
+      
+      auctionsWithSellers = allAuctions.map(auction => ({
+        ...auction,
+        users: auction.created_by ? sellerMap.get(auction.created_by) : null
+      }));
+    }
+  }
+
+  // Map to match expected interface (name -> title, place -> location)
+  const auctionsWithMapping = auctionsWithSellers.map(auction => ({
+    ...auction,
+    name: auction.title,
+    place: auction.location
+  }));
 
   return (
     <>
@@ -187,7 +214,7 @@ export default async function DashboardPage() {
       <CategorizedAuctionBrowser
         items={itemsWithBidCounts}
         endedItems={endedItemsWithBidCounts}
-        auctions={allAuctions || []}
+        auctions={auctionsWithMapping}
         userBidItemIds={userBidItemIds}
         userBidAmounts={userBidAmounts}
         userId={user.id}
