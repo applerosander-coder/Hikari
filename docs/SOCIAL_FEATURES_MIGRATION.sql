@@ -62,13 +62,12 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 -- 6. CREATE RLS POLICIES
 
 -- FOLLOWS POLICIES
--- Users can view follows where they are the follower or following
+-- Users can only view follows where they are directly involved (follower or following)
 CREATE POLICY "Users can view their own follows" 
   ON public.follows FOR SELECT 
   USING (
     auth.uid() = follower_id OR 
-    auth.uid() = following_id OR
-    auth.role() = 'authenticated'
+    auth.uid() = following_id
   );
 
 -- Users can create follow requests
