@@ -42,9 +42,13 @@ export const getPlans = cache(async (supabase: SupabaseClient) => {
 });
 
 export const getUserDetails = async (supabase: SupabaseClient) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  
   const { data: userDetails } = await supabase
     .from('users')
     .select('*')
+    .eq('id', user.id)
     .single();
   return userDetails;
 };

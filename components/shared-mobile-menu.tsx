@@ -83,7 +83,10 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         >
           <Avatar className="h-10 w-10">
             {userDetails?.avatar_url && (
-              <AvatarImage src={userDetails.avatar_url} alt={userDetails?.full_name || 'User'} />
+              <AvatarImage 
+                src={userDetails.avatar_url} 
+                alt={userDetails?.full_name || 'User'}
+              />
             )}
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
