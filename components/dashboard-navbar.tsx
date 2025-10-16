@@ -27,7 +27,7 @@ export function Navbar({
   }, []);
 
   return (
-    <header className="flex h-20 items-center gap-4 border-b bg-background px-4 sm:hidden fixed top-0 left-0 right-0 z-20">
+    <header className="flex h-20 items-center gap-4 border-b bg-background px-4 sm:hidden fixed top-0 left-0 right-0 z-20 safe-top">
       <Link href="/" className="flex items-center" prefetch={false}>
         {mounted && (
           <Image 
