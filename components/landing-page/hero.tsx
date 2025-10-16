@@ -68,7 +68,7 @@ export default function HeroSection() {
                 size="xl"
                 className="rounded-full border-2 border-primary dark:border-white text-semibold select-none"
               >
-                Confetti
+                More Confetti
               </Button>
             </CoolMode>
           </div>
