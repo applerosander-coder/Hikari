@@ -133,8 +133,8 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         </span>
       </button>
 
-      {/* Sign Out */}
-      {user && (
+      {/* Sign In / Sign Out */}
+      {user ? (
         <button
           onClick={() => setShowSignOutDialog(true)}
           className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
@@ -142,6 +142,15 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
           <LogOut className="h-5 w-5" />
           Sign Out
         </button>
+      ) : (
+        <Link
+          href="/signin"
+          onClick={onClose}
+          className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+        >
+          <LogOut className="h-5 w-5" />
+          Sign In
+        </Link>
       )}
 
       {/* Sign Out Confirmation Dialog */}

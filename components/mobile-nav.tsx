@@ -44,42 +44,12 @@ export function MobileNav({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-        <SheetHeader>
-          <SheetTitle className="flex items-center text-left">
-            {mounted && (
-              <Image 
-                src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
-                alt="BIDWIN" 
-                width={100} 
-                height={50}
-                className="h-10 w-auto"
-              />
-            )}
-          </SheetTitle>
-        </SheetHeader>
-        
+      <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
         <SharedMobileMenu 
           user={user} 
           userDetails={userDetails} 
           onClose={() => onOpenChange(false)} 
         />
-
-        {!user && (
-          <div className="mt-6 flex justify-center">
-            <Link
-              href="/signin"
-              onClick={() => onOpenChange(false)}
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-                'rounded-full px-6'
-              )}
-            >
-              Login
-            </Link>
-          </div>
-        )}
-
         {children}
       </SheetContent>
     </Sheet>

@@ -9,14 +9,14 @@ export default function FooterBlog() {
         <div className="flex flex-col items-center md:flex-row justify-between">
           <div className="flex items-center space-x-2">
             <Image 
-              src="/bidwin-logo-light.png"
+              src="/bidwin-logo.svg"
               alt="BIDWIN" 
               width={120} 
               height={60}
               className="h-8 w-auto dark:hidden"
             />
             <Image 
-              src="/bidwin-logo-dark.png"
+              src="/bidwin-logo-white.svg"
               alt="BIDWIN" 
               width={120} 
               height={60}

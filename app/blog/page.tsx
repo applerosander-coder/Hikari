@@ -46,7 +46,7 @@ export default function Page(): React.ReactElement {
         >
           <div className="mb-6">
             <Image 
-              src="/bidwin-logo-light.png"
+              src="/bidwin-logo.svg"
               alt="BIDWIN" 
               width={200} 
               height={100}
@@ -54,7 +54,7 @@ export default function Page(): React.ReactElement {
               priority
             />
             <Image 
-              src="/bidwin-logo-dark.png"
+              src="/bidwin-logo-white.svg"
               alt="BIDWIN" 
               width={200} 
               height={100}
