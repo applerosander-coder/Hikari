@@ -18,7 +18,7 @@ export default async function MarketingLayout({
 
   return (
     <div className="flex min-h-screen flex-col items-center w-full">
-      <CircularNavigation items={marketingConfig.mainNav} user={user ? true : false} />
+      <CircularNavigation items={marketingConfig.mainNav} user={user} />
       <main className="flex-1">{children}</main>
       <FooterPrimary />
     </div>
