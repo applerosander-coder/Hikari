@@ -66,9 +66,9 @@ export default function HeroSection() {
               <Button
                 variant="outline"
                 size="xl"
-                className="rounded-full border-2 border-primary dark:border-white text-semibold"
+                className="rounded-full border-2 border-primary dark:border-white text-semibold select-none"
               >
-                Start Bidding Today
+                Confetti
               </Button>
             </CoolMode>
           </div>
