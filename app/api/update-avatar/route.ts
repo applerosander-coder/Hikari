@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -27,6 +28,10 @@ export async function POST(request: Request) {
     }
     
     console.log('User record created successfully');
+    
+    // Revalidate all paths that use user data
+    revalidatePath('/', 'layout');
+    
     return NextResponse.json({ success: true });
   }
 
@@ -42,5 +47,9 @@ export async function POST(request: Request) {
   }
 
   console.log('Avatar updated successfully:', data);
+  
+  // Revalidate all paths that use user data
+  revalidatePath('/', 'layout');
+  
   return NextResponse.json({ data });
 }

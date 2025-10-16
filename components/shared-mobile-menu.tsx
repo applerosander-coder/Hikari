@@ -82,7 +82,9 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
           className="flex items-center gap-3 px-2.5 pb-4 border-b border-border hover:bg-accent/50 transition-colors rounded-md cursor-pointer"
         >
           <Avatar className="h-10 w-10">
-            <AvatarImage src={userDetails?.avatar_url || ''} alt={userDetails?.full_name || 'User'} />
+            {userDetails?.avatar_url && (
+              <AvatarImage src={userDetails.avatar_url} alt={userDetails?.full_name || 'User'} />
+            )}
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
