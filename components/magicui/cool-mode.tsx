@@ -91,14 +91,33 @@ const applyParticleEffect = (
       ];
       const color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
       
-      // Random shape - mix of circles and rectangles for confetti variety
+      // Random shape - mix of circles and squares for confetti variety
       const isCircle = Math.random() > 0.5;
       
-      particle.style.width = `${size}px`;
-      particle.style.height = `${size}px`;
-      particle.style.background = color;
-      particle.style.borderRadius = isCircle ? '50%' : '2px';
-      particle.style.boxShadow = `0 0 ${size}px ${size / 2}px ${color}`;
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("width", size.toString());
+      svg.setAttribute("height", size.toString());
+      
+      if (isCircle) {
+        const circle = document.createElementNS(svgNS, "circle");
+        circle.setAttributeNS(null, "cx", (size / 2).toString());
+        circle.setAttributeNS(null, "cy", (size / 2).toString());
+        circle.setAttributeNS(null, "r", (size / 2).toString());
+        circle.setAttributeNS(null, "fill", color);
+        circle.setAttributeNS(null, "filter", `drop-shadow(0 0 ${size / 2}px ${color})`);
+        svg.appendChild(circle);
+      } else {
+        const rect = document.createElementNS(svgNS, "rect");
+        rect.setAttributeNS(null, "width", size.toString());
+        rect.setAttributeNS(null, "height", size.toString());
+        rect.setAttributeNS(null, "rx", "2");
+        rect.setAttributeNS(null, "fill", color);
+        rect.setAttributeNS(null, "filter", `drop-shadow(0 0 ${size / 2}px ${color})`);
+        svg.appendChild(rect);
+      }
+      
+      particle.appendChild(svg);
     } else {
       particle.innerHTML = `<img src="${particleType}" width="${size}" height="${size}" style="border-radius: 50%">`;
     }
