@@ -57,11 +57,16 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
     router.push('/signin');
   };
 
+  const getFullName = () => {
+    return userDetails?.full_name || user?.user_metadata?.full_name || null;
+  };
+
   const getUserInitials = () => {
-    if (userDetails?.full_name) {
-      return userDetails.full_name
+    const fullName = getFullName();
+    if (fullName) {
+      return fullName
         .split(' ')
-        .map(n => n[0])
+        .map((n: string) => n[0])
         .join('')
         .toUpperCase()
         .slice(0, 2);
@@ -70,6 +75,27 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
       return user.email.slice(0, 2).toUpperCase();
     }
     return 'U';
+  };
+
+  const getFirstName = () => {
+    const fullName = getFullName();
+    if (fullName) {
+      return fullName.split(' ')[0];
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  const getAvatarUrl = () => {
+    const avatarUrl = userDetails?.avatar_url || user?.user_metadata?.avatar_url;
+    if (avatarUrl) {
+      if (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')) {
+        return avatarUrl;
+      }
+    }
+    return undefined;
   };
 
   return (
@@ -82,11 +108,11 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
           className="flex items-center gap-3 px-2.5 pb-4 border-b border-border hover:bg-accent/50 transition-colors rounded-md cursor-pointer"
         >
           <Avatar className="h-10 w-10">
-            <AvatarImage src={userDetails?.avatar_url || ''} alt={userDetails?.full_name || 'User'} />
+            <AvatarImage src={getAvatarUrl()} alt={getFirstName()} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">{userDetails?.full_name || 'User'}</span>
+            <span className="text-sm font-semibold">{getFirstName()}</span>
             <span className="text-xs text-muted-foreground">{user?.email}</span>
           </div>
         </Link>
