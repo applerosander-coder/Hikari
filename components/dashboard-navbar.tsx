@@ -5,10 +5,8 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, Bell, MessageCircle, Users } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { SharedMobileMenu } from '@/components/shared-mobile-menu';
-import { NotificationsDropdown } from '@/components/notifications-dropdown';
-import { MessagesDropdown } from '@/components/messages-dropdown';
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
 
@@ -60,24 +58,23 @@ export function Navbar({
         </SheetContent>
       </Sheet>
 
-      {/* Center: Page Title */}
-      {pageTitle && (
+      {/* Center: Page Title or Logo */}
+      {pageTitle ? (
         <h1 className="flex-1 text-center text-lg font-bold">{pageTitle}</h1>
+      ) : (
+        <div className="flex-1 flex justify-center">
+          <Link href="/">
+            <Image
+              src={mounted && resolvedTheme === 'dark' ? '/bidwin-logo-white.svg' : '/bidwin-logo.svg'}
+              alt="BIDWIN"
+              width={80}
+              height={32}
+              className="h-8 w-auto"
+              priority
+            />
+          </Link>
+        </div>
       )}
-
-      {!pageTitle && <div className="flex-1" />}
-
-      {/* Right: Social Icons (Messages, Notifications, Connections) */}
-      <div className="flex items-center gap-1">
-        <MessagesDropdown userId={userDetails?.id} />
-        <NotificationsDropdown userId={userDetails?.id} />
-        <Link href="/connections">
-          <Button size="icon" variant="ghost" className="relative">
-            <Users className="h-5 w-5" />
-            <span className="sr-only">Connections</span>
-          </Button>
-        </Link>
-      </div>
     </header>
   );
 }
