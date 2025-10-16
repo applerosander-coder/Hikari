@@ -40,7 +40,7 @@ export function Navbar({
   const pageTitle = getPageTitle();
 
   return (
-    <header className="flex h-14 items-center gap-3 border-b bg-background px-3 sm:hidden fixed top-0 left-0 right-0 z-20 safe-top">
+    <header className="flex h-14 items-center gap-3 border-b bg-background px-3 sm:hidden fixed top-0 left-0 right-0 z-40 safe-top">
       <Link href="/" className="flex items-center" prefetch={false}>
         {mounted && (
           <Image 
