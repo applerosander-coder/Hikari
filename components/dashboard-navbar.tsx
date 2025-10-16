@@ -30,7 +30,10 @@ export function Navbar({
 
   // Get page title based on pathname
   const getPageTitle = () => {
+    if (pathname === '/dashboard') return 'Auctions';
+    if (pathname === '/mybids') return 'My Bids';
     if (pathname === '/dashboard/leaderboard') return 'Leaderboard';
+    if (pathname === '/seller') return 'Seller Dashboard';
     return null;
   };
 

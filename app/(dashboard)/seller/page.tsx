@@ -33,11 +33,8 @@ export default async function SellerPage() {
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-8 hidden sm:block">
           <h1 className="text-3xl font-bold tracking-tight">Seller Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Create and manage your auction containers with multiple items
-          </p>
         </div>
 
         {/* Create Auction Form */}

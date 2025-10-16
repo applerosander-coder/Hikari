@@ -244,9 +244,8 @@ export function MyBidsPageClient({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">My Bids</h1>
-        <p className="text-muted-foreground">Participate in auctions, track your bids and wins</p>
+      <div className="mb-6 hidden sm:block">
+        <h1 className="text-3xl font-bold">My Bids</h1>
       </div>
 
       <div className="mb-6">
