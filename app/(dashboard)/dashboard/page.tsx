@@ -203,12 +203,6 @@ export default async function DashboardPage() {
     place: '' // Remove location since column doesn't exist in production
   }));
 
-  // Debug logging
-  console.log('Auctions fetched:', auctionsWithMapping.length);
-  console.log('Sample auction:', auctionsWithMapping[0]);
-  console.log('Items count:', itemsWithBidCounts.length);
-  console.log('Sample item auction_id:', itemsWithBidCounts[0]?.auction_id);
-
   return (
     <>
       <div className="w-full px-4 sm:px-6 pt-4 sm:pt-8">

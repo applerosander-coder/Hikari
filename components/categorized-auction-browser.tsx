@@ -223,7 +223,7 @@ export function CategorizedAuctionBrowser({
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
         {/* Filter Pills - Auction Items and All Auctions */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-          {/* Auction Items Pill */}
+          {/* All Items Pill */}
           <button
             onClick={() => {
               setSelectedAuction('all');
@@ -237,7 +237,7 @@ export function CategorizedAuctionBrowser({
               }
             `}
           >
-            Auction Items ({items.length + endedItems.length})
+            All Items ({items.length + endedItems.length})
           </button>
 
           {/* Individual Auction Pills with Creator Avatar */}
