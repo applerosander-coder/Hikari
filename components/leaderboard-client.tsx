@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Clock, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import { AuctionCategoryNav } from './auction-category-nav';
 
 const CATEGORIES = [
   'Electronics',
@@ -29,71 +28,6 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
   const [selectedAuction, setSelectedAuction] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortType>('latest');
-
-  // Build auction options for the nav
-  const auctionOptions = useMemo(() => {
-    const now = new Date();
-    
-    // Start with "All Items"
-    const options = [
-      { label: `Items (${items.length})`, value: 'all' }
-    ];
-    
-    // Map all auctions with their metadata
-    const mappedAuctions = auctions.map((auction) => {
-      const auctionItems = items.filter(i => i.auction_id === auction.id);
-      const endDate = auction.end_date ? new Date(auction.end_date) : null;
-      const hasEnded = endDate && endDate <= now;
-      const isActive = !hasEnded && auctionItems.length > 0;
-      
-      return {
-        auction,
-        itemCount: auctionItems.length,
-        isActive,
-        endDate
-      };
-    });
-    
-    // Separate live and ended auctions
-    const liveAuctions = mappedAuctions.filter(a => a.isActive);
-    const endedAuctions = mappedAuctions
-      .filter(a => !a.isActive && a.itemCount > 0)
-      .sort((a, b) => {
-        if (!a.endDate) return 1;
-        if (!b.endDate) return -1;
-        return b.endDate.getTime() - a.endDate.getTime();
-      })
-      .slice(0, 3); // Limit to 3 most recent ended auctions
-    
-    // Combine: live auctions first, then limited ended auctions
-    [...liveAuctions, ...endedAuctions].forEach(({ auction, itemCount }) => {
-      options.push({
-        label: `${auction.name} (${itemCount})`,
-        value: auction.id
-      });
-    });
-    
-    return options;
-  }, [items, auctions]);
-
-  // Build category options for the nav
-  const categoryOptions = useMemo(() => {
-    const options = [
-      { label: 'All', value: 'all' }
-    ];
-    
-    CATEGORIES.forEach((category) => {
-      const categoryCount = items.filter(item => item.category === category).length;
-      if (categoryCount > 0) {
-        options.push({
-          label: `${category} (${categoryCount})`,
-          value: category
-        });
-      }
-    });
-    
-    return options;
-  }, [items]);
 
   const filteredAndSortedItems = useMemo(() => {
     let filtered = [...items];
@@ -158,21 +92,106 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
   };
 
   return (
-    <>
-      {/* Two-Tier Navigation */}
-      <AuctionCategoryNav
-        auctionOptions={auctionOptions}
-        categoryOptions={categoryOptions}
-        valueAuction={selectedAuction}
-        valueCategory={selectedCategory}
-        onChangeAuction={setSelectedAuction}
-        onChangeCategory={setSelectedCategory}
-      />
+    <div className="container mx-auto px-4 py-6 sm:py-8">
+      <div className="mb-6 hidden sm:block">
+        <h1 className="text-2xl sm:text-3xl font-bold">Leaderboard</h1>
+      </div>
 
-      <div className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="mb-6 hidden sm:block">
-          <h1 className="text-2xl sm:text-3xl font-bold">Leaderboard</h1>
-        </div>
+      {/* Filter Pills */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4">
+        {/* All Items Pill */}
+        <button
+          onClick={() => {
+            setSelectedAuction('all');
+            setSelectedCategory('all');
+          }}
+          className={`
+            flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
+            ${selectedAuction === 'all' && selectedCategory === 'all'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }
+          `}
+        >
+          All Items ({items.length})
+        </button>
+
+        {/* Category Pills */}
+        {CATEGORIES.map((category) => {
+          const categoryCount = items.filter(item => item.category === category).length;
+          if (categoryCount === 0) return null;
+          
+          return (
+            <button
+              key={category}
+              onClick={() => {
+                setSelectedCategory(category);
+                setSelectedAuction('all');
+              }}
+              className={`
+                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                ${selectedCategory === category
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }
+              `}
+            >
+              {category} ({categoryCount})
+            </button>
+          );
+        })}
+
+        {/* Auction Pills */}
+        {(() => {
+          const now = new Date();
+          
+          // Map all auctions with their metadata
+          const mappedAuctions = auctions.map((auction) => {
+            const auctionItems = items.filter(i => i.auction_id === auction.id);
+            const endDate = auction.end_date ? new Date(auction.end_date) : null;
+            const hasEnded = endDate && endDate <= now;
+            const isActive = !hasEnded && auctionItems.length > 0;
+            
+            return {
+              auction,
+              itemCount: auctionItems.length,
+              isActive,
+              endDate
+            };
+          });
+          
+          // Separate live and ended auctions
+          const liveAuctions = mappedAuctions.filter(a => a.isActive);
+          const endedAuctions = mappedAuctions
+            .filter(a => !a.isActive && a.itemCount > 0)
+            .sort((a, b) => {
+              if (!a.endDate) return 1;
+              if (!b.endDate) return -1;
+              return b.endDate.getTime() - a.endDate.getTime();
+            })
+            .slice(0, 3); // Limit to 3 most recent ended auctions
+          
+          // Combine: live auctions first, then limited ended auctions
+          return [...liveAuctions, ...endedAuctions].map(({ auction, itemCount }) => (
+            <button
+              key={auction.id}
+              onClick={() => {
+                setSelectedAuction(auction.id);
+                setSelectedCategory('all');
+              }}
+              className={`
+                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                ${selectedAuction === auction.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }
+              `}
+            >
+              {auction.name} ({itemCount})
+            </button>
+          ));
+        })()}
+      </div>
 
       {/* Sort Dropdown */}
       <div className="flex items-center gap-3 mb-6">
@@ -348,7 +367,6 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
           })
         )}
       </div>
-      </div>
-    </>
+    </div>
   );
 }
