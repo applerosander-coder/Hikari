@@ -69,15 +69,13 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
 
     // Create bid record (NO PAYMENT YET - payment only happens when auction ends if user wins)
     if (isAuctionItem) {
-      // Insert bid for auction item
-      const bidData = {
-        auction_item_id: auctionId,
-        auction_id: parentAuctionId!,
-        user_id: user.id,
-        bid_amount: bidAmount,
-      };
-      console.log('Inserting bid data:', JSON.stringify(bidData, null, 2));
-      const { error: bidError } = await supabase.from('bids').insert(bidData);
+      // WORKAROUND: Use raw SQL to bypass any schema caching issues
+      const { error: bidError } = await supabase.rpc('insert_bid', {
+        p_auction_item_id: auctionId,
+        p_auction_id: parentAuctionId!,
+        p_user_id: user.id,
+        p_bid_amount: bidAmount,
+      });
 
       if (bidError) {
         console.error('Error inserting bid:', bidError);
