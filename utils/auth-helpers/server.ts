@@ -339,17 +339,25 @@ export async function updateName(formData: FormData) {
   }
   
   if (data.user) {
-    // Also update public.users table
-    const { error: dbError } = await supabase
-      .from('users')
-      .upsert({
-        id: data.user.id,
-        full_name: fullName
-      }, {
-        onConflict: 'id'
-      });
-
-    if (dbError) {
+    // Also update public.users table using direct SQL
+    const { Pool } = require('pg');
+    const pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+    });
+    
+    try {
+      const currentAvatar = data.user.user_metadata?.avatar_url || null;
+      await pool.query(
+        `INSERT INTO users (id, full_name, avatar_url)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (id) 
+         DO UPDATE SET full_name = $2
+         RETURNING *`,
+        [data.user.id, fullName, currentAvatar]
+      );
+      await pool.end();
+    } catch (dbError: any) {
       return getErrorRedirect(
         '/dashboard/account',
         'Your name could not be updated.',
@@ -359,6 +367,7 @@ export async function updateName(formData: FormData) {
 
     // Clear all caches
     revalidatePath('/', 'layout');
+    revalidatePath('/profile/[userId]', 'page');
 
     return getStatusRedirect(
       '/dashboard/account',

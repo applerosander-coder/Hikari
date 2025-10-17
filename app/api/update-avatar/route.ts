@@ -30,31 +30,33 @@ export async function POST(request: Request) {
       }
     });
 
-    // Use service client to bypass RLS and ensure consistent writes to public.users
-    const serviceClient = createServiceClient();
+    // Update public.users table using direct SQL (bypasses schema cache issues)
+    const { Pool } = require('pg');
+    const pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+    });
     
-    const { data: result, error } = await serviceClient
-      .from('users')
-      .upsert({
-        id: userId,
-        avatar_url: avatarUrl,
-        full_name: fullName
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Supabase upsert error:', error);
-      throw new Error(error.message);
-    }
+    const result = await pool.query(
+      `INSERT INTO users (id, full_name, avatar_url)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (id) 
+       DO UPDATE SET full_name = $2, avatar_url = $3
+       RETURNING *`,
+      [userId, fullName, avatarUrl]
+    );
+    
+    await pool.end();
+    
+    console.log('Avatar updated successfully via PostgreSQL:', result.rows[0]);
 
     // Revalidate all paths that use getUserDetails
     revalidatePath('/', 'layout');
     revalidatePath('/dashboard', 'layout');
     revalidatePath('/dashboard/account');
+    revalidatePath('/profile/[userId]', 'page');
 
-    console.log('Avatar updated successfully via Supabase:', result);
-    return NextResponse.json({ success: true, data: result });
+    return NextResponse.json({ success: true, data: result.rows[0] });
   } catch (error: any) {
     console.error('Avatar update error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
