@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { saveRating, saveComment } from '@/app/actions/reviews';
 
 interface ReviewFormProps {
   userId: string;
@@ -25,7 +24,22 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
 
   const submitRatingAction = async (newRating: number) => {
     try {
-      await saveRating(userId, newRating);
+      const response = await fetch('/api/save-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          rating: newRating,
+          comment: null // Don't update comment when saving rating
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save rating');
+      }
+
       router.refresh();
       return true;
     } catch (error: any) {
@@ -36,7 +50,22 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
 
   const submitCommentAction = async () => {
     try {
-      await saveComment(userId, rating, comment);
+      const response = await fetch('/api/save-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          rating: rating,
+          comment: comment.trim() || null
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save comment');
+      }
+
       router.refresh();
       return true;
     } catch (error: any) {
