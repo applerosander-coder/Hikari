@@ -31,7 +31,7 @@ export default function SettingsPage() {
   return (
     <div className="w-full mx-auto">
       <div className="space-y-4">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground">
             Customize your account and preferences.
