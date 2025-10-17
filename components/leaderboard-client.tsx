@@ -104,7 +104,7 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
       </div>
 
       {/* Filter Pills - Auction Names */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4 pt-4 sm:pt-8">
         {/* All Auction Items Pill */}
         <button
           onClick={() => {
