@@ -22,7 +22,15 @@ export async function POST(request: Request) {
     // Get user's full name from auth metadata
     const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
 
-    // Use service client to bypass RLS and ensure consistent writes
+    // Update auth metadata to keep it in sync
+    await supabase.auth.updateUser({
+      data: {
+        avatar_url: avatarUrl,
+        full_name: fullName
+      }
+    });
+
+    // Use service client to bypass RLS and ensure consistent writes to public.users
     const serviceClient = createServiceClient();
     
     const { data: result, error } = await serviceClient

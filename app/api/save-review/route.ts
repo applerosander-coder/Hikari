@@ -35,17 +35,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure user exists in public.users table with current auth metadata
-    const supabaseAdmin = createClient();
-    await supabaseAdmin.from('users').upsert({
-      id: user.id,
-      full_name: user.user_metadata?.full_name || null,
-      avatar_url: user.user_metadata?.avatar_url || null
-    }, {
-      onConflict: 'id'
-    });
+    // Ensure user exists in public.users table - only insert if missing, preserve existing data
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id, full_name, avatar_url')
+      .eq('id', user.id)
+      .single();
 
-    // Use direct PostgreSQL connection to save review (no need to pass reviewer data since we use JOIN)
+    if (!existingUser) {
+      // Only create if user doesn't exist - use auth metadata as fallback
+      await supabase.from('users').insert({
+        id: user.id,
+        full_name: user.user_metadata?.full_name || null,
+        avatar_url: user.user_metadata?.avatar_url || null
+      });
+    }
+    // If user exists, don't overwrite - let their current data persist
+
+    // Use direct PostgreSQL connection to save review (JOIN fetches current user data)
     const result = await saveUserReview(
       user_id,
       user.id,
