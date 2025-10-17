@@ -10,59 +10,59 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-interface FollowButtonProps {
+interface ConnectButtonProps {
   userId: string;
 }
 
-export function FollowButton({ userId }: FollowButtonProps) {
-  const [isFollowing, setIsFollowing] = useState(false);
+export function ConnectButton({ userId }: ConnectButtonProps) {
+  const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
 
   useEffect(() => {
-    checkFollowStatus();
+    checkConnectStatus();
   }, [userId]);
 
-  const checkFollowStatus = async () => {
+  const checkConnectStatus = async () => {
     try {
-      const response = await fetch(`/api/follow?followingId=${userId}`);
+      const response = await fetch(`/api/connect?connectedUserId=${userId}`);
       if (response.ok) {
         const data = await response.json();
-        setIsFollowing(data.isFollowing);
+        setIsConnected(data.isConnected);
       }
     } catch (error) {
-      console.error('Error checking follow status:', error);
+      console.error('Error checking connect status:', error);
     } finally {
       setIsCheckingStatus(false);
     }
   };
 
-  const handleFollow = async () => {
+  const handleConnect = async () => {
     setIsLoading(true);
     try {
-      if (isFollowing) {
-        // Unfollow
-        const response = await fetch(`/api/follow?followingId=${userId}`, {
+      if (isConnected) {
+        // Disconnect
+        const response = await fetch(`/api/connect?connectedUserId=${userId}`, {
           method: 'DELETE',
         });
         if (response.ok) {
-          setIsFollowing(false);
+          setIsConnected(false);
         }
       } else {
-        // Follow
-        const response = await fetch('/api/follow', {
+        // Connect
+        const response = await fetch('/api/connect', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ followingId: userId }),
+          body: JSON.stringify({ connectedUserId: userId }),
         });
         if (response.ok) {
-          setIsFollowing(true);
+          setIsConnected(true);
         }
       }
     } catch (error) {
-      console.error('Error toggling follow:', error);
+      console.error('Error toggling connect:', error);
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +70,7 @@ export function FollowButton({ userId }: FollowButtonProps) {
 
   if (isCheckingStatus) {
     return (
-      <Button disabled className="w-full">
+      <Button disabled className="w-full" variant="outline">
         Loading...
       </Button>
     );
@@ -81,28 +81,28 @@ export function FollowButton({ userId }: FollowButtonProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            onClick={handleFollow}
+            onClick={handleConnect}
             disabled={isLoading}
             className="w-full"
-            variant={isFollowing ? "outline" : "default"}
+            variant="outline"
           >
             {isLoading ? (
               'Loading...'
-            ) : isFollowing ? (
+            ) : isConnected ? (
               <>
                 <UserCheck className="h-4 w-4 mr-2" />
-                Following
+                Connected
               </>
             ) : (
               <>
                 <UserPlus className="h-4 w-4 mr-2" />
-                Follow
+                Connect
               </>
             )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Follow this person&apos;s auctions</p>
+          <p>Only connect with people you know</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

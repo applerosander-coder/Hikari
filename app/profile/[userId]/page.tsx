@@ -7,6 +7,7 @@ import { ReviewForm } from '@/components/review-form';
 import { ReviewList } from '@/components/review-list';
 import { UserAuctionList } from '@/components/user-auction-list';
 import { FollowButton } from '@/components/follow-button';
+import { ConnectButton } from '@/components/connect-button';
 
 interface UserProfilePageProps {
   params: {
@@ -167,8 +168,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </div>
 
               {!isOwnProfile && currentUser && (
-                <div className="border-t pt-4">
+                <div className="border-t pt-4 space-y-3">
                   <FollowButton userId={params.userId} />
+                  <ConnectButton userId={params.userId} />
                 </div>
               )}
             </CardContent>
