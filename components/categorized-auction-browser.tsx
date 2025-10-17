@@ -221,33 +221,29 @@ export function CategorizedAuctionBrowser({
   return (
     <div className="w-full px-4 sm:px-6 py-4 sm:py-8">
       <div className="mb-6 sm:mb-8 max-w-5xl mx-auto space-y-4">
-        {/* Filter Pills - Auction Names Only */}
+        {/* Filter Pills - All Auction Items + Individual Auctions */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-          {/* Individual Auction Pills with Creator Avatar */}
+          {/* All Auction Items Pill */}
+          <button
+            onClick={() => {
+              setSelectedAuction('all');
+              setSelectedCategory('all');
+            }}
+            className={`
+              flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors
+              ${selectedAuction === 'all' && selectedCategory === 'all'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }
+            `}
+          >
+            All Auction items ({items.length + endedItems.length})
+          </button>
+
+          {/* Individual Auction Pills (without avatars) */}
           {auctions.map((auction) => {
             const auctionItemCount = [...items, ...endedItems].filter(item => item.auction_id === auction.id).length;
             if (auctionItemCount === 0) return null;
-
-            const getAvatarUrl = (avatarUrl: string | null | undefined) => {
-              if (avatarUrl) {
-                if (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')) {
-                  return avatarUrl;
-                }
-              }
-              return undefined;
-            };
-
-            const getInitials = (fullName: string | null | undefined) => {
-              if (fullName) {
-                return fullName
-                  .split(' ')
-                  .map((n: string) => n[0])
-                  .join('')
-                  .toUpperCase()
-                  .slice(0, 2);
-              }
-              return 'A';
-            };
 
             return (
               <button
@@ -257,23 +253,14 @@ export function CategorizedAuctionBrowser({
                   setSelectedCategory('all');
                 }}
                 className={`
-                  flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2
+                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
                   ${selectedAuction === auction.id
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }
                 `}
               >
-                <Avatar className="h-6 w-6">
-                  <AvatarImage 
-                    src={getAvatarUrl(auction.users?.avatar_url)} 
-                    alt={auction.users?.full_name || 'Creator'} 
-                  />
-                  <AvatarFallback className="text-xs">
-                    {getInitials(auction.users?.full_name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span>{auction.name} ({auctionItemCount})</span>
+                {auction.name} ({auctionItemCount})
               </button>
             );
           })}
