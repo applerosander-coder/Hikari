@@ -42,5 +42,6 @@ export const navConfig = [
     label: 'Leaderboard'
   },
   { href: '/seller', icon: 'Store', label: 'Seller' },
-  { href: '/notices', icon: 'Clock', label: 'Notices' }
+  { href: '/notices', icon: 'Clock', label: 'Notices' },
+  { href: '/connections', icon: 'Users2', label: 'Connections' }
 ];
