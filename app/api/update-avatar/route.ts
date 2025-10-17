@@ -22,8 +22,16 @@ export async function POST(request: Request) {
     // Get user's full name from auth metadata
     const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
 
-    // Use direct PostgreSQL to update avatar
+    // Update both database and auth metadata
     const result = await updateUserAvatar(userId, avatarUrl, fullName);
+
+    // Update auth user metadata to keep it in sync
+    await supabase.auth.updateUser({
+      data: {
+        avatar_url: avatarUrl,
+        full_name: fullName
+      }
+    });
 
     console.log('Avatar updated successfully:', result);
     return NextResponse.json({ success: true, data: result });
