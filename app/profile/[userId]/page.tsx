@@ -62,32 +62,35 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;
   const endedAuctions = auctionsData?.filter(a => a.status === 'ended').length || 0;
 
-  // Fetch reviews using Supabase (same method as dashboard/leaderboard)
-  const { data: reviewsRaw, error: reviewsError } = await supabase
-    .from('user_reviews')
-    .select('*')
-    .eq('user_id', params.userId)
-    .order('created_at', { ascending: false });
-
-  if (reviewsError) {
-    console.error('Error fetching reviews:', reviewsError);
-  }
-
-  // For each review, fetch fresh reviewer data from public.users using getUserDetails pattern
-  const reviews = await Promise.all(
-    (reviewsRaw || []).map(async (review) => {
-      const { data: reviewerData } = await supabase
-        .from('users')
-        .select('id, full_name, avatar_url')
-        .eq('id', review.reviewer_id)
-        .single();
-      
-      return {
-        ...review,
-        reviewer: reviewerData || null
-      };
-    })
-  );
+  // Fetch reviews using PostgreSQL with JOIN to get fresh reviewer data
+  const { Pool } = require('pg');
+  const pool = new Pool({ 
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+  });
+  
+  const reviewsResult = await pool.query(`
+    SELECT 
+      ur.*,
+      u.id as reviewer_id,
+      u.full_name as reviewer_full_name,
+      u.avatar_url as reviewer_avatar_url
+    FROM user_reviews ur
+    LEFT JOIN users u ON ur.reviewer_id = u.id
+    WHERE ur.user_id = $1
+    ORDER BY ur.created_at DESC
+  `, [params.userId]);
+  
+  await pool.end();
+  
+  const reviews = reviewsResult.rows.map(row => ({
+    ...row,
+    reviewer: row.reviewer_id ? {
+      id: row.reviewer_id,
+      full_name: row.reviewer_full_name,
+      avatar_url: row.reviewer_avatar_url
+    } : null
+  }));
 
   // Filter reviews to only include those with actual comments
   const reviewsWithComments = reviews.filter(r => r.comment && r.comment.trim());
