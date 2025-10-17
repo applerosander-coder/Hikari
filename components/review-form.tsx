@@ -104,6 +104,7 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
     const success = await submitCommentAction();
     if (success) {
       toast.success('Comment saved!');
+      setComment(''); // Clear the comment field after successful save
     }
     
     setIsSavingComment(false);
@@ -162,7 +163,7 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
             className="mt-2"
             variant="outline"
           >
-            {isSavingComment ? 'Saving...' : 'Save Comment'}
+            {isSavingComment ? 'Sending...' : 'Send'}
           </Button>
         </form>
       )}
