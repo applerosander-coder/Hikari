@@ -19,18 +19,10 @@ export async function POST(request: Request) {
 
     console.log('Updating avatar for user:', userId, 'with URL:', avatarUrl);
 
-    // Get user's full name from auth metadata
+    // Get user's full name from auth metadata OR public.users
     const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
 
-    // Update auth metadata to keep it in sync
-    await supabase.auth.updateUser({
-      data: {
-        avatar_url: avatarUrl,
-        full_name: fullName
-      }
-    });
-
-    // Update public.users table using direct SQL (bypasses schema cache issues)
+    // Update public.users table using direct PostgreSQL (single source of truth)
     const { Pool } = require('pg');
     const pool = new Pool({ 
       connectionString: process.env.DATABASE_URL,
@@ -50,13 +42,17 @@ export async function POST(request: Request) {
     
     console.log('Avatar updated successfully via PostgreSQL:', result.rows[0]);
 
-    // Revalidate all paths that use getUserDetails
+    // Aggressively revalidate all paths to clear Next.js cache
     revalidatePath('/', 'layout');
-    revalidatePath('/dashboard', 'layout');
-    revalidatePath('/dashboard/account');
-    revalidatePath('/profile/[userId]', 'page');
-
-    return NextResponse.json({ success: true, data: result.rows[0] });
+    revalidatePath('/dashboard', 'layout'); 
+    revalidatePath('/dashboard/account', 'layout');
+    revalidatePath('/profile', 'layout');
+    
+    return NextResponse.json({ 
+      success: true, 
+      data: result.rows[0],
+      timestamp: Date.now() // Help with client-side cache busting
+    });
   } catch (error: any) {
     console.error('Avatar update error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

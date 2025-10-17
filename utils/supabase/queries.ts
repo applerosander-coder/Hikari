@@ -45,10 +45,19 @@ export const getUserDetails = async (supabase: SupabaseClient) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   
-  const { data: userDetails } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-  return userDetails;
+  // Use PostgreSQL directly to avoid Supabase cache issues
+  const { Pool } = require('pg');
+  const pool = new Pool({ 
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+  });
+  
+  const result = await pool.query(
+    'SELECT * FROM users WHERE id = $1',
+    [user.id]
+  );
+  
+  await pool.end();
+  
+  return result.rows[0] || null;
 };
