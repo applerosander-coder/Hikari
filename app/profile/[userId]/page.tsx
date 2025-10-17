@@ -6,7 +6,6 @@ import { notFound } from 'next/navigation';
 import { ReviewForm } from '@/components/review-form';
 import { ReviewList } from '@/components/review-list';
 import { UserAuctionList } from '@/components/user-auction-list';
-import { Pool } from 'pg';
 
 interface UserProfilePageProps {
   params: {
@@ -41,54 +40,43 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     notFound();
   }
 
-  // Use direct database connection to fetch profile and reviews from Supabase PostgreSQL
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
-  });
-
-  // Fetch profile user
-  const profileQuery = await pool.query(
-    'SELECT id, full_name, avatar_url FROM users WHERE id = $1',
-    [params.userId]
-  );
-  const profileUser = profileQuery.rows[0] || null;
+  // Fetch profile user from Supabase
+  const { data: profileUser } = await supabase
+    .from('users')
+    .select('id, full_name, avatar_url')
+    .eq('id', params.userId)
+    .single();
 
   // If user not found and it's current user, create profile
   if (!profileUser && currentUser?.id === params.userId) {
-    await pool.query(
-      'INSERT INTO users (id, full_name, avatar_url) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING',
-      [params.userId, currentUser.user_metadata?.full_name || null, currentUser.user_metadata?.avatar_url || null]
-    );
+    await supabase
+      .from('users')
+      .insert({
+        id: params.userId,
+        full_name: currentUser.user_metadata?.full_name || null,
+        avatar_url: currentUser.user_metadata?.avatar_url || null
+      });
   }
 
   const totalAuctions = auctionsData?.length || 0;
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;
   const endedAuctions = auctionsData?.filter(a => a.status === 'ended').length || 0;
 
-  // Fetch reviews with JOIN to get current reviewer data
-  const reviewsQuery = await pool.query(`
-    SELECT 
-      ur.*,
-      u.id as reviewer_user_id,
-      u.full_name as reviewer_full_name,
-      u.avatar_url as reviewer_avatar_url
-    FROM user_reviews ur
-    LEFT JOIN users u ON ur.reviewer_id = u.id
-    WHERE ur.user_id = $1
-    ORDER BY ur.created_at DESC
-  `, [params.userId]);
+  // Fetch reviews with reviewer data using Supabase - this gets fresh data from public.users
+  const { data: reviewsData } = await supabase
+    .from('user_reviews')
+    .select(`
+      *,
+      reviewer:users!user_reviews_reviewer_id_fkey (
+        id,
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq('user_id', params.userId)
+    .order('created_at', { ascending: false });
 
-  const reviews = reviewsQuery.rows.map(row => ({
-    ...row,
-    reviewer: row.reviewer_user_id ? {
-      id: row.reviewer_user_id,
-      full_name: row.reviewer_full_name,
-      avatar_url: row.reviewer_avatar_url
-    } : null
-  }));
-
-  await pool.end();
+  const reviews = reviewsData || [];
 
   // Filter reviews to only include those with actual comments
   const reviewsWithComments = reviews.filter(r => r.comment && r.comment.trim());
