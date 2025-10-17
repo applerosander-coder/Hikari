@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import { updateUserAvatar } from '@/lib/db-pg';
 
@@ -32,6 +33,11 @@ export async function POST(request: Request) {
         full_name: fullName
       }
     });
+
+    // Revalidate all paths that use getUserDetails to clear the cache
+    revalidatePath('/', 'layout');
+    revalidatePath('/dashboard', 'layout');
+    revalidatePath('/dashboard/account');
 
     console.log('Avatar updated successfully:', result);
     return NextResponse.json({ success: true, data: result });
