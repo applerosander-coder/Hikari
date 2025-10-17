@@ -23,7 +23,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
   if (reviews.length === 0) {
     return (
       <p className="text-center text-muted-foreground py-8">
-        No reviews yet. Be the first to leave a review!
+        No comments yet. Be the first to leave a review!
       </p>
     );
   }

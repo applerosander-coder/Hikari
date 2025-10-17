@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { saveRating, saveComment } from '@/app/actions/reviews';
 
 interface ReviewFormProps {
   userId: string;
@@ -22,29 +23,24 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
   const [isSavingComment, setIsSavingComment] = useState(false);
   const router = useRouter();
 
-  const submitReview = async (newRating: number, newComment?: string) => {
+  const submitRatingAction = async (newRating: number) => {
     try {
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          reviewer_id: currentUserId,
-          rating: newRating,
-          comment: newComment?.trim() || null,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit review');
-      }
-
+      await saveRating(userId, newRating);
       router.refresh();
       return true;
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save review');
+      toast.error(error.message || 'Failed to save rating');
+      return false;
+    }
+  };
+
+  const submitCommentAction = async () => {
+    try {
+      await saveComment(userId, rating, comment);
+      router.refresh();
+      return true;
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save comment');
       return false;
     }
   };
@@ -53,7 +49,7 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
     setRating(star);
     setIsSubmitting(true);
     
-    const success = await submitReview(star, comment);
+    const success = await submitRatingAction(star);
     if (success) {
       toast.success('Rating saved!');
     }
@@ -71,7 +67,7 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
 
     setIsSavingComment(true);
     
-    const success = await submitReview(rating, comment);
+    const success = await submitCommentAction();
     if (success) {
       toast.success('Comment saved!');
     }

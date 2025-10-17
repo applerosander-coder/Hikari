@@ -90,7 +90,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {averageRating.toFixed(1)} ({reviews?.length || 0} reviews)
+                  {averageRating.toFixed(1)} ({reviews?.length || 0} {reviews?.length === 1 ? 'review' : 'reviews'})
                 </p>
               </div>
 
@@ -131,7 +131,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
           <Card>
             <CardHeader>
-              <CardTitle>Reviews ({reviews?.length || 0})</CardTitle>
+              <CardTitle>Comments ({reviews?.length || 0})</CardTitle>
             </CardHeader>
             <CardContent>
               <ReviewList reviews={reviews || []} />

@@ -38,15 +38,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if review already exists to preserve comment when updating rating only
+    const { data: existingReview } = await supabase
+      .from('user_reviews')
+      .select('comment')
+      .eq('user_id', user_id)
+      .eq('reviewer_id', reviewer_id)
+      .single();
+
+    const updateData: any = {
+      user_id,
+      reviewer_id,
+      rating,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Only update comment if explicitly provided, otherwise preserve existing
+    if (comment !== undefined) {
+      updateData.comment = comment;
+    } else if (existingReview?.comment) {
+      updateData.comment = existingReview.comment;
+    }
+
     const { data, error } = await supabase
       .from('user_reviews')
-      .upsert({
-        user_id,
-        reviewer_id,
-        rating,
-        comment,
-        updated_at: new Date().toISOString(),
-      }, {
+      .upsert(updateData, {
         onConflict: 'user_id,reviewer_id'
       })
       .select()
