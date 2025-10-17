@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AuctionItemCard } from './auction-item-card';
@@ -382,6 +383,7 @@ export function CategorizedAuctionBrowser({
                 const auction = auctions.find(a => a.name === auctionName);
                 const creatorAvatar = auction?.users?.avatar_url;
                 const creatorName = auction?.users?.full_name || 'Unknown';
+                const creatorId = auction?.created_by;
                 
                 return auctionItems.length > 0 ? (
                   <AuctionRow
@@ -395,6 +397,7 @@ export function CategorizedAuctionBrowser({
                     handleBidNow={handleBidNow}
                     creatorAvatar={creatorAvatar}
                     creatorName={creatorName}
+                    creatorId={creatorId}
                   />
                 ) : null;
               })}
@@ -438,6 +441,7 @@ export function CategorizedAuctionBrowser({
                   const auction = auctions.find(a => a.name === auctionName);
                   const creatorAvatar = auction?.users?.avatar_url;
                   const creatorName = auction?.users?.full_name || 'Unknown';
+                  const creatorId = auction?.created_by;
                   
                   return auctionItems.length > 0 ? (
                     <AuctionRow
@@ -452,6 +456,7 @@ export function CategorizedAuctionBrowser({
                       ended
                       creatorAvatar={creatorAvatar}
                       creatorName={creatorName}
+                      creatorId={creatorId}
                     />
                   ) : null;
                 })}
@@ -475,6 +480,7 @@ interface AuctionRowProps {
   ended?: boolean;
   creatorAvatar?: string | null;
   creatorName?: string;
+  creatorId?: string;
 }
 
 function AuctionRow({
@@ -488,7 +494,8 @@ function AuctionRow({
   highlight = false,
   ended = false,
   creatorAvatar,
-  creatorName
+  creatorName,
+  creatorId
 }: AuctionRowProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
@@ -528,13 +535,15 @@ function AuctionRow({
     <div className={`relative ${ended ? 'opacity-60' : ''}`}>
       <div className="mb-4 px-4">
         <div className="flex items-center gap-3">
-          {creatorAvatar !== undefined && creatorName && (
-            <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={creatorAvatar || ''} alt={creatorName} />
-              <AvatarFallback className="text-sm">
-                {creatorName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+          {creatorAvatar !== undefined && creatorName && creatorId && (
+            <Link href={`/profile/${creatorId}`} className="flex-shrink-0 hover:opacity-80 transition-opacity">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={creatorAvatar || ''} alt={creatorName} />
+                <AvatarFallback className="text-sm">
+                  {creatorName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
           )}
           <h2 className={`${highlight ? "text-2xl sm:text-3xl font-bold" : "text-xl sm:text-2xl font-bold"} ${ended ? 'text-muted-foreground' : ''}`}>
             {title}

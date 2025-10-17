@@ -122,12 +122,18 @@ function AuctionCard({ auction, isUpcoming = false }: { auction: any; isUpcoming
         
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6 flex-shrink-0">
-              <AvatarImage src={creatorAvatar || ''} alt={creatorName} />
-              <AvatarFallback className="text-xs">
-                {creatorName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <Link 
+              href={`/profile/${auction.created_by}`} 
+              onClick={(e) => e.stopPropagation()}
+              className="hover:opacity-80 transition-opacity"
+            >
+              <Avatar className="h-6 w-6 flex-shrink-0">
+                <AvatarImage src={creatorAvatar || ''} alt={creatorName} />
+                <AvatarFallback className="text-xs">
+                  {creatorName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
             <h3 className="font-semibold text-lg line-clamp-2">{auction.title}</h3>
           </div>
           <p className="text-sm text-muted-foreground mt-1">{creatorName}</p>
