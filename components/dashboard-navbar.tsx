@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -24,12 +24,7 @@ export function Navbar({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Get page title based on pathname
   const getPageTitle = () => {
@@ -56,16 +51,14 @@ export function Navbar({
         <>
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/" className="flex items-center" prefetch={false}>
-              {mounted && (
-                <Image 
-                  src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
-                  alt="BIDWIN" 
-                  width={LOGO_CONFIG.width} 
-                  height={LOGO_CONFIG.height}
-                  className={LOGO_CONFIG.className}
-                  priority
-                />
-              )}
+              <Image 
+                src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
+                alt="BIDWIN" 
+                width={LOGO_CONFIG.width} 
+                height={LOGO_CONFIG.height}
+                className={LOGO_CONFIG.className}
+                priority
+              />
             </Link>
           </div>
           <div className="ml-auto">
@@ -89,16 +82,14 @@ export function Navbar({
       ) : (
         <>
           <Link href="/" className="flex items-center" prefetch={false}>
-            {mounted && (
-              <Image 
-                src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
-                alt="BIDWIN" 
-                width={LOGO_CONFIG.width} 
-                height={LOGO_CONFIG.height}
-                className={LOGO_CONFIG.className}
-                priority
-              />
-            )}
+            <Image 
+              src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
+              alt="BIDWIN" 
+              width={LOGO_CONFIG.width} 
+              height={LOGO_CONFIG.height}
+              className={LOGO_CONFIG.className}
+              priority
+            />
           </Link>
 
           {pageTitle && (
