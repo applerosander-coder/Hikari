@@ -117,7 +117,7 @@ function AuctionItemCarousel({ items, auctionId }: { items: AuctionItem[]; aucti
             return (
               <Link
                 key={item.id}
-                href={`/auctions/${auctionId}`}
+                href={`/auctions/${auctionId}/items/${item.id}`}
                 className="flex-shrink-0 w-24 h-24 relative rounded-md overflow-hidden border hover:border-primary transition-colors"
               >
                 {imageUrl ? (
