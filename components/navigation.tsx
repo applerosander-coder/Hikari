@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { UserAccountNav } from '@/components/user-account-nav';
 import { useTheme } from 'next-themes';
+import { LOGO_CONFIG } from '@/config/logo';
 
 interface CircularNavProps {
   items?: MainNavItem[];
@@ -58,9 +59,9 @@ export default function CircularNavigation({
             <Image 
               src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
               alt="BIDWIN" 
-              width={180} 
-              height={90}
-              className="h-16 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
+              width={LOGO_CONFIG.width} 
+              height={LOGO_CONFIG.height}
+              className={`${LOGO_CONFIG.className} transition-transform duration-300 ease-in-out hover:scale-105`}
               priority
             />
           )}

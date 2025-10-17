@@ -7,6 +7,7 @@ import { blog } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { Control } from './page.client';
+import { LOGO_CONFIG } from '@/config/logo';
 
 interface Param {
   slug: string;
@@ -61,17 +62,17 @@ export default function Page({
           <Image 
             src="/bidwin-logo-light.png"
             alt="BIDWIN" 
-            width={280} 
-            height={140}
-            className="h-24 w-auto dark:hidden"
+            width={LOGO_CONFIG.width} 
+            height={LOGO_CONFIG.height}
+            className={`${LOGO_CONFIG.className} dark:hidden`}
             priority
           />
           <Image 
             src="/bidwin-logo-dark.png"
             alt="BIDWIN" 
-            width={280} 
-            height={140}
-            className="h-24 w-auto hidden dark:block"
+            width={LOGO_CONFIG.width} 
+            height={LOGO_CONFIG.height}
+            className={`${LOGO_CONFIG.className} hidden dark:block`}
             priority
           />
         </div>

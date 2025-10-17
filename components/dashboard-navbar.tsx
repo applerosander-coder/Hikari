@@ -9,6 +9,7 @@ import { Menu } from 'lucide-react';
 import { SharedMobileMenu } from '@/components/shared-mobile-menu';
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
+import { LOGO_CONFIG } from '@/config/logo';
 
 import { NavItem } from '@/config/dashboard';
 
@@ -58,9 +59,9 @@ export function Navbar({
                 <Image 
                   src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
                   alt="BIDWIN" 
-                  width={180} 
-                  height={90}
-                  className="h-16 w-auto"
+                  width={LOGO_CONFIG.width} 
+                  height={LOGO_CONFIG.height}
+                  className={LOGO_CONFIG.className}
                   priority
                 />
               )}
@@ -91,9 +92,9 @@ export function Navbar({
               <Image 
                 src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
                 alt="BIDWIN" 
-                width={180} 
-                height={90}
-                className="h-16 w-auto"
+                width={LOGO_CONFIG.width} 
+                height={LOGO_CONFIG.height}
+                className={LOGO_CONFIG.className}
                 priority
               />
             )}

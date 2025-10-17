@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import { LOGO_CONFIG } from '@/config/logo';
 
 export default function FooterBlog() {
   return (
@@ -11,16 +12,16 @@ export default function FooterBlog() {
             <Image 
               src="/bidwin-logo-light.png"
               alt="BIDWIN" 
-              width={240} 
-              height={120}
-              className="h-16 w-auto dark:hidden"
+              width={LOGO_CONFIG.width} 
+              height={LOGO_CONFIG.height}
+              className={`${LOGO_CONFIG.className} dark:hidden`}
             />
             <Image 
               src="/bidwin-logo-dark.png"
               alt="BIDWIN" 
-              width={240} 
-              height={120}
-              className="h-16 w-auto hidden dark:block"
+              width={LOGO_CONFIG.width} 
+              height={LOGO_CONFIG.height}
+              className={`${LOGO_CONFIG.className} hidden dark:block`}
             />
           </div>
           <div className="flex flex-col items-center md:items-end space-y-2 md:space-y-0">

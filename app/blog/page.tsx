@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { blog } from '@/utils/source';
+import { LOGO_CONFIG } from '@/config/logo';
 
 export default function Page(): React.ReactElement {
   const posts = [...blog.getPages()].sort(
@@ -48,17 +49,17 @@ export default function Page(): React.ReactElement {
             <Image 
               src="/bidwin-logo-light.png"
               alt="BIDWIN" 
-              width={400} 
-              height={200}
-              className="h-32 w-auto dark:hidden"
+              width={LOGO_CONFIG.width} 
+              height={LOGO_CONFIG.height}
+              className={`${LOGO_CONFIG.className} dark:hidden`}
               priority
             />
             <Image 
               src="/bidwin-logo-dark.png"
               alt="BIDWIN" 
-              width={400} 
-              height={200}
-              className="h-32 w-auto hidden dark:block"
+              width={LOGO_CONFIG.width} 
+              height={LOGO_CONFIG.height}
+              className={`${LOGO_CONFIG.className} hidden dark:block`}
               priority
             />
           </div>
