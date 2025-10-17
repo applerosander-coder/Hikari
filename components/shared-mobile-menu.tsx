@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sun, Moon, LogOut } from 'lucide-react';
+import { Sun, Moon, LogOut, MessageSquare, Bell, Users } from 'lucide-react';
 import { mobileNavItems } from '@/config/navigation';
 import {
   AlertDialog,
@@ -141,6 +141,36 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
           </Link>
         );
       })}
+
+      {/* Divider */}
+      <div className="border-t border-border" />
+
+      {/* Messages */}
+      <button
+        onClick={onClose}
+        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+      >
+        <MessageSquare className="h-5 w-5" />
+        Messages
+      </button>
+
+      {/* Notices */}
+      <button
+        onClick={onClose}
+        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+      >
+        <Bell className="h-5 w-5" />
+        Notices
+      </button>
+
+      {/* Connections */}
+      <button
+        onClick={onClose}
+        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+      >
+        <Users className="h-5 w-5" />
+        Connections
+      </button>
 
       {/* Divider */}
       <div className="border-t border-border" />
