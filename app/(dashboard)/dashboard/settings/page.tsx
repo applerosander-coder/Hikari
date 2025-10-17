@@ -32,10 +32,7 @@ export default function SettingsPage() {
     <div className="w-full mx-auto">
       <div className="space-y-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">
-            Customize your account and preferences.
-          </p>
+          <h1 className="text-3xl font-bold hidden sm:block">Settings</h1>
         </div>
         <div className="grid gap-6">
           <Card className="w-full">

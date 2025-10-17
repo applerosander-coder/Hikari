@@ -37,6 +37,7 @@ export function Navbar({
     if (pathname === '/mybids') return 'My Bids';
     if (pathname === '/dashboard/leaderboard') return 'Leaderboard';
     if (pathname === '/seller') return 'Seller Dashboard';
+    if (pathname === '/dashboard/settings') return 'Settings';
     if (pathname === '/pricing') return 'Pricing';
     if (pathname === '/how-it-works') return 'How it Works';
     return null;
