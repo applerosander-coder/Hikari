@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { saveUserReview, getUserInfo } from '@/lib/db-pg';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,17 +50,29 @@ export async function POST(request: NextRequest) {
         avatar_url: user.user_metadata?.avatar_url || null
       });
     }
-    // If user exists, don't overwrite - let their current data persist
 
-    // Use direct PostgreSQL connection to save review (JOIN fetches current user data)
-    const result = await saveUserReview(
-      user_id,
-      user.id,
-      rating,
-      comment || null
-    );
+    // Save review using Supabase with proper SQL
+    const { data: result, error } = await supabase
+      .from('user_reviews')
+      .insert({
+        user_id: user_id,
+        reviewer_id: user.id,
+        rating: rating,
+        comment: comment || null
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw new Error(error.message);
+    }
 
     console.log('Review saved successfully:', result);
+
+    // Revalidate the profile page to show new comment immediately
+    revalidatePath(`/profile/${user_id}`);
+    revalidatePath('/profile/[userId]', 'page');
 
     return NextResponse.json({ success: true, data: result }, { status: 200 });
   } catch (error: any) {
