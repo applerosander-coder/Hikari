@@ -8,8 +8,13 @@ interface Review {
   rating: number;
   comment: string | null;
   created_at: string;
-  reviewer_name: string | null;
-  reviewer_avatar: string | null;
+  reviewer_name?: string | null;
+  reviewer_avatar?: string | null;
+  reviewer?: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 interface ReviewListProps {
@@ -32,11 +37,11 @@ export function ReviewList({ reviews }: ReviewListProps) {
           <div className="flex items-start gap-3">
             <Avatar className="h-10 w-10">
               <AvatarImage 
-                src={review.reviewer_avatar || '/avatars/default-avatar.svg'} 
-                alt={review.reviewer_name || 'User'}
+                src={review.reviewer_avatar || review.reviewer?.avatar_url || ''} 
+                alt={review.reviewer_name || review.reviewer?.full_name || 'Reviewer'}
               />
               <AvatarFallback>
-                {review.reviewer_name?.charAt(0).toUpperCase() || 'U'}
+                {(review.reviewer_name || review.reviewer?.full_name)?.charAt(0).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             
@@ -44,7 +49,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <p className="font-semibold">
-                    {review.reviewer_name || 'User'}
+                    {review.reviewer?.full_name || review.reviewer_name || 'Anonymous'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}

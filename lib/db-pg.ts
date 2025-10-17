@@ -9,31 +9,27 @@ export async function saveUserReview(
   userId: string,
   reviewerId: string,
   rating: number,
-  comment: string | null
+  comment: string | null,
+  reviewerName?: string | null,
+  reviewerAvatar?: string | null
 ) {
   // Always INSERT a new review - allow multiple comments from same reviewer
   const query = `
-    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, NOW(), NOW())
+    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, reviewer_name, reviewer_avatar, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
     RETURNING *;
   `;
 
-  const result = await pool.query(query, [userId, reviewerId, rating, comment]);
+  const result = await pool.query(query, [userId, reviewerId, rating, comment, reviewerName, reviewerAvatar]);
   return result.rows[0];
 }
 
 export async function getUserReviews(userId: string) {
   const query = `
     SELECT 
-      ur.id,
-      ur.user_id,
-      ur.reviewer_id,
-      ur.rating,
-      ur.comment,
-      ur.created_at,
-      ur.updated_at,
-      u.full_name as reviewer_name,
-      u.avatar_url as reviewer_avatar
+      ur.*,
+      COALESCE(ur.reviewer_name, u.full_name) as reviewer_name,
+      COALESCE(ur.reviewer_avatar, u.avatar_url) as reviewer_avatar
     FROM public.user_reviews ur
     LEFT JOIN public.users u ON ur.reviewer_id = u.id
     WHERE ur.user_id = $1
