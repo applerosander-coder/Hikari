@@ -48,23 +48,42 @@ export function Navbar({
   const shouldCenterLogo = centerLogoPages.includes(pathname);
 
   return (
-    <header className="flex h-20 items-center gap-3 border-b bg-background px-3 sm:hidden fixed top-0 left-0 right-0 z-20 safe-top">
+    <header className="flex h-20 items-center border-b bg-background px-3 sm:hidden fixed top-0 left-0 right-0 z-20 safe-top">
       {/* Logo - centered for pricing/how-it-works, left-aligned otherwise */}
       {shouldCenterLogo ? (
-        <div className="flex-1 flex justify-center">
-          <Link href="/" className="flex items-center" prefetch={false}>
-            {mounted && (
-              <Image 
-                src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
-                alt="BIDWIN" 
-                width={180} 
-                height={90}
-                className="h-16 w-auto"
-                priority
-              />
-            )}
-          </Link>
-        </div>
+        <>
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <Link href="/" className="flex items-center" prefetch={false}>
+              {mounted && (
+                <Image 
+                  src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
+                  alt="BIDWIN" 
+                  width={180} 
+                  height={90}
+                  className="h-16 w-auto"
+                  priority
+                />
+              )}
+            </Link>
+          </div>
+          <div className="ml-auto">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button size="icon" variant="outline">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="sm:max-w-xs">
+                <SharedMobileMenu 
+                  user={user} 
+                  userDetails={userDetails} 
+                  onClose={() => setIsOpen(false)} 
+                />
+              </SheetContent>
+            </Sheet>
+          </div>
+        </>
       ) : (
         <>
           <Link href="/" className="flex items-center" prefetch={false}>
@@ -85,24 +104,24 @@ export function Navbar({
           )}
 
           {!pageTitle && <div className="ml-auto" />}
+
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="sm:max-w-xs">
+              <SharedMobileMenu 
+                user={user} 
+                userDetails={userDetails} 
+                onClose={() => setIsOpen(false)} 
+              />
+            </SheetContent>
+          </Sheet>
         </>
       )}
-
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button size="icon" variant="outline">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="sm:max-w-xs">
-          <SharedMobileMenu 
-            user={user} 
-            userDetails={userDetails} 
-            onClose={() => setIsOpen(false)} 
-          />
-        </SheetContent>
-      </Sheet>
     </header>
   );
 }
