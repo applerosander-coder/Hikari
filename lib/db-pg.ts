@@ -9,18 +9,17 @@ export async function saveUserReview(
   userId: string,
   reviewerId: string,
   rating: number,
-  comment: string | null,
-  reviewerName?: string | null,
-  reviewerAvatar?: string | null
+  comment: string | null
 ) {
   // Always INSERT a new review - allow multiple comments from same reviewer
+  // Don't store reviewer data - we use JOIN to get current data dynamically
   const query = `
-    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, reviewer_name, reviewer_avatar, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, NOW(), NOW())
     RETURNING *;
   `;
 
-  const result = await pool.query(query, [userId, reviewerId, rating, comment, reviewerName, reviewerAvatar]);
+  const result = await pool.query(query, [userId, reviewerId, rating, comment]);
   return result.rows[0];
 }
 
