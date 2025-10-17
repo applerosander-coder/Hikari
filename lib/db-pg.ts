@@ -94,3 +94,20 @@ export async function updateUserAvatar(userId: string, avatarUrl: string, fullNa
   const result = await pool.query(query, [userId, avatarUrl, fullName]);
   return result.rows[0];
 }
+
+export async function getUserProfile(userId: string) {
+  const publicQuery = `
+    SELECT full_name, avatar_url
+    FROM public.users
+    WHERE id = $1;
+  `;
+
+  const result = await pool.query(publicQuery, [userId]);
+  const publicUser = result.rows[0];
+
+  return {
+    id: userId,
+    full_name: publicUser?.full_name || 'User',
+    avatar_url: publicUser?.avatar_url || null
+  };
+}

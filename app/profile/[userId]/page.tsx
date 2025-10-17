@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { ReviewForm } from '@/components/review-form';
 import { ReviewList } from '@/components/review-list';
 import { UserAuctionList } from '@/components/user-auction-list';
-import { getUserReviews, getAverageRating } from '@/lib/db-pg';
+import { getUserReviews, getAverageRating, getUserProfile } from '@/lib/db-pg';
 
 interface UserProfilePageProps {
   params: {
@@ -19,21 +19,30 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   
-  const { data: profileUser, error: userError } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', params.userId)
-    .single();
+  const [profileUser, { data: auctionsData }] = await Promise.all([
+    getUserProfile(params.userId),
+    supabase
+      .from('auctions')
+      .select(`
+        id, 
+        name, 
+        status, 
+        created_at, 
+        end_date,
+        auction_items (
+          id,
+          image_url,
+          image_urls,
+          title
+        )
+      `)
+      .eq('created_by', params.userId)
+      .order('created_at', { ascending: false })
+  ]);
 
-  if (userError || !profileUser) {
+  if (!profileUser || !auctionsData) {
     notFound();
   }
-
-  const { data: auctionsData } = await supabase
-    .from('auctions')
-    .select('id, name, status, created_at, end_date')
-    .eq('created_by', params.userId)
-    .order('created_at', { ascending: false });
 
   const totalAuctions = auctionsData?.length || 0;
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;
