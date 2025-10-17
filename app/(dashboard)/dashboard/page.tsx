@@ -165,7 +165,7 @@ export default async function DashboardPage() {
     .from('auctions')
     .select(`
       id, 
-      title, 
+      name, 
       status,
       created_by
     `)
@@ -196,11 +196,10 @@ export default async function DashboardPage() {
     }
   }
 
-  // Map to match expected interface (name -> title, no location for now)
+  // Auctions already have 'name' field, just add place
   const auctionsWithMapping = auctionsWithSellers.map(auction => ({
     ...auction,
-    name: auction.title,
-    place: '' // Remove location since column doesn't exist in production
+    place: '' // Add empty place field for compatibility
   }));
 
   return (
