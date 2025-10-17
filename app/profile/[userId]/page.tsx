@@ -40,23 +40,43 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     notFound();
   }
 
-  // Fetch profile user from Supabase
-  const { data: profileUser } = await supabase
-    .from('users')
-    .select('id, full_name, avatar_url')
-    .eq('id', params.userId)
-    .single();
+  // Fetch profile user using PostgreSQL directly to get fresh avatar data
+  const { Pool } = require('pg');
+  const profilePool = new Pool({ 
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+  });
+  
+  const profileResult = await profilePool.query(
+    'SELECT id, full_name, avatar_url FROM users WHERE id = $1',
+    [params.userId]
+  );
+  
+  let profileUser = profileResult.rows[0] || null;
 
   // If user not found and it's current user, create profile
   if (!profileUser && currentUser?.id === params.userId) {
-    await supabase
-      .from('users')
-      .insert({
-        id: params.userId,
-        full_name: currentUser.user_metadata?.full_name || null,
-        avatar_url: currentUser.user_metadata?.avatar_url || null
-      });
+    await profilePool.query(
+      `INSERT INTO users (id, full_name, avatar_url) 
+       VALUES ($1, $2, $3)
+       ON CONFLICT (id) DO NOTHING
+       RETURNING *`,
+      [
+        params.userId,
+        currentUser.user_metadata?.full_name || null,
+        currentUser.user_metadata?.avatar_url || null
+      ]
+    );
+    
+    // Fetch again after insert
+    const newResult = await profilePool.query(
+      'SELECT id, full_name, avatar_url FROM users WHERE id = $1',
+      [params.userId]
+    );
+    profileUser = newResult.rows[0];
   }
+  
+  await profilePool.end();
 
   const totalAuctions = auctionsData?.length || 0;
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;

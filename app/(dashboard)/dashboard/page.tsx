@@ -176,18 +176,26 @@ export default async function DashboardPage() {
     console.error('Error fetching auctions:', auctionsError);
   }
 
-  // Fetch seller info for each auction separately to avoid RLS issues
+  // Fetch seller info using PostgreSQL directly to get fresh avatar data
   let auctionsWithSellers = allAuctions || [];
   if (allAuctions && allAuctions.length > 0) {
     const sellerIds = [...new Set(allAuctions.map(a => a.created_by).filter(Boolean))];
     
     if (sellerIds.length > 0) {
-      const { data: sellers } = await supabase
-        .from('users')
-        .select('id, avatar_url, full_name')
-        .in('id', sellerIds);
+      const { Pool } = require('pg');
+      const pool = new Pool({ 
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+      });
       
-      const sellerMap = new Map(sellers?.map(s => [s.id, s]) || []);
+      const result = await pool.query(
+        'SELECT id, avatar_url, full_name FROM users WHERE id = ANY($1)',
+        [sellerIds]
+      );
+      
+      await pool.end();
+      
+      const sellerMap = new Map(result.rows.map(s => [s.id, s]));
       
       auctionsWithSellers = allAuctions.map(auction => ({
         ...auction,
