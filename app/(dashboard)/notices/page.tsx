@@ -115,10 +115,7 @@ export default async function NoticesPage() {
                           View auction
                         </Link>
                         <span className="text-[8px] sm:text-[9px] text-muted-foreground truncate">
-                          {new Date(notification.created_at).toLocaleDateString()}
-                        </span>
-                        <span className="text-[8px] sm:text-[9px] text-muted-foreground truncate">
-                          {new Date(notification.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(notification.created_at).toLocaleDateString()} {new Date(notification.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </div>
