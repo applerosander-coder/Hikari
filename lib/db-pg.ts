@@ -95,7 +95,7 @@ export async function updateUserAvatar(userId: string, avatarUrl: string, fullNa
   return result.rows[0];
 }
 
-export async function getUserProfile(userId: string) {
+export async function getUserProfile(userId: string, authUserMetadata?: { full_name?: string; avatar_url?: string }) {
   const publicQuery = `
     SELECT full_name, avatar_url
     FROM public.users
@@ -103,11 +103,27 @@ export async function getUserProfile(userId: string) {
   `;
 
   const result = await pool.query(publicQuery, [userId]);
-  const publicUser = result.rows[0];
+  let publicUser = result.rows[0];
+
+  if (!publicUser && authUserMetadata) {
+    const insertQuery = `
+      INSERT INTO public.users (id, full_name, avatar_url)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (id) DO NOTHING
+      RETURNING full_name, avatar_url;
+    `;
+    
+    const insertResult = await pool.query(insertQuery, [
+      userId,
+      authUserMetadata.full_name || null,
+      authUserMetadata.avatar_url || null
+    ]);
+    publicUser = insertResult.rows[0];
+  }
 
   return {
     id: userId,
-    full_name: publicUser?.full_name || 'User',
-    avatar_url: publicUser?.avatar_url || null
+    full_name: publicUser?.full_name || authUserMetadata?.full_name || 'User',
+    avatar_url: publicUser?.avatar_url || authUserMetadata?.avatar_url || null
   };
 }

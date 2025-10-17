@@ -19,30 +19,36 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   
-  const [profileUser, { data: auctionsData }] = await Promise.all([
-    getUserProfile(params.userId),
-    supabase
-      .from('auctions')
-      .select(`
-        id, 
-        name, 
-        status, 
-        created_at, 
-        end_date,
-        auction_items (
-          id,
-          image_url,
-          image_urls,
-          title
-        )
-      `)
-      .eq('created_by', params.userId)
-      .order('created_at', { ascending: false })
-  ]);
+  const { data: auctionsData } = await supabase
+    .from('auctions')
+    .select(`
+      id, 
+      name, 
+      status, 
+      created_at, 
+      end_date,
+      auction_items (
+        id,
+        image_url,
+        image_urls,
+        title
+      )
+    `)
+    .eq('created_by', params.userId)
+    .order('created_at', { ascending: false });
 
-  if (!profileUser || !auctionsData) {
+  if (!auctionsData || auctionsData.length === 0) {
     notFound();
   }
+
+  const isCurrentUser = currentUser?.id === params.userId;
+  
+  const authMetadata = isCurrentUser && currentUser ? {
+    full_name: currentUser.user_metadata?.full_name,
+    avatar_url: currentUser.user_metadata?.avatar_url
+  } : undefined;
+
+  const profileUser = await getUserProfile(params.userId, authMetadata);
 
   const totalAuctions = auctionsData?.length || 0;
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;

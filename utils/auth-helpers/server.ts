@@ -188,6 +188,18 @@ export async function signUp(formData: FormData) {
     }
   });
 
+  if (data.user && !error) {
+    await supabase
+      .from('users')
+      .upsert({
+        id: data.user.id,
+        full_name: fullName,
+        avatar_url: '/avatars/default-avatar.svg'
+      }, {
+        onConflict: 'id'
+      });
+  }
+
   if (error) {
     redirectPath = getErrorRedirect(
       '/signup',
