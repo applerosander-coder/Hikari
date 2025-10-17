@@ -205,7 +205,7 @@ export default async function DashboardPage() {
   return (
     <>
       <div className="w-full px-4 sm:px-6 pt-4 sm:pt-8">
-        <div className="mb-2 hidden sm:block">
+        <div className="mb-0 hidden sm:block">
           <h1 className="text-3xl font-bold">Auctions</h1>
         </div>
       </div>
