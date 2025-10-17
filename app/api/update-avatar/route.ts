@@ -23,18 +23,12 @@ export async function POST(request: Request) {
     const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
 
     // Update auth metadata to keep it in sync
-    const { data: authData, error: authError } = await supabase.auth.updateUser({
+    await supabase.auth.updateUser({
       data: {
         avatar_url: avatarUrl,
         full_name: fullName
       }
     });
-
-    if (authError) {
-      console.error('Auth update error:', authError);
-    } else {
-      console.log('Auth metadata updated successfully');
-    }
 
     // Update public.users table using direct SQL (bypasses schema cache issues)
     const { Pool } = require('pg');
