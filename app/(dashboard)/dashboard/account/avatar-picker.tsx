@@ -16,6 +16,16 @@ const AVATAR_OPTIONS = [
   '/avatars/avatar-4.jpg',
   '/avatars/avatar-5.jpg',
   '/avatars/avatar-6.jpg',
+  '/avatars/avatar-7.jpg',
+  '/avatars/avatar-8.jpg',
+  '/avatars/avatar-9.jpg',
+  '/avatars/avatar-10.jpg',
+  '/avatars/avatar-11.jpg',
+  '/avatars/avatar-12.jpg',
+  '/avatars/avatar-13.jpg',
+  '/avatars/avatar-14.jpg',
+  '/avatars/avatar-15.jpg',
+  '/avatars/avatar-16.jpg',
 ];
 
 interface AvatarPickerProps {
@@ -87,7 +97,7 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
       </div>
 
       {/* Avatar Options Grid */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 sm:gap-4">
         {AVATAR_OPTIONS.map((avatarUrl) => (
           <button
             key={avatarUrl}
