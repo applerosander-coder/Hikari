@@ -378,6 +378,11 @@ export function CategorizedAuctionBrowser({
                 const auctionInfo = auctionItems[0]?.auction;
                 const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items` : undefined;
                 
+                // Find the auction to get creator info
+                const auction = auctions.find(a => a.name === auctionName);
+                const creatorAvatar = auction?.users?.avatar_url;
+                const creatorName = auction?.users?.full_name || 'Unknown';
+                
                 return auctionItems.length > 0 ? (
                   <AuctionRow
                     key={auctionName}
@@ -388,6 +393,8 @@ export function CategorizedAuctionBrowser({
                     userBidAmounts={userBidAmounts}
                     watchlistItemIds={watchlistItemIds}
                     handleBidNow={handleBidNow}
+                    creatorAvatar={creatorAvatar}
+                    creatorName={creatorName}
                   />
                 ) : null;
               })}
@@ -427,6 +434,11 @@ export function CategorizedAuctionBrowser({
                   const auctionInfo = auctionItems[0]?.auction;
                   const subtitle = auctionInfo ? `${auctionInfo.place} • ${auctionItems.length} items • Ended` : undefined;
                   
+                  // Find the auction to get creator info
+                  const auction = auctions.find(a => a.name === auctionName);
+                  const creatorAvatar = auction?.users?.avatar_url;
+                  const creatorName = auction?.users?.full_name || 'Unknown';
+                  
                   return auctionItems.length > 0 ? (
                     <AuctionRow
                       key={`ended-${auctionName}`}
@@ -438,6 +450,8 @@ export function CategorizedAuctionBrowser({
                       watchlistItemIds={watchlistItemIds}
                       handleBidNow={handleBidNow}
                       ended
+                      creatorAvatar={creatorAvatar}
+                      creatorName={creatorName}
                     />
                   ) : null;
                 })}
@@ -459,6 +473,8 @@ interface AuctionRowProps {
   handleBidNow: (id: string) => void;
   highlight?: boolean;
   ended?: boolean;
+  creatorAvatar?: string | null;
+  creatorName?: string;
 }
 
 function AuctionRow({
@@ -470,7 +486,9 @@ function AuctionRow({
   watchlistItemIds,
   handleBidNow,
   highlight = false,
-  ended = false
+  ended = false,
+  creatorAvatar,
+  creatorName
 }: AuctionRowProps) {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
@@ -509,9 +527,19 @@ function AuctionRow({
   return (
     <div className={`relative ${ended ? 'opacity-60' : ''}`}>
       <div className="mb-4 px-4">
-        <h2 className={`${highlight ? "text-2xl sm:text-3xl font-bold" : "text-xl sm:text-2xl font-bold"} ${ended ? 'text-muted-foreground' : ''}`}>
-          {title}
-        </h2>
+        <div className="flex items-center gap-3">
+          {creatorAvatar !== undefined && creatorName && (
+            <Avatar className="h-8 w-8 flex-shrink-0">
+              <AvatarImage src={creatorAvatar || ''} alt={creatorName} />
+              <AvatarFallback className="text-sm">
+                {creatorName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <h2 className={`${highlight ? "text-2xl sm:text-3xl font-bold" : "text-xl sm:text-2xl font-bold"} ${ended ? 'text-muted-foreground' : ''}`}>
+            {title}
+          </h2>
+        </div>
         {subtitle && (
           <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
         )}
