@@ -86,7 +86,7 @@ export default async function DashboardLayout({
           userDetails={userDetails} 
           navConfig={navConfig as NavItem[]} 
         />
-        <main className="flex-1 w-full overflow-x-hidden pt-14 sm:pt-0 safe-bottom">
+        <main className="flex-1 w-full overflow-x-hidden pt-20 sm:pt-0 safe-bottom">
           {children}
         </main>
       </div>
