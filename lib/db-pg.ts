@@ -9,26 +9,33 @@ export async function saveUserReview(
   userId: string,
   reviewerId: string,
   rating: number,
-  comment: string | null
+  comment: string | null,
+  reviewerName?: string | null,
+  reviewerAvatar?: string | null
 ) {
   const query = `
-    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, updated_at)
-    VALUES ($1, $2, $3, $4, NOW())
+    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, reviewer_name, reviewer_avatar, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW())
     ON CONFLICT (user_id, reviewer_id)
     DO UPDATE SET 
       rating = $3,
       comment = COALESCE($4, public.user_reviews.comment),
+      reviewer_name = COALESCE($5, public.user_reviews.reviewer_name),
+      reviewer_avatar = COALESCE($6, public.user_reviews.reviewer_avatar),
       updated_at = NOW()
     RETURNING *;
   `;
 
-  const result = await pool.query(query, [userId, reviewerId, rating, comment]);
+  const result = await pool.query(query, [userId, reviewerId, rating, comment, reviewerName, reviewerAvatar]);
   return result.rows[0];
 }
 
 export async function getUserReviews(userId: string) {
   const query = `
-    SELECT ur.*, u.full_name as reviewer_name, u.avatar_url as reviewer_avatar
+    SELECT 
+      ur.*,
+      COALESCE(ur.reviewer_name, u.full_name) as reviewer_name,
+      COALESCE(ur.reviewer_avatar, u.avatar_url) as reviewer_avatar
     FROM public.user_reviews ur
     LEFT JOIN public.users u ON ur.reviewer_id = u.id
     WHERE ur.user_id = $1

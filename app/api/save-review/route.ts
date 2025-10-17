@@ -35,12 +35,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get reviewer's name and avatar from auth user metadata
+    const reviewerName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
+    const reviewerAvatar = user.user_metadata?.avatar_url || null;
+
     // Use direct PostgreSQL connection to bypass PostgREST cache issues
     const result = await saveUserReview(
       user_id,
       user.id,
       rating,
-      comment || null
+      comment || null,
+      reviewerName,
+      reviewerAvatar
     );
 
     console.log('Review saved successfully:', result);
