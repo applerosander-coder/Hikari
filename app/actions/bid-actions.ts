@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { Pool } from 'pg';
 
 export async function placeBidWithSavedCard(auctionId: string, bidAmount: number) {
   try {
@@ -69,6 +70,16 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
 
     // Create bid record (NO PAYMENT YET - payment only happens when auction ends if user wins)
     if (isAuctionItem) {
+      // Find users who will be outbid by this new bid
+      const { data: previousBids } = await supabase
+        .from('bids')
+        .select('user_id')
+        .eq('auction_item_id', auctionId)
+        .neq('user_id', user.id)
+        .gte('bid_amount', currentBid);
+
+      const outbidUserIds = [...new Set(previousBids?.map(b => b.user_id) || [])];
+
       // WORKAROUND: Use raw SQL to bypass any schema caching issues
       const { error: bidError } = await supabase.rpc('insert_bid', {
         p_auction_item_id: auctionId,
@@ -90,6 +101,41 @@ export async function placeBidWithSavedCard(auctionId: string, bidAmount: number
 
       if (updateError) {
         console.error('Error updating auction item:', updateError);
+      }
+
+      // Send outbid notifications using PostgreSQL Pool
+      if (outbidUserIds.length > 0 && auctionItem) {
+        try {
+          const pool = new Pool({ 
+            connectionString: process.env.DATABASE_URL,
+            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+          });
+
+          const imageUrl = auctionItem.image_url || 
+                          (auctionItem.image_urls && auctionItem.image_urls.length > 0 ? auctionItem.image_urls[0] : null);
+
+          for (const outbidUserId of outbidUserIds) {
+            await pool.query(
+              `INSERT INTO notifications (user_id, type, title, message, auction_item_id, image_url, read, from_user_id)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+              [
+                outbidUserId,
+                'outbid',
+                'You\'ve been outbid!',
+                `Someone placed a higher bid on ${auctionItem.title || 'an auction item'}`,
+                auctionId,
+                imageUrl,
+                false,
+                user.id
+              ]
+            );
+          }
+
+          await pool.end();
+        } catch (notifError) {
+          console.error('Error sending outbid notifications:', notifError);
+          // Don't fail the bid if notifications fail
+        }
       }
     } else {
       // Insert bid for legacy auction

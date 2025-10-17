@@ -1,12 +1,13 @@
 import { createClient } from '@/utils/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, UserPlus, Users } from 'lucide-react';
+import { Clock, UserPlus, Users, Gavel } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { Pool } from 'pg';
 import { MarkAsReadButton } from '@/components/mark-as-read-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { ConnectionRequestActions } from '@/components/connection-request-actions';
+import Image from 'next/image';
 
 export default async function NoticesPage() {
   const supabase = await createClient();
@@ -79,7 +80,22 @@ export default async function NoticesPage() {
                       : 'bg-gray-50 dark:bg-gray-900/20'
                   }`}
                 >
-                  {notification.from_user ? (
+                  {notification.type === 'outbid' && notification.image_url ? (
+                    <Link 
+                      href={`/auctions/${notification.auction_item_id}`}
+                      className="flex-shrink-0"
+                    >
+                      <div className="relative h-16 w-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
+                        <Image
+                          src={notification.image_url}
+                          alt="Auction item"
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                        />
+                      </div>
+                    </Link>
+                  ) : notification.from_user ? (
                     <Link 
                       href={`/profile/${notification.from_user.id}`}
                       className="flex-shrink-0"
@@ -100,18 +116,36 @@ export default async function NoticesPage() {
                         <UserPlus className="h-5 w-5 text-blue-500" />
                       ) : notification.type === 'connection_request' ? (
                         <Users className="h-5 w-5 text-purple-500" />
+                      ) : notification.type === 'outbid' ? (
+                        <Gavel className="h-5 w-5 text-red-500" />
                       ) : (
                         <Clock className="h-5 w-5 text-gray-500" />
                       )}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm">
-                      {notification.title}
-                    </h3>
+                    {notification.type === 'outbid' && notification.auction_item_id ? (
+                      <Link href={`/auctions/${notification.auction_item_id}`} className="block hover:underline">
+                        <h3 className="font-semibold text-sm">
+                          {notification.title}
+                        </h3>
+                      </Link>
+                    ) : (
+                      <h3 className="font-semibold text-sm">
+                        {notification.title}
+                      </h3>
+                    )}
                     <p className="text-sm text-muted-foreground mt-1">
                       {notification.message}
                     </p>
+                    {notification.type === 'outbid' && notification.auction_item_id && (
+                      <Link 
+                        href={`/auctions/${notification.auction_item_id}`}
+                        className="text-xs text-blue-600 hover:underline mt-2 inline-block"
+                      >
+                        View auction →
+                      </Link>
+                    )}
                     <p className="text-xs text-muted-foreground mt-2">
                       {new Date(notification.created_at).toLocaleString()}
                     </p>
