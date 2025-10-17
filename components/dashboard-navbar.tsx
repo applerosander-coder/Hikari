@@ -36,6 +36,8 @@ export function Navbar({
     if (pathname === '/mybids') return 'My Bids';
     if (pathname === '/dashboard/leaderboard') return 'Leaderboard';
     if (pathname === '/seller') return 'Seller Dashboard';
+    if (pathname === '/pricing') return 'Pricing';
+    if (pathname === '/how-it-works') return 'How it Works';
     return null;
   };
 
@@ -48,9 +50,9 @@ export function Navbar({
           <Image 
             src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
             alt="BIDWIN" 
-            width={90} 
-            height={45}
-            className="h-8 w-auto"
+            width={180} 
+            height={90}
+            className="h-16 w-auto"
             priority
           />
         )}

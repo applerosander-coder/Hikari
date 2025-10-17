@@ -48,17 +48,17 @@ export default function Page(): React.ReactElement {
             <Image 
               src="/bidwin-logo-light.png"
               alt="BIDWIN" 
-              width={200} 
-              height={100}
-              className="h-16 w-auto dark:hidden"
+              width={400} 
+              height={200}
+              className="h-32 w-auto dark:hidden"
               priority
             />
             <Image 
               src="/bidwin-logo-dark.png"
               alt="BIDWIN" 
-              width={200} 
-              height={100}
-              className="h-16 w-auto hidden dark:block"
+              width={400} 
+              height={200}
+              className="h-32 w-auto hidden dark:block"
               priority
             />
           </div>

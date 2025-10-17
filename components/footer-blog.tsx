@@ -11,16 +11,16 @@ export default function FooterBlog() {
             <Image 
               src="/bidwin-logo-light.png"
               alt="BIDWIN" 
-              width={120} 
-              height={60}
-              className="h-8 w-auto dark:hidden"
+              width={240} 
+              height={120}
+              className="h-16 w-auto dark:hidden"
             />
             <Image 
               src="/bidwin-logo-dark.png"
               alt="BIDWIN" 
-              width={120} 
-              height={60}
-              className="h-8 w-auto hidden dark:block"
+              width={240} 
+              height={120}
+              className="h-16 w-auto hidden dark:block"
             />
           </div>
           <div className="flex flex-col items-center md:items-end space-y-2 md:space-y-0">

@@ -61,17 +61,17 @@ export default function Page({
           <Image 
             src="/bidwin-logo-light.png"
             alt="BIDWIN" 
-            width={140} 
-            height={70}
-            className="h-12 w-auto dark:hidden"
+            width={280} 
+            height={140}
+            className="h-24 w-auto dark:hidden"
             priority
           />
           <Image 
             src="/bidwin-logo-dark.png"
             alt="BIDWIN" 
-            width={140} 
-            height={70}
-            className="h-12 w-auto hidden dark:block"
+            width={280} 
+            height={140}
+            className="h-24 w-auto hidden dark:block"
             priority
           />
         </div>

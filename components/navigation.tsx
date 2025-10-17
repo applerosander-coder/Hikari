@@ -58,9 +58,9 @@ export default function CircularNavigation({
             <Image 
               src={resolvedTheme === 'dark' ? '/bidwin-logo-dark.png' : '/bidwin-logo-light.png'}
               alt="BIDWIN" 
-              width={120} 
-              height={60}
-              className="h-9 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
+              width={240} 
+              height={120}
+              className="h-18 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
               priority
             />
           )}
