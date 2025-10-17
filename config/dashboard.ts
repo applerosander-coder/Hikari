@@ -9,7 +9,8 @@ import {
   FileText,
   Heart,
   Gavel,
-  Store
+  Store,
+  Clock
 } from 'lucide-react';
 
 export interface NavItem {
@@ -28,7 +29,8 @@ export const iconComponents = {
   LineChart,
   Heart,
   Gavel,
-  Store
+  Store,
+  Clock
 };
 
 export const navConfig = [
@@ -39,5 +41,6 @@ export const navConfig = [
     icon: 'LineChart',
     label: 'Leaderboard'
   },
-  { href: '/seller', icon: 'Store', label: 'Seller' }
+  { href: '/seller', icon: 'Store', label: 'Seller' },
+  { href: '/notices', icon: 'Clock', label: 'Notices' }
 ];

@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { ReviewForm } from '@/components/review-form';
 import { ReviewList } from '@/components/review-list';
 import { UserAuctionList } from '@/components/user-auction-list';
+import { FollowButton } from '@/components/follow-button';
 
 interface UserProfilePageProps {
   params: {
@@ -164,6 +165,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   <span className="font-semibold text-gray-600">{endedAuctions}</span>
                 </div>
               </div>
+
+              {!isOwnProfile && currentUser && (
+                <div className="border-t pt-4">
+                  <FollowButton userId={params.userId} />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

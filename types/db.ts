@@ -331,6 +331,7 @@ export interface Database {
           title: string
           message: string
           auction_id: string | null
+          auction_item_id: string | null
           read: boolean
           created_at: string
         }
@@ -341,6 +342,7 @@ export interface Database {
           title: string
           message: string
           auction_id?: string | null
+          auction_item_id?: string | null
           read?: boolean
           created_at?: string
         }
@@ -351,6 +353,7 @@ export interface Database {
           title?: string
           message?: string
           auction_id?: string | null
+          auction_item_id?: string | null
           read?: boolean
           created_at?: string
         }
@@ -682,6 +685,27 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
+      }
+      follows: {
+        Row: {
+          id: string
+          follower_id: string
+          following_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          follower_id: string
+          following_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          follower_id?: string
+          following_id?: string
+          created_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

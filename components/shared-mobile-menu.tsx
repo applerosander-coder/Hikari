@@ -7,6 +7,7 @@ import { useTheme } from 'next-themes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sun, Moon, LogOut, MessageSquare, Bell, Users } from 'lucide-react';
 import { mobileNavItems } from '@/config/navigation';
+import { MobileNotificationBadge } from '@/components/mobile-notification-badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -155,13 +156,7 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
       </button>
 
       {/* Notices */}
-      <button
-        onClick={onClose}
-        className="flex items-center gap-3 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
-      >
-        <Bell className="h-4 w-4" />
-        Notices
-      </button>
+      <MobileNotificationBadge onClose={onClose} />
 
       {/* Connections */}
       <button

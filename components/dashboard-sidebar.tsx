@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { NavItem, iconComponents } from '@/config/dashboard';
+import { NotificationBadge } from '@/components/notification-badge';
 
 const Sidebar = ({ navConfig }: { navConfig: NavItem[] }) => {
   const pathname = usePathname();
@@ -39,6 +40,8 @@ const Sidebar = ({ navConfig }: { navConfig: NavItem[] }) => {
             iconComponents[item.icon as keyof typeof iconComponents];
           const isActive = pathname === item.href;
           const isDisabled = item.disabled;
+          const isNotices = item.label === 'Notices';
+          
           return (
             <Tooltip key={index}>
               <TooltipTrigger asChild>
@@ -59,7 +62,11 @@ const Sidebar = ({ navConfig }: { navConfig: NavItem[] }) => {
                       className="flex h-full w-full items-center justify-center"
                       prefetch={false}
                     >
-                      <IconComponent className="h-5 w-5" />
+                      {isNotices ? (
+                        <NotificationBadge />
+                      ) : (
+                        <IconComponent className="h-5 w-5" />
+                      )}
                     </Link>
                   )}
                   <span className="sr-only">{item.label}</span>
