@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { getURL, getErrorRedirect, getStatusRedirect } from '@/utils/helpers';
 import { getAuthTypes } from '@/utils/auth-helpers/settings';
 
@@ -323,6 +324,8 @@ export async function updateName(formData: FormData) {
   const fullName = String(formData.get('fullName')).trim();
 
   const supabase = createClient();
+  
+  // First update auth metadata
   const { error, data } = await supabase.auth.updateUser({
     data: { full_name: fullName }
   });
@@ -333,7 +336,30 @@ export async function updateName(formData: FormData) {
       'Your name could not be updated.',
       error.message
     );
-  } else if (data.user) {
+  }
+  
+  if (data.user) {
+    // Also update public.users table
+    const { error: dbError } = await supabase
+      .from('users')
+      .upsert({
+        id: data.user.id,
+        full_name: fullName
+      }, {
+        onConflict: 'id'
+      });
+
+    if (dbError) {
+      return getErrorRedirect(
+        '/dashboard/account',
+        'Your name could not be updated.',
+        dbError.message
+      );
+    }
+
+    // Clear all caches
+    revalidatePath('/', 'layout');
+
     return getStatusRedirect(
       '/dashboard/account',
       'Success!',
