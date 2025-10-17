@@ -62,9 +62,9 @@ export function UserAuctionList({ auctions }: UserAuctionListProps) {
             href={`/auctions/${auction.id}`}
             className="block hover:opacity-80 transition-opacity"
           >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <h3 className="font-semibold mb-1">
+            <div className="flex items-start justify-between gap-2 mb-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold mb-1 break-words">
                   {auction.name || 'Untitled Auction'}
                 </h3>
                 <p className="text-sm text-muted-foreground">

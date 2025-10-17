@@ -116,9 +116,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const isOwnProfile = currentUser?.id === params.userId;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="w-full max-w-6xl mx-auto px-4 py-8">
       <div className="grid gap-8 md:grid-cols-3">
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 min-w-0">
           <Card>
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -168,7 +168,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           </Card>
         </div>
 
-        <div className="md:col-span-2 space-y-8">
+        <div className="md:col-span-2 space-y-8 min-w-0">
           {!isOwnProfile && currentUser && (
             <Card>
               <CardHeader>

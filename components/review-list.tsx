@@ -35,7 +35,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
     <div className="space-y-4">
       {reviewsWithComments.map((review) => (
         <div key={review.id} className="border rounded-lg p-4">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 min-w-0">
             <Avatar className="h-10 w-10">
               <AvatarImage 
                 src={review.reviewer?.avatar_url || ''} 
@@ -46,17 +46,17 @@ export function ReviewList({ reviews }: ReviewListProps) {
               </AvatarFallback>
             </Avatar>
             
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="font-semibold">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">
                     {review.reviewer?.full_name || 'Anonymous'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
                   </p>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 flex-shrink-0">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
@@ -71,7 +71,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
               </div>
               
               {review.comment && (
-                <p className="text-sm text-muted-foreground mt-2">{review.comment}</p>
+                <p className="text-sm text-muted-foreground mt-2 break-words">{review.comment}</p>
               )}
             </div>
           </div>
