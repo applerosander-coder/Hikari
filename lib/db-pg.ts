@@ -68,3 +68,29 @@ export async function getAverageRating(userId: string) {
   const result = await pool.query(query, [userId]);
   return result.rows[0];
 }
+
+export async function getUserInfo(userId: string) {
+  const query = `
+    SELECT full_name, avatar_url
+    FROM public.users
+    WHERE id = $1;
+  `;
+
+  const result = await pool.query(query, [userId]);
+  return result.rows[0] || null;
+}
+
+export async function updateUserAvatar(userId: string, avatarUrl: string, fullName?: string) {
+  const query = `
+    INSERT INTO public.users (id, avatar_url, full_name)
+    VALUES ($1, $2, $3)
+    ON CONFLICT (id)
+    DO UPDATE SET 
+      avatar_url = $2,
+      full_name = COALESCE($3, public.users.full_name)
+    RETURNING *;
+  `;
+
+  const result = await pool.query(query, [userId, avatarUrl, fullName]);
+  return result.rows[0];
+}

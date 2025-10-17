@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { saveUserReview } from '@/lib/db-pg';
+import { saveUserReview, getUserInfo } from '@/lib/db-pg';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,9 +35,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get reviewer's name and avatar from auth user metadata
-    const reviewerName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
-    const reviewerAvatar = user.user_metadata?.avatar_url || null;
+    // Get reviewer's info from database using direct PostgreSQL
+    const reviewerInfo = await getUserInfo(user.id);
+    const reviewerName = reviewerInfo?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || null;
+    const reviewerAvatar = reviewerInfo?.avatar_url || user.user_metadata?.avatar_url || null;
 
     // Use direct PostgreSQL connection to bypass PostgREST cache issues
     const result = await saveUserReview(

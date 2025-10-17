@@ -1,46 +1,34 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { updateUserAvatar } from '@/lib/db-pg';
 
 export async function POST(request: Request) {
-  const supabase = createClient();
-  const { userId, avatarUrl }: { userId: string; avatarUrl: string } = await request.json();
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  console.log('Updating avatar for user:', userId, 'with URL:', avatarUrl);
-
-  // First check if user record exists
-  const { data: existingUser } = await supabase
-    .from('users')
-    .select('id')
-    .eq('id', userId)
-    .single();
-
-  // If user doesn't exist, create the record first
-  if (!existingUser) {
-    console.log('User record not found, creating...');
-    const { error: insertError } = await supabase
-      .from('users')
-      .insert({ id: userId, avatar_url: avatarUrl });
-    
-    if (insertError) {
-      console.error('Error creating user record:', insertError);
-      return NextResponse.json({ error: insertError.message }, { status: 400 });
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    console.log('User record created successfully');
-    return NextResponse.json({ success: true });
-  }
 
-  // Update existing user record
-  const { data, error } = await supabase
-    .from('users')
-    .update({ avatar_url: avatarUrl })
-    .eq('id', userId);
+    const { userId, avatarUrl }: { userId: string; avatarUrl: string } = await request.json();
 
-  if (error) {
+    if (user.id !== userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    console.log('Updating avatar for user:', userId, 'with URL:', avatarUrl);
+
+    // Get user's full name from auth metadata
+    const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
+
+    // Use direct PostgreSQL to update avatar
+    const result = await updateUserAvatar(userId, avatarUrl, fullName);
+
+    console.log('Avatar updated successfully:', result);
+    return NextResponse.json({ success: true, data: result });
+  } catch (error: any) {
     console.error('Avatar update error:', error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  console.log('Avatar updated successfully:', data);
-  return NextResponse.json({ data });
 }
