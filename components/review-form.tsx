@@ -16,7 +16,6 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingComment, setIsSavingComment] = useState(false);
   const router = useRouter();
 
