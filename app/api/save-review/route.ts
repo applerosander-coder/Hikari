@@ -51,23 +51,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Save review using Supabase with proper SQL
-    const { data: result, error } = await supabase
-      .from('user_reviews')
-      .insert({
-        user_id: user_id,
-        reviewer_id: user.id,
-        rating: rating,
-        comment: comment || null
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Supabase error:', error);
-      throw new Error(error.message);
-    }
-
+    // Save review using PostgreSQL (Supabase's underlying database)
+    const { Pool } = require('pg');
+    const pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+    });
+    
+    const insertResult = await pool.query(
+      `INSERT INTO user_reviews (user_id, reviewer_id, rating, comment)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [user_id, user.id, rating, comment || null]
+    );
+    
+    await pool.end();
+    
+    const result = insertResult.rows[0];
     console.log('Review saved successfully:', result);
 
     // Revalidate the profile page to show new comment immediately
