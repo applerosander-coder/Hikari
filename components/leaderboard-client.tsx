@@ -2,9 +2,15 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { Clock, Trophy } from 'lucide-react';
+import { Clock, Trophy, Filter } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 const CATEGORIES = [
   'Electronics',
@@ -93,13 +99,13 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">
-      <div className="mb-6 hidden sm:block">
+      <div className="mb-0 hidden sm:block">
         <h1 className="text-2xl sm:text-3xl font-bold">Leaderboard</h1>
       </div>
 
-      {/* Filter Pills */}
+      {/* Filter Pills - Auction Names */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide mb-4">
-        {/* All Items Pill */}
+        {/* All Auction Items Pill */}
         <button
           onClick={() => {
             setSelectedAuction('all');
@@ -113,66 +119,15 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
             }
           `}
         >
-          All Items ({items.length})
+          All Auction items ({items.length})
         </button>
 
-        {/* Category Pills */}
-        {CATEGORIES.map((category) => {
-          const categoryCount = items.filter(item => item.category === category).length;
-          if (categoryCount === 0) return null;
-          
-          return (
-            <button
-              key={category}
-              onClick={() => {
-                setSelectedCategory(category);
-                setSelectedAuction('all');
-              }}
-              className={`
-                flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                ${selectedCategory === category
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }
-              `}
-            >
-              {category} ({categoryCount})
-            </button>
-          );
-        })}
+        {/* Individual Auction Pills */}
+        {auctions.map((auction) => {
+          const auctionItemCount = items.filter(item => item.auction_id === auction.id).length;
+          if (auctionItemCount === 0) return null;
 
-        {/* Auction Pills */}
-        {(() => {
-          const now = new Date();
-          
-          // Map all auctions with their metadata
-          const mappedAuctions = auctions.map((auction) => {
-            const auctionItems = items.filter(i => i.auction_id === auction.id);
-            const endDate = auction.end_date ? new Date(auction.end_date) : null;
-            const hasEnded = endDate && endDate <= now;
-            const isActive = !hasEnded && auctionItems.length > 0;
-            
-            return {
-              auction,
-              itemCount: auctionItems.length,
-              isActive,
-              endDate
-            };
-          });
-          
-          // Separate live and ended auctions
-          const liveAuctions = mappedAuctions.filter(a => a.isActive);
-          const endedAuctions = mappedAuctions
-            .filter(a => !a.isActive && a.itemCount > 0)
-            .sort((a, b) => {
-              if (!a.endDate) return 1;
-              if (!b.endDate) return -1;
-              return b.endDate.getTime() - a.endDate.getTime();
-            })
-            .slice(0, 3); // Limit to 3 most recent ended auctions
-          
-          // Combine: live auctions first, then limited ended auctions
-          return [...liveAuctions, ...endedAuctions].map(({ auction, itemCount }) => (
+          return (
             <button
               key={auction.id}
               onClick={() => {
@@ -187,13 +142,13 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
                 }
               `}
             >
-              {auction.name} ({itemCount})
+              {auction.name} ({auctionItemCount})
             </button>
-          ));
-        })()}
+          );
+        })}
       </div>
 
-      {/* Sort Dropdown */}
+      {/* Sort Dropdown and Category Filter */}
       <div className="flex items-center gap-3 mb-6">
         <span className="text-sm text-muted-foreground">Sort by:</span>
         <select
@@ -204,6 +159,58 @@ export function LeaderboardClient({ items, auctions }: LeaderboardClientProps) {
           <option value="latest">Latest Bid First</option>
           <option value="highest">Highest Bid First</option>
         </select>
+
+        {/* Category Filter Button */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="default"
+              className={`gap-2 ${selectedCategory !== 'all' ? 'bg-primary text-primary-foreground' : ''}`}
+            >
+              <Filter className="h-4 w-4" />
+              Categories
+              {selectedCategory !== 'all' && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary-foreground text-primary">
+                  1
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56">
+            <div className="space-y-1">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${
+                  selectedCategory === 'all'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+              >
+                All Categories
+              </button>
+              {CATEGORIES.map((category) => {
+                const categoryCount = items.filter(item => item.category === category).length;
+                if (categoryCount === 0) return null;
+                
+                return (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between ${
+                      selectedCategory === category
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-muted'
+                    }`}
+                  >
+                    <span>{category}</span>
+                    <span className="text-xs opacity-70">({categoryCount})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Results count */}
