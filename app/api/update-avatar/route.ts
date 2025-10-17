@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { createClient } from '@/utils/supabase/server';
-import { updateUserAvatar } from '@/lib/db-pg';
+import { createClient, createServiceClient } from '@/utils/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -23,23 +22,30 @@ export async function POST(request: Request) {
     // Get user's full name from auth metadata
     const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
 
-    // Update both database and auth metadata
-    const result = await updateUserAvatar(userId, avatarUrl, fullName);
-
-    // Update auth user metadata to keep it in sync
-    await supabase.auth.updateUser({
-      data: {
+    // Use service client to bypass RLS and ensure consistent writes
+    const serviceClient = createServiceClient();
+    
+    const { data: result, error } = await serviceClient
+      .from('users')
+      .upsert({
+        id: userId,
         avatar_url: avatarUrl,
         full_name: fullName
-      }
-    });
+      })
+      .select()
+      .single();
 
-    // Revalidate all paths that use getUserDetails to clear the cache
+    if (error) {
+      console.error('Supabase upsert error:', error);
+      throw new Error(error.message);
+    }
+
+    // Revalidate all paths that use getUserDetails
     revalidatePath('/', 'layout');
     revalidatePath('/dashboard', 'layout');
     revalidatePath('/dashboard/account');
 
-    console.log('Avatar updated successfully:', result);
+    console.log('Avatar updated successfully via Supabase:', result);
     return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     console.error('Avatar update error:', error);

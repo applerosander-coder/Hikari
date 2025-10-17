@@ -41,7 +41,7 @@ export const getPlans = cache(async (supabase: SupabaseClient) => {
   return plans;
 });
 
-export const getUserDetails = cache(async (supabase: SupabaseClient) => {
+export const getUserDetails = async (supabase: SupabaseClient) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   
@@ -51,4 +51,4 @@ export const getUserDetails = cache(async (supabase: SupabaseClient) => {
     .eq('id', user.id)
     .single();
   return userDetails;
-});
+};
