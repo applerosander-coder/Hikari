@@ -61,8 +61,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   const isOwnProfile = currentUser?.id === params.userId;
 
-  const existingReview = currentUser && reviews?.find(r => r.reviewer_id === currentUser.id);
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="grid gap-8 md:grid-cols-3">
@@ -120,13 +118,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           {!isOwnProfile && currentUser && (
             <Card>
               <CardHeader>
-                <CardTitle>{existingReview ? 'Your Review' : 'Leave a Review'}</CardTitle>
+                <CardTitle>Leave a Review</CardTitle>
               </CardHeader>
               <CardContent>
                 <ReviewForm 
                   userId={params.userId} 
                   currentUserId={currentUser.id}
-                  existingRating={existingReview?.rating}
                 />
               </CardContent>
             </Card>

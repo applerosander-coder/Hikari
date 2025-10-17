@@ -13,16 +13,10 @@ export async function saveUserReview(
   reviewerName?: string | null,
   reviewerAvatar?: string | null
 ) {
+  // Always INSERT a new review - allow multiple comments from same reviewer
   const query = `
-    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, reviewer_name, reviewer_avatar, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW())
-    ON CONFLICT (user_id, reviewer_id)
-    DO UPDATE SET 
-      rating = $3,
-      comment = COALESCE($4, public.user_reviews.comment),
-      reviewer_name = COALESCE($5, public.user_reviews.reviewer_name),
-      reviewer_avatar = COALESCE($6, public.user_reviews.reviewer_avatar),
-      updated_at = NOW()
+    INSERT INTO public.user_reviews (user_id, reviewer_id, rating, comment, reviewer_name, reviewer_avatar, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
     RETURNING *;
   `;
 

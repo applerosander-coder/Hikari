@@ -10,49 +10,30 @@ import { toast } from 'sonner';
 interface ReviewFormProps {
   userId: string;
   currentUserId: string;
-  existingRating?: number;
 }
 
-export function ReviewForm({ userId, currentUserId, existingRating = 0 }: ReviewFormProps) {
-  const [rating, setRating] = useState(existingRating);
+export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
+  const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingComment, setIsSavingComment] = useState(false);
   const router = useRouter();
 
-  const submitRatingAction = async (newRating: number) => {
-    try {
-      console.log('Submitting rating:', { userId, newRating });
-      
-      const response = await fetch('/api/save-review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          rating: newRating,
-          comment: null // Don't update comment when saving rating
-        }),
-      });
-
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save rating');
-      }
-
-      router.refresh();
-      return true;
-    } catch (error: any) {
-      console.error('Error submitting rating:', error);
-      toast.error(error.message || 'Failed to save rating');
-      return false;
-    }
+  const handleStarClick = (star: number) => {
+    setRating(star);
   };
 
-  const submitCommentAction = async () => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (rating === 0) {
+      toast.error('Please select a rating first');
+      return;
+    }
+
+    setIsSavingComment(true);
+    
     try {
       const response = await fetch('/api/save-review', {
         method: 'POST',
@@ -67,46 +48,18 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0 }: Review
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to save comment');
+        throw new Error(data.error || 'Failed to save review');
       }
 
+      toast.success('Review saved!');
+      setComment('');
+      setRating(0);
       router.refresh();
-      return true;
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save comment');
-      return false;
+      toast.error(error.message || 'Failed to save review');
+    } finally {
+      setIsSavingComment(false);
     }
-  };
-
-  const handleStarClick = async (star: number) => {
-    setRating(star);
-    setIsSubmitting(true);
-    
-    const success = await submitRatingAction(star);
-    if (success) {
-      toast.success('Rating saved!');
-    }
-    
-    setIsSubmitting(false);
-  };
-
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (rating === 0) {
-      toast.error('Please select a rating first');
-      return;
-    }
-
-    setIsSavingComment(true);
-    
-    const success = await submitCommentAction();
-    if (success) {
-      toast.success('Comment saved!');
-      setComment(''); // Clear the comment field after successful save
-    }
-    
-    setIsSavingComment(false);
   };
 
   return (
@@ -122,7 +75,7 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0 }: Review
               onMouseEnter={() => setHoveredRating(star)}
               onMouseLeave={() => setHoveredRating(0)}
               className="transition-transform hover:scale-110 disabled:opacity-50"
-              disabled={isSubmitting}
+              disabled={isSavingComment}
             >
               <Star
                 className={`h-8 w-8 ${
@@ -134,9 +87,6 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0 }: Review
             </button>
           ))}
         </div>
-        {isSubmitting && (
-          <p className="text-xs text-muted-foreground mt-1">Saving...</p>
-        )}
       </div>
 
       {rating > 0 && (

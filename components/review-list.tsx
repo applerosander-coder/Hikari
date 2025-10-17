@@ -37,11 +37,11 @@ export function ReviewList({ reviews }: ReviewListProps) {
           <div className="flex items-start gap-3">
             <Avatar className="h-10 w-10">
               <AvatarImage 
-                src={review.reviewer?.avatar_url || review.reviewer_avatar || ''} 
-                alt={review.reviewer?.full_name || review.reviewer_name || 'Reviewer'} 
+                src={review.reviewer_avatar || review.reviewer?.avatar_url || ''} 
+                alt={review.reviewer_name || review.reviewer?.full_name || 'Reviewer'}
               />
               <AvatarFallback>
-                {(review.reviewer?.full_name || review.reviewer_name)?.charAt(0).toUpperCase() || 'U'}
+                {(review.reviewer_name || review.reviewer?.full_name)?.charAt(0).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             
