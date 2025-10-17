@@ -62,7 +62,8 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
           description: 'Your avatar has been updated.',
         });
         
-        router.refresh();
+        // Force a full page reload to clear cache
+        window.location.reload();
       } catch (error) {
         toast({
           title: 'Error',
