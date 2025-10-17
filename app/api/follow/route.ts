@@ -43,13 +43,14 @@ export async function POST(request: Request) {
 
     // Create notification for the user being followed
     await pool.query(
-      `INSERT INTO notifications (user_id, type, title, message, read) 
-       VALUES ($1, $2, $3, $4, $5)`,
+      `INSERT INTO notifications (user_id, type, title, message, from_user_id, read) 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         followingId,
         'follow',
         'New Follower',
         `${followerName} started following you`,
+        user.id,
         false
       ]
     );

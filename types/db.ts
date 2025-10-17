@@ -332,6 +332,7 @@ export interface Database {
           message: string
           auction_id: string | null
           auction_item_id: string | null
+          from_user_id: string | null
           read: boolean
           created_at: string
         }
@@ -343,6 +344,7 @@ export interface Database {
           message: string
           auction_id?: string | null
           auction_item_id?: string | null
+          from_user_id?: string | null
           read?: boolean
           created_at?: string
         }
@@ -354,6 +356,7 @@ export interface Database {
           message?: string
           auction_id?: string | null
           auction_item_id?: string | null
+          from_user_id?: string | null
           read?: boolean
           created_at?: string
         }

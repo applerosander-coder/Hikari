@@ -4,6 +4,8 @@ import { Clock, UserPlus } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { Pool } from 'pg';
 import { MarkAsReadButton } from '@/components/mark-as-read-button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 export default async function NoticesPage() {
   const supabase = await createClient();
@@ -18,17 +20,30 @@ export default async function NoticesPage() {
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
   });
 
-  // Fetch all notifications for the user, ordered by newest first
+  // Fetch all notifications with user info, ordered by newest first
   const result = await pool.query(
-    `SELECT * FROM notifications 
-     WHERE user_id = $1 
-     ORDER BY created_at DESC`,
+    `SELECT 
+      n.*,
+      u.id as from_user_id,
+      u.full_name as from_user_name,
+      u.avatar_url as from_user_avatar
+     FROM notifications n
+     LEFT JOIN users u ON n.from_user_id = u.id
+     WHERE n.user_id = $1 
+     ORDER BY n.created_at DESC`,
     [user.id]
   );
 
   await pool.end();
 
-  const notifications = result.rows;
+  const notifications = result.rows.map(row => ({
+    ...row,
+    from_user: row.from_user_id ? {
+      id: row.from_user_id,
+      full_name: row.from_user_name,
+      avatar_url: row.from_user_avatar
+    } : null
+  }));
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -56,13 +71,30 @@ export default async function NoticesPage() {
                       : 'bg-gray-50 dark:bg-gray-900/20'
                   }`}
                 >
-                  <div className="flex-shrink-0 mt-1">
-                    {notification.type === 'follow' ? (
-                      <UserPlus className="h-5 w-5 text-blue-500" />
-                    ) : (
-                      <Clock className="h-5 w-5 text-gray-500" />
-                    )}
-                  </div>
+                  {notification.from_user ? (
+                    <Link 
+                      href={`/profile/${notification.from_user.id}`}
+                      className="flex-shrink-0"
+                    >
+                      <Avatar className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity">
+                        <AvatarImage 
+                          src={notification.from_user.avatar_url || ''} 
+                          alt={notification.from_user.full_name || 'User'} 
+                        />
+                        <AvatarFallback>
+                          {notification.from_user.full_name?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <div className="flex-shrink-0 mt-1">
+                      {notification.type === 'follow' ? (
+                        <UserPlus className="h-5 w-5 text-blue-500" />
+                      ) : (
+                        <Clock className="h-5 w-5 text-gray-500" />
+                      )}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm">
                       {notification.title}
