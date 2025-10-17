@@ -4,6 +4,10 @@
 Auctions is a live auction and bidding platform built with Next.js 14 and Supabase. It provides a specialized marketplace experience with real-time bidding, countdowns, and integrated payment processing. The platform aims to offer a seamless and engaging auction experience across various categories, featuring a seller dashboard for auction creation, watchlist functionality, and Netflix-style categorization for browsing. The project emphasizes scalability, a rich, interactive user experience, and a streamlined listing process leveraging AI. The platform positions itself as a marketplace facilitator, emphasizing clear legal acknowledgments for users.
 
 ### Recent Changes (Oct 2025)
+- **Follow System with Notifications (Oct 17):** Implemented comprehensive follow functionality allowing users to follow/unfollow other users from profile pages. Follow button displays current follow state with loading indicators. When users follow someone, the followed user receives a notification. Added `follows` table with unique constraint on (follower_id, following_id) and proper indexes. Notification system displays unread count in both desktop sidebar (gold clock icon with badge) and mobile hamburger menu. New `/notices` page shows all notifications with mark-as-read functionality. Notifications poll every 30 seconds for real-time updates. All database operations use direct PostgreSQL Pool connections for consistency.
+
+- **Page Load Reliability Fix (Oct 17):** Fixed blank page issues during server restarts by adding proper loading states. Root and marketing layouts now show spinner components while Next.js compiles pages, preventing blank screens and eliminating need for manual page refresh.
+
 - **Complete PostgreSQL Migration for Avatar Persistence (Oct 17):** All user avatar and profile data now fetched via **direct PostgreSQL queries** to ensure data consistency. `getUserDetails`, dashboard page, leaderboard page, and profile pages all use PostgreSQL Pool instead of Supabase client API to avoid caching issues. Avatar updates sync to `public.users` table as single source of truth. Review submissions automatically sync current user profile to database. Avatars and names persist correctly across all pages and page switches without reverting to old data. Comments dynamically display current user avatar/name via JOIN - when users update their profile, all their past comments automatically reflect the new information. Empty comments (rating-only submissions) are filtered from display - only comments with text appear in the Comments section, while all ratings contribute to the average score.
 
 - **Multi-Comment Review System (Oct 17):** Enhanced review system to support multiple comments per user instead of overwriting. Removed unique constraint on `user_reviews(user_id, reviewer_id)` to allow unlimited comments. Updated review form to save rating + comment together (preventing duplicate entries). Auto-population of `public.users` table during signup ensures all new users have profile data available immediately. Review submission now uses direct PostgreSQL INSERT operations for reliability. Comments dynamically display current user data via JOIN - when users update their profile, all their past comments automatically reflect the new information.
@@ -27,8 +31,8 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **Visual Enhancements:** Creator avatars integrated across auction displays and filters, photo-first AI workflow for sellers, and improved mobile navigation.
 
 **Technical Implementations:**
-- **Real-time Functionality:** Supabase real-time subscriptions for live auction updates and countdowns.
-- **Database Schema:** Custom tables for `auctions`, `auction_items` (with category field), `bids`, `customers`, `payments`, `watchlist`, `notifications`, and `invitations`. Bids are linked to `auction_items`.
+- **Real-time Functionality:** Supabase real-time subscriptions for live auction updates and countdowns. Notification polling (30s interval) for real-time unread count updates.
+- **Database Schema:** Custom tables for `auctions`, `auction_items` (with category field), `bids`, `customers`, `payments`, `watchlist`, `notifications`, `invitations`, `follows`, and `user_reviews`. Bids are linked to `auction_items`. Follows table tracks user relationships with unique constraints.
 - **Storage:** Supabase Storage for `seller-auctions` images and `avatar` images, with automatic compression.
 - **State Management:** TanStack Query for data fetching and caching, and tRPC for API communication.
 - **Performance Optimizations:** Exponential backoff, `router.refresh()`, retry logic, and Postgres RPC functions.
@@ -40,6 +44,8 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 - **Live Auctions:** Real-time updates and categorized listings of individual auction items.
 - **Dashboard Display:** Active and recently ended auctions, with unified filtering using pill chips.
 - **User Accounts:** Secure authentication, profile management, and selection from 16 unique artistic avatars.
+- **User Profiles & Social Features:** Comprehensive profile pages with auction statistics, follow/unfollow functionality, and multi-comment review system with star ratings.
+- **Notification System:** Real-time notification center accessible via gold clock icon in sidebar and mobile menu. Displays follow notifications and other activity with unread count badges. Notices page shows all notifications with mark-as-read functionality.
 - **Seller Dashboard:** AI-powered form for creating multi-item auctions, managing drafts, and generating content from photos.
 - **Payment Processing:** Secure bidding, saved payment methods, instant bidding, and automated off-session charging.
 - **My Bids Page:** Tracks active bids, outbid items, won auctions, and a user-curated watchlist (now "Saved").
