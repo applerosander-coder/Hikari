@@ -24,6 +24,8 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
 
   const submitRatingAction = async (newRating: number) => {
     try {
+      console.log('Submitting rating:', { userId, newRating });
+      
       const response = await fetch('/api/save-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -34,7 +36,9 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
         }),
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to save rating');
@@ -43,6 +47,7 @@ export function ReviewForm({ userId, currentUserId, existingRating = 0, existing
       router.refresh();
       return true;
     } catch (error: any) {
+      console.error('Error submitting rating:', error);
       toast.error(error.message || 'Failed to save rating');
       return false;
     }
