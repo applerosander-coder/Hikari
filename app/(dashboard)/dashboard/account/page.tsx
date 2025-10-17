@@ -21,6 +21,8 @@ import {
 import { updateName, updateEmail } from '@/utils/auth-helpers/server';
 import { AvatarPicker } from './avatar-picker'; 
 import { redirect } from 'next/navigation';
+import { UpdateNameForm } from './update-name-form';
+import { UpdateEmailForm } from './update-email-form';
 
 export default async function AccountPage() {
   const supabase = createClient();
@@ -49,31 +51,14 @@ export default async function AccountPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={updateName} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  defaultValue={user.user_metadata.full_name || ''}
-                  placeholder="Enter your full name"
-                />
-              </div>
-              <Button type="submit">Update Name</Button>
-            </form>
-            <form action={updateEmail} className="space-y-4 mt-6">
-              <div className="space-y-2">
-                <Label htmlFor="newEmail">Email</Label>
-                <Input
-                  id="newEmail"
-                  name="newEmail"
-                  type="email"
-                  defaultValue={user.email}
-                  placeholder="Enter your new email"
-                />
-              </div>
-              <Button type="submit">Update Email</Button>
-            </form>
+            <UpdateNameForm 
+              action={updateName} 
+              defaultValue={user.user_metadata.full_name || ''} 
+            />
+            <UpdateEmailForm 
+              action={updateEmail} 
+              defaultValue={user.email || ''} 
+            />
             {/* Avatar Picker */}
             <AvatarPicker 
               currentAvatar={userDetails?.avatar_url || null} 
