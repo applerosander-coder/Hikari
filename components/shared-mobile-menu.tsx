@@ -99,21 +99,21 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
   };
 
   return (
-    <nav className="grid gap-6 text-lg font-medium mt-6">
+    <nav className="grid gap-3 text-sm font-medium mt-4">
       {/* Avatar at Top */}
       {user && (
         <Link 
           href="/dashboard/account"
           onClick={onClose}
-          className="flex items-center gap-3 px-2.5 pb-4 border-b border-border hover:bg-accent/50 transition-colors rounded-md cursor-pointer"
+          className="flex items-center gap-2 px-2.5 pb-3 border-b border-border hover:bg-accent/50 transition-colors rounded-md cursor-pointer"
         >
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-8 w-8">
             <AvatarImage src={getAvatarUrl()} alt={getFirstName()} />
-            <AvatarFallback>{getUserInitials()}</AvatarFallback>
+            <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">{getFirstName()}</span>
-            <span className="text-xs text-muted-foreground">{user?.email}</span>
+            <span className="text-xs font-semibold">{getFirstName()}</span>
+            <span className="text-[10px] text-muted-foreground">{user?.email}</span>
           </div>
         </Link>
       )}
@@ -128,7 +128,7 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
             key={index}
             href={item.disabled ? '#' : item.href}
             onClick={() => !item.disabled && onClose()}
-            className={`flex items-center gap-4 px-2.5 transition-colors ${
+            className={`flex items-center gap-3 px-2.5 transition-colors ${
               isActive 
                 ? 'text-foreground' 
                 : item.disabled 
@@ -136,7 +136,7 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
                   : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <IconComponent className="h-5 w-5" />
+            <IconComponent className="h-4 w-4" />
             {item.label}
           </Link>
         );
@@ -148,27 +148,27 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
       {/* Messages */}
       <button
         onClick={onClose}
-        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+        className="flex items-center gap-3 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
       >
-        <MessageSquare className="h-5 w-5" />
+        <MessageSquare className="h-4 w-4" />
         Messages
       </button>
 
       {/* Notices */}
       <button
         onClick={onClose}
-        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+        className="flex items-center gap-3 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-4 w-4" />
         Notices
       </button>
 
       {/* Connections */}
       <button
         onClick={onClose}
-        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+        className="flex items-center gap-3 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
       >
-        <Users className="h-5 w-5" />
+        <Users className="h-4 w-4" />
         Connections
       </button>
 
@@ -178,11 +178,11 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
       {/* Theme Toggle */}
       <button
         onClick={toggleTheme}
-        className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+        className="flex items-center gap-3 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
       >
-        <span className="relative size-5 inline-flex items-center justify-center shrink-0">
-          <Sun className="absolute h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        <span className="relative size-4 inline-flex items-center justify-center shrink-0">
+          <Sun className="absolute h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </span>
         <span>
           {!mounted ? 'Theme' : theme === 'light' || theme === 'system' ? 'Light Mode' : 'Dark Mode'}
@@ -194,9 +194,9 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         <>
           <button
             onClick={() => setShowSignOutDialog(true)}
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-3 px-2.5 text-muted-foreground hover:text-foreground"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-4 w-4" />
             Sign Out
           </button>
 
