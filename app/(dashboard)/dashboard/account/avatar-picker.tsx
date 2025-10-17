@@ -45,33 +45,33 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
   };
 
   const handleSaveAvatar = async () => {
-    startTransition(async () => {
-      try {
-        const response = await fetch('/api/update-avatar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, avatarUrl: selectedAvatar }),
-        });
+    try {
+      const response = await fetch('/api/update-avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, avatarUrl: selectedAvatar }),
+      });
 
-        if (!response.ok) {
-          throw new Error('Failed to update avatar');
-        }
-
-        toast({
-          title: 'Success!',
-          description: 'Your avatar has been updated.',
-        });
-        
-        // Force a full page reload to clear cache
-        window.location.reload();
-      } catch (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to update avatar. Please try again.',
-          variant: 'destructive',
-        });
+      if (!response.ok) {
+        throw new Error('Failed to update avatar');
       }
-    });
+
+      toast({
+        title: 'Success!',
+        description: 'Your avatar has been updated. Refreshing...',
+      });
+      
+      // Wait for auth metadata update to propagate, then refresh
+      setTimeout(() => {
+        router.refresh();
+      }, 800);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update avatar. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const hasChanged = selectedAvatar !== (currentAvatar || '/avatars/default-avatar.svg');
