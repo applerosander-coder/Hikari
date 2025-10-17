@@ -56,52 +56,53 @@ export default async function NoticesPage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="container max-w-5xl mx-auto px-4 py-8">
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="relative">
-              <Clock className="h-6 w-6" />
+    <div className="w-full">
+      <div className="container max-w-5xl mx-auto px-0 sm:px-4 py-4 sm:py-8">
+        <Card className="border-0 sm:border rounded-none sm:rounded-lg shadow-none sm:shadow-sm">
+          <CardHeader className="border-b px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+              <div className="relative flex-shrink-0">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-black dark:bg-white rounded-full" />
+                )}
+              </div>
+              <span className="truncate">Notices</span>
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-black dark:bg-white rounded-full" />
+                <span className="text-xs sm:text-sm font-normal text-muted-foreground flex-shrink-0">
+                  ({unreadCount} unread)
+                </span>
               )}
-            </div>
-            Notices
-            {unreadCount > 0 && (
-              <span className="text-sm font-normal text-muted-foreground">
-                ({unreadCount} unread)
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {notifications.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              No notices yet
-            </div>
-          ) : (
-            <div className="divide-y">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`flex items-start gap-4 p-6 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
-                    !notification.read 
-                      ? 'bg-gray-50/50 dark:bg-gray-900/30 border-l-4 border-l-black dark:border-l-white' 
-                      : 'border-l-4 border-l-transparent'
-                  }`}
-                >
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {notifications.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                No notices yet
+              </div>
+            ) : (
+              <div className="divide-y">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-6 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
+                      !notification.read 
+                        ? 'bg-gray-50/50 dark:bg-gray-900/30 border-l-4 border-l-black dark:border-l-white' 
+                        : 'border-l-4 border-l-transparent'
+                    }`}
+                  >
                   {notification.type === 'outbid' && notification.image_url ? (
                     <Link 
                       href={`/auctions/${notification.auction_item_id}`}
                       className="flex-shrink-0"
                     >
-                      <div className="relative h-20 w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
                         <Image
                           src={notification.image_url}
                           alt="Auction item"
                           fill
                           className="object-cover"
-                          sizes="80px"
+                          sizes="(max-width: 640px) 64px, 80px"
                         />
                       </div>
                     </Link>
@@ -110,7 +111,7 @@ export default async function NoticesPage() {
                       href={`/profile/${notification.from_user.id}`}
                       className="flex-shrink-0"
                     >
-                      <Avatar className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
                         <AvatarImage 
                           src={notification.from_user.avatar_url || ''} 
                           alt={notification.from_user.full_name || 'User'} 
@@ -122,47 +123,47 @@ export default async function NoticesPage() {
                     </Link>
                   ) : (
                     <div className="flex-shrink-0">
-                      <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                         {notification.type === 'follow' ? (
-                          <UserPlus className="h-6 w-6" />
+                          <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
                         ) : notification.type === 'connection_request' ? (
-                          <Users className="h-6 w-6" />
+                          <Users className="h-5 w-5 sm:h-6 sm:w-6" />
                         ) : notification.type === 'outbid' ? (
-                          <Gavel className="h-6 w-6" />
+                          <Gavel className="h-5 w-5 sm:h-6 sm:w-6" />
                         ) : (
-                          <Clock className="h-6 w-6" />
+                          <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
                         )}
                       </div>
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 pr-2">
                     {notification.type === 'outbid' && notification.auction_item_id ? (
                       <Link href={`/auctions/${notification.auction_item_id}`} className="block hover:underline">
-                        <h3 className="font-semibold text-base mb-1">
+                        <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
                           {notification.title}
                         </h3>
                       </Link>
                     ) : (
-                      <h3 className="font-semibold text-base mb-1">
+                      <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
                         {notification.title}
                       </h3>
                     )}
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">
                       {notification.message}
                     </p>
                     {notification.type === 'outbid' && notification.auction_item_id && (
                       <Link 
                         href={`/auctions/${notification.auction_item_id}`}
-                        className="inline-flex items-center gap-1 text-sm font-medium hover:underline mt-2"
+                        className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium hover:underline mt-2"
                       >
                         View auction →
                       </Link>
                     )}
-                    <p className="text-xs text-muted-foreground mt-3">
+                    <p className="text-xs text-muted-foreground mt-2 sm:mt-3">
                       {new Date(notification.created_at).toLocaleString()}
                     </p>
                     {notification.type === 'connection_request' && notification.from_user && (
-                      <div className="mt-4">
+                      <div className="mt-3 sm:mt-4">
                         <ConnectionRequestActions
                           requesterId={notification.from_user.id}
                           requesterName={notification.from_user.full_name || 'Someone'}
@@ -171,7 +172,7 @@ export default async function NoticesPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 self-start">
                     {!notification.read && notification.type !== 'connection_request' && (
                       <MarkAsReadButton notificationId={notification.id} />
                     )}
@@ -182,6 +183,7 @@ export default async function NoticesPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
