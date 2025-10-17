@@ -28,8 +28,8 @@ export async function getUserReviews(userId: string) {
   const query = `
     SELECT 
       ur.*,
-      COALESCE(ur.reviewer_name, u.full_name) as reviewer_name,
-      COALESCE(ur.reviewer_avatar, u.avatar_url) as reviewer_avatar
+      COALESCE(u.full_name, ur.reviewer_name) as reviewer_name,
+      COALESCE(u.avatar_url, ur.reviewer_avatar) as reviewer_avatar
     FROM public.user_reviews ur
     LEFT JOIN public.users u ON ur.reviewer_id = u.id
     WHERE ur.user_id = $1
