@@ -10,25 +10,19 @@ import { toast } from 'sonner';
 interface ReviewFormProps {
   userId: string;
   currentUserId: string;
+  existingRating?: number;
+  existingComment?: string;
 }
 
-export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
-  const [rating, setRating] = useState(0);
+export function ReviewForm({ userId, currentUserId, existingRating = 0, existingComment = '' }: ReviewFormProps) {
+  const [rating, setRating] = useState(existingRating);
   const [hoveredRating, setHoveredRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState(existingComment);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingComment, setIsSavingComment] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (rating === 0) {
-      toast.error('Please select a rating');
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const submitReview = async (newRating: number, newComment?: string) => {
     try {
       const response = await fetch('/api/reviews', {
         method: 'POST',
@@ -36,8 +30,8 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
         body: JSON.stringify({
           user_id: userId,
           reviewer_id: currentUserId,
-          rating,
-          comment: comment.trim() || null,
+          rating: newRating,
+          comment: newComment?.trim() || null,
         }),
       });
 
@@ -47,19 +41,46 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
         throw new Error(data.error || 'Failed to submit review');
       }
 
-      toast.success('Review submitted successfully!');
-      setRating(0);
-      setComment('');
       router.refresh();
+      return true;
     } catch (error: any) {
-      toast.error(error.message || 'Failed to submit review');
-    } finally {
-      setIsSubmitting(false);
+      toast.error(error.message || 'Failed to save review');
+      return false;
     }
   };
 
+  const handleStarClick = async (star: number) => {
+    setRating(star);
+    setIsSubmitting(true);
+    
+    const success = await submitReview(star, comment);
+    if (success) {
+      toast.success('Rating saved!');
+    }
+    
+    setIsSubmitting(false);
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (rating === 0) {
+      toast.error('Please select a rating first');
+      return;
+    }
+
+    setIsSavingComment(true);
+    
+    const success = await submitReview(rating, comment);
+    if (success) {
+      toast.success('Comment saved!');
+    }
+    
+    setIsSavingComment(false);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium mb-2">Rating</label>
         <div className="flex gap-2">
@@ -67,10 +88,11 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
             <button
               key={star}
               type="button"
-              onClick={() => setRating(star)}
+              onClick={() => handleStarClick(star)}
               onMouseEnter={() => setHoveredRating(star)}
               onMouseLeave={() => setHoveredRating(0)}
-              className="transition-transform hover:scale-110"
+              className="transition-transform hover:scale-110 disabled:opacity-50"
+              disabled={isSubmitting}
             >
               <Star
                 className={`h-8 w-8 ${
@@ -82,25 +104,38 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
             </button>
           ))}
         </div>
+        {isSubmitting && (
+          <p className="text-xs text-muted-foreground mt-1">Saving...</p>
+        )}
       </div>
 
-      <div>
-        <label htmlFor="comment" className="block text-sm font-medium mb-2">
-          Comment (optional)
-        </label>
-        <Textarea
-          id="comment"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Share your experience..."
-          rows={4}
-          className="resize-none"
-        />
-      </div>
+      {rating > 0 && (
+        <form onSubmit={handleCommentSubmit}>
+          <div>
+            <label htmlFor="comment" className="block text-sm font-medium mb-2">
+              Comment (optional)
+            </label>
+            <Textarea
+              id="comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Share your experience..."
+              rows={4}
+              className="resize-none"
+              disabled={isSavingComment}
+            />
+          </div>
 
-      <Button type="submit" disabled={isSubmitting || rating === 0}>
-        {isSubmitting ? 'Submitting...' : 'Submit Review'}
-      </Button>
-    </form>
+          <Button 
+            type="submit" 
+            disabled={isSavingComment}
+            className="mt-2"
+            variant="outline"
+          >
+            {isSavingComment ? 'Saving...' : 'Save Comment'}
+          </Button>
+        </form>
+      )}
+    </div>
   );
 }
