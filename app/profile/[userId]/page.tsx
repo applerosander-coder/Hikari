@@ -6,7 +6,6 @@ import { notFound } from 'next/navigation';
 import { ReviewForm } from '@/components/review-form';
 import { ReviewList } from '@/components/review-list';
 import { UserAuctionList } from '@/components/user-auction-list';
-import { getUserReviews, getAverageRating, getUserProfile } from '@/lib/db-pg';
 
 interface UserProfilePageProps {
   params: {
@@ -41,23 +40,48 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     notFound();
   }
 
-  const isCurrentUser = currentUser?.id === params.userId;
-  
-  const authMetadata = isCurrentUser && currentUser ? {
-    full_name: currentUser.user_metadata?.full_name,
-    avatar_url: currentUser.user_metadata?.avatar_url
-  } : undefined;
+  // Fetch profile user data using Supabase
+  const { data: profileUser } = await supabase
+    .from('users')
+    .select('id, full_name, avatar_url')
+    .eq('id', params.userId)
+    .single();
 
-  const profileUser = await getUserProfile(params.userId, authMetadata);
+  // If user not found in public.users table, create from auth metadata
+  if (!profileUser && currentUser?.id === params.userId) {
+    await supabase
+      .from('users')
+      .upsert({
+        id: params.userId,
+        full_name: currentUser.user_metadata?.full_name || null,
+        avatar_url: currentUser.user_metadata?.avatar_url || null
+      });
+  }
 
   const totalAuctions = auctionsData?.length || 0;
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;
   const endedAuctions = auctionsData?.filter(a => a.status === 'ended').length || 0;
 
-  // Fetch reviews using direct PostgreSQL connection
-  const reviews = await getUserReviews(params.userId);
-  const ratingData = await getAverageRating(params.userId);
-  const averageRating = parseFloat(ratingData.average_rating) || 0;
+  // Fetch reviews using Supabase with JOIN to get current user data
+  const { data: reviewsData } = await supabase
+    .from('user_reviews')
+    .select(`
+      *,
+      reviewer:users!reviewer_id (
+        id,
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq('user_id', params.userId)
+    .order('created_at', { ascending: false });
+
+  const reviews = reviewsData || [];
+
+  // Calculate average rating
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+    : 0;
 
   const isOwnProfile = currentUser?.id === params.userId;
 
@@ -69,13 +93,13 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={profileUser.avatar_url || ''} alt={profileUser.full_name || 'User'} />
+                  <AvatarImage src={profileUser?.avatar_url || ''} alt={profileUser?.full_name || 'User'} />
                   <AvatarFallback className="text-4xl">
-                    {profileUser.full_name?.charAt(0).toUpperCase() || 'U'}
+                    {profileUser?.full_name?.charAt(0).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <CardTitle className="text-2xl">{profileUser.full_name || 'Anonymous User'}</CardTitle>
+              <CardTitle className="text-2xl">{profileUser?.full_name || 'Anonymous User'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
