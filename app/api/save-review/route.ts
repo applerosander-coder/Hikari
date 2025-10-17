@@ -35,27 +35,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sync current user profile from auth metadata to public.users table
-    // This ensures comments always display the latest name and avatar
-    const currentName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
-    const currentAvatar = user.user_metadata?.avatar_url || null;
-
     const { Pool } = require('pg');
     const pool = new Pool({ 
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
     });
     
-    // First, sync user profile to public.users
-    await pool.query(
-      `INSERT INTO users (id, full_name, avatar_url)
-       VALUES ($1, $2, $3)
-       ON CONFLICT (id) 
-       DO UPDATE SET full_name = $2, avatar_url = $3`,
-      [user.id, currentName, currentAvatar]
-    );
-    
-    // Then save the review
+    // Save the review (user profile is already in public.users from avatar/name updates)
     const insertResult = await pool.query(
       `INSERT INTO user_reviews (user_id, reviewer_id, rating, comment)
        VALUES ($1, $2, $3, $4)
