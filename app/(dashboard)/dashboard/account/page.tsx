@@ -18,9 +18,8 @@ import {
   getUserDetails,
   getSubscription
 } from '@/utils/supabase/queries';
-import { updateEmail } from '@/utils/auth-helpers/server';
+import { updateName, updateEmail } from '@/utils/auth-helpers/server';
 import { AvatarPicker } from './avatar-picker'; 
-import { NameForm } from './name-form';
 import { redirect } from 'next/navigation';
 
 export default async function AccountPage() {
@@ -50,7 +49,18 @@ export default async function AccountPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <NameForm defaultValue={user.user_metadata.full_name || ''} />
+            <form action={updateName} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  defaultValue={user.user_metadata.full_name || ''}
+                  placeholder="Enter your full name"
+                />
+              </div>
+              <Button type="submit">Update Name</Button>
+            </form>
             <form action={updateEmail} className="space-y-4 mt-6">
               <div className="space-y-2">
                 <Label htmlFor="newEmail">Email</Label>
