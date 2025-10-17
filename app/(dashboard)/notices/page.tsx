@@ -92,33 +92,20 @@ export default async function NoticesPage() {
                     }`}
                   >
                   {notification.type === 'outbid' && notification.image_url ? (
-                    <div className="flex flex-col gap-1 flex-shrink-0">
-                      <Link 
-                        href={`/auctions/${notification.auction_item_id}`}
-                        className="flex-shrink-0"
-                      >
-                        <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
-                          <Image
-                            src={notification.image_url}
-                            alt="Auction item"
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 640px) 64px, 80px"
-                          />
-                        </div>
-                      </Link>
-                      <div className="flex flex-col gap-0.5 w-16 sm:w-20">
-                        <Link 
-                          href={`/auctions/${notification.auction_item_id}`}
-                          className="text-[9px] sm:text-[10px] font-medium hover:underline truncate"
-                        >
-                          View auction
-                        </Link>
-                        <span className="text-[8px] sm:text-[9px] text-muted-foreground truncate">
-                          {new Date(notification.created_at).toLocaleDateString()} {new Date(notification.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                    <Link 
+                      href={`/auctions/${notification.auction_item_id}`}
+                      className="flex-shrink-0"
+                    >
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
+                        <Image
+                          src={notification.image_url}
+                          alt="Auction item"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 64px, 80px"
+                        />
                       </div>
-                    </div>
+                    </Link>
                   ) : notification.from_user ? (
                     <Link 
                       href={`/profile/${notification.from_user.id}`}
