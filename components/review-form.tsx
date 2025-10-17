@@ -31,6 +31,14 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
       return;
     }
 
+    const trimmedComment = comment.trim();
+    
+    // Don't save if both rating and comment are effectively empty
+    if (rating === 0 && !trimmedComment) {
+      toast.error('Please provide a rating or comment');
+      return;
+    }
+
     setIsSavingComment(true);
     
     try {
@@ -40,7 +48,7 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
         body: JSON.stringify({
           user_id: userId,
           rating: rating,
-          comment: comment.trim() || null
+          comment: trimmedComment || null
         }),
       });
 
@@ -50,7 +58,7 @@ export function ReviewForm({ userId, currentUserId }: ReviewFormProps) {
         throw new Error(data.error || 'Failed to save review');
       }
 
-      toast.success('Review saved!');
+      toast.success(trimmedComment ? 'Review saved!' : 'Rating saved!');
       setComment('');
       setRating(0);
       router.refresh();

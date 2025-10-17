@@ -20,7 +20,10 @@ interface ReviewListProps {
 }
 
 export function ReviewList({ reviews }: ReviewListProps) {
-  if (reviews.length === 0) {
+  // Filter out reviews with empty comments and only show those with actual text
+  const reviewsWithComments = reviews.filter(review => review.comment && review.comment.trim());
+
+  if (reviewsWithComments.length === 0) {
     return (
       <p className="text-center text-muted-foreground py-8">
         No comments yet. Be the first to leave a review!
@@ -30,7 +33,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
 
   return (
     <div className="space-y-4">
-      {reviews.map((review) => (
+      {reviewsWithComments.map((review) => (
         <div key={review.id} className="border rounded-lg p-4">
           <div className="flex items-start gap-3">
             <Avatar className="h-10 w-10">

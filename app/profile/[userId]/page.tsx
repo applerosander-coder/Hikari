@@ -90,7 +90,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   await pool.end();
 
-  // Calculate average rating
+  // Filter reviews to only include those with actual comments
+  const reviewsWithComments = reviews.filter(r => r.comment && r.comment.trim());
+
+  // Calculate average rating from ALL reviews (including rating-only ones)
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
     : 0;
@@ -128,7 +131,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {averageRating.toFixed(1)} ({reviews?.length || 0} {reviews?.length === 1 ? 'review' : 'reviews'})
+                  {averageRating.toFixed(1)} ({reviews?.length || 0} {reviews?.length === 1 ? 'rating' : 'ratings'})
                 </p>
               </div>
 
@@ -167,10 +170,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
           <Card>
             <CardHeader>
-              <CardTitle>Comments ({reviews?.length || 0})</CardTitle>
+              <CardTitle>Comments ({reviewsWithComments?.length || 0})</CardTitle>
             </CardHeader>
             <CardContent>
-              <ReviewList reviews={reviews || []} />
+              <ReviewList reviews={reviewsWithComments || []} />
             </CardContent>
           </Card>
 
