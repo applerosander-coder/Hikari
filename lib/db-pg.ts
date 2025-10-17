@@ -28,9 +28,9 @@ export async function saveUserReview(
 
 export async function getUserReviews(userId: string) {
   const query = `
-    SELECT ur.*, u.name as reviewer_name, u.avatar_url as reviewer_avatar
+    SELECT ur.*, u.full_name as reviewer_name, u.avatar_url as reviewer_avatar
     FROM public.user_reviews ur
-    JOIN public.users u ON ur.reviewer_id = u.id
+    LEFT JOIN public.users u ON ur.reviewer_id = u.id
     WHERE ur.user_id = $1
     ORDER BY ur.created_at DESC;
   `;

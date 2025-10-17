@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { ReviewForm } from '@/components/review-form';
 import { ReviewList } from '@/components/review-list';
 import { UserAuctionList } from '@/components/user-auction-list';
+import { getUserReviews, getAverageRating } from '@/lib/db-pg';
 
 interface UserProfilePageProps {
   params: {
@@ -38,22 +39,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;
   const endedAuctions = auctionsData?.filter(a => a.status === 'ended').length || 0;
 
-  const { data: reviews } = await supabase
-    .from('user_reviews')
-    .select(`
-      *,
-      reviewer:reviewer_id (
-        id,
-        full_name,
-        avatar_url
-      )
-    `)
-    .eq('user_id', params.userId)
-    .order('created_at', { ascending: false });
-
-  const averageRating = reviews && reviews.length > 0
-    ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
-    : 0;
+  // Fetch reviews using direct PostgreSQL connection
+  const reviews = await getUserReviews(params.userId);
+  const ratingData = await getAverageRating(params.userId);
+  const averageRating = parseFloat(ratingData.average_rating) || 0;
 
   const isOwnProfile = currentUser?.id === params.userId;
 
