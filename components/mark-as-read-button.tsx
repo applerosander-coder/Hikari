@@ -10,11 +10,12 @@ interface MarkAsReadButtonProps {
 }
 
 export function MarkAsReadButton({ notificationId }: MarkAsReadButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const router = useRouter();
 
   const handleMarkAsRead = async () => {
-    setIsLoading(true);
+    setIsChecked(true);
+    
     try {
       const response = await fetch('/api/notifications/mark-read', {
         method: 'POST',
@@ -25,25 +26,32 @@ export function MarkAsReadButton({ notificationId }: MarkAsReadButtonProps) {
       });
 
       if (response.ok) {
-        router.refresh();
+        setTimeout(() => {
+          router.refresh();
+        }, 400);
       }
     } catch (error) {
       console.error('Error marking as read:', error);
-    } finally {
-      setIsLoading(false);
+      setIsChecked(false);
     }
   };
 
   return (
     <Button
       onClick={handleMarkAsRead}
-      disabled={isLoading}
+      disabled={isChecked}
       size="icon"
       variant="outline"
-      className="h-7 w-7 sm:h-8 sm:w-8 rounded-md"
+      className="h-10 w-10 sm:h-12 sm:w-12 rounded-md border-2 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
       title="Mark as read"
     >
-      <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+      <Check 
+        className={`h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 ${
+          isChecked 
+            ? 'opacity-100 scale-100' 
+            : 'opacity-0 scale-0'
+        }`} 
+      />
     </Button>
   );
 }
