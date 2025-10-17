@@ -35,19 +35,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get reviewer's info - try database first, then auth metadata, then email
-    const reviewerInfo = await getUserInfo(user.id);
-    const reviewerName = reviewerInfo?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-    const reviewerAvatar = reviewerInfo?.avatar_url || user.user_metadata?.avatar_url || '/avatars/default-avatar.svg';
-
-    // Use direct PostgreSQL connection to bypass PostgREST cache issues
+    // Don't store reviewer info - it will be fetched dynamically via JOIN
     const result = await saveUserReview(
       user_id,
       user.id,
       rating,
-      comment || null,
-      reviewerName,
-      reviewerAvatar
+      comment || null
     );
 
     console.log('Review saved successfully:', result);
