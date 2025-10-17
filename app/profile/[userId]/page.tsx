@@ -112,7 +112,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   userId={params.userId} 
                   currentUserId={currentUser.id}
                   existingRating={existingReview?.rating}
-                  existingComment={existingReview?.comment || ''}
                 />
               </CardContent>
             </Card>

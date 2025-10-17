@@ -11,13 +11,12 @@ interface ReviewFormProps {
   userId: string;
   currentUserId: string;
   existingRating?: number;
-  existingComment?: string;
 }
 
-export function ReviewForm({ userId, currentUserId, existingRating = 0, existingComment = '' }: ReviewFormProps) {
+export function ReviewForm({ userId, currentUserId, existingRating = 0 }: ReviewFormProps) {
   const [rating, setRating] = useState(existingRating);
   const [hoveredRating, setHoveredRating] = useState(0);
-  const [comment, setComment] = useState(existingComment);
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingComment, setIsSavingComment] = useState(false);
   const router = useRouter();
