@@ -59,8 +59,10 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
 
       toast.success('Avatar updated successfully!');
       
-      // Refresh to show new avatar
-      router.refresh();
+      // Wait a moment for auth metadata to propagate, then refresh
+      setTimeout(() => {
+        router.refresh();
+      }, 500);
     } catch (error) {
       toast.error('Failed to update avatar. Please try again.');
     } finally {
