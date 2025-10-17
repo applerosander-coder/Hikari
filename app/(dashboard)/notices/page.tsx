@@ -91,52 +91,57 @@ export default async function NoticesPage() {
                         : 'border-l-4 border-l-transparent'
                     }`}
                   >
-                  {notification.type === 'outbid' && notification.image_url ? (
-                    <Link 
-                      href={`/auctions/${notification.auction_item_id}`}
-                      className="flex-shrink-0"
-                    >
-                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
-                        <Image
-                          src={notification.image_url}
-                          alt="Auction item"
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 64px, 80px"
-                        />
+                  <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                    {notification.type === 'outbid' && notification.image_url ? (
+                      <Link 
+                        href={`/auctions/${notification.auction_item_id}`}
+                        className="flex-shrink-0"
+                      >
+                        <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
+                          <Image
+                            src={notification.image_url}
+                            alt="Auction item"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 64px, 80px"
+                          />
+                        </div>
+                      </Link>
+                    ) : notification.from_user ? (
+                      <Link 
+                        href={`/profile/${notification.from_user.id}`}
+                        className="flex-shrink-0"
+                      >
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
+                          <AvatarImage 
+                            src={notification.from_user.avatar_url || ''} 
+                            alt={notification.from_user.full_name || 'User'} 
+                          />
+                          <AvatarFallback>
+                            {notification.from_user.full_name?.charAt(0).toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                    ) : (
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                          {notification.type === 'follow' ? (
+                            <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
+                          ) : notification.type === 'connection_request' ? (
+                            <Users className="h-5 w-5 sm:h-6 sm:w-6" />
+                          ) : notification.type === 'outbid' ? (
+                            <Gavel className="h-5 w-5 sm:h-6 sm:w-6" />
+                          ) : (
+                            <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
+                          )}
+                        </div>
                       </div>
-                    </Link>
-                  ) : notification.from_user ? (
-                    <Link 
-                      href={`/profile/${notification.from_user.id}`}
-                      className="flex-shrink-0"
-                    >
-                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
-                        <AvatarImage 
-                          src={notification.from_user.avatar_url || ''} 
-                          alt={notification.from_user.full_name || 'User'} 
-                        />
-                        <AvatarFallback>
-                          {notification.from_user.full_name?.charAt(0).toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
-                  ) : (
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        {notification.type === 'follow' ? (
-                          <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
-                        ) : notification.type === 'connection_request' ? (
-                          <Users className="h-5 w-5 sm:h-6 sm:w-6" />
-                        ) : notification.type === 'outbid' ? (
-                          <Gavel className="h-5 w-5 sm:h-6 sm:w-6" />
-                        ) : (
-                          <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0 pr-2">
+                    )}
+                    {!notification.read && notification.type !== 'connection_request' && (
+                      <MarkAsReadButton notificationId={notification.id} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
                     {notification.type === 'outbid' && notification.auction_item_id ? (
                       <Link href={`/auctions/${notification.auction_item_id}`} className="block hover:underline">
                         <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
@@ -170,11 +175,6 @@ export default async function NoticesPage() {
                           skipConfirmation={skipConfirmation}
                         />
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-shrink-0 self-start">
-                    {!notification.read && notification.type !== 'connection_request' && (
-                      <MarkAsReadButton notificationId={notification.id} />
                     )}
                   </div>
                 </div>

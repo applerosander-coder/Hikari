@@ -38,17 +38,12 @@ export function MarkAsReadButton({ notificationId }: MarkAsReadButtonProps) {
     <Button
       onClick={handleMarkAsRead}
       disabled={isLoading}
-      size="sm"
+      size="icon"
       variant="outline"
+      className="h-7 w-7 sm:h-8 sm:w-8 rounded-md"
+      title="Mark as read"
     >
-      {isLoading ? (
-        'Marking...'
-      ) : (
-        <>
-          <Check className="h-3 w-3 mr-1" />
-          Mark Read
-        </>
-      )}
+      <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
     </Button>
   );
 }
