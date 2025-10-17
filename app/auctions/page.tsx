@@ -1,14 +1,14 @@
 'use client';
 
-import { createClient } from '@/utils/supabase/client';
-import { AuctionCountdown } from '@/components/auction-countdown';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Hammer, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { AuctionCountdown } from '@/components/auction-countdown';
 
 export default function AuctionsPage() {
   const [auctions, setAuctions] = useState<any[]>([]);
@@ -16,19 +16,16 @@ export default function AuctionsPage() {
 
   useEffect(() => {
     async function fetchAuctions() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('auctions')
-        .select('*')
-        .in('status', ['active', 'upcoming'])
-        .order('end_date', { ascending: true });
-
-      if (error) {
+      try {
+        const response = await fetch('/api/auctions');
+        if (!response.ok) throw new Error('Failed to fetch auctions');
+        const data = await response.json();
+        setAuctions(data);
+      } catch (error) {
         console.error('Error fetching auctions:', error);
-      } else {
-        setAuctions(data || []);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     fetchAuctions();
@@ -98,6 +95,10 @@ function AuctionCard({ auction, isUpcoming = false }: { auction: any; isUpcoming
     currency: 'USD'
   });
 
+  const creator = auction.users;
+  const creatorName = creator?.full_name || 'Unknown';
+  const creatorAvatar = creator?.avatar_url;
+
   return (
     <Link href={`/auctions/${auction.id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
@@ -120,9 +121,18 @@ function AuctionCard({ auction, isUpcoming = false }: { auction: any; isUpcoming
         </div>
         
         <CardHeader>
-          <h3 className="font-semibold text-lg line-clamp-2">{auction.title}</h3>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6 flex-shrink-0">
+              <AvatarImage src={creatorAvatar || ''} alt={creatorName} />
+              <AvatarFallback className="text-xs">
+                {creatorName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <h3 className="font-semibold text-lg line-clamp-2">{auction.title}</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">{creatorName}</p>
           {auction.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">{auction.description}</p>
+            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{auction.description}</p>
           )}
         </CardHeader>
 
