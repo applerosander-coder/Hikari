@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { saveUserReview } from '@/lib/db-pg';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,40 +35,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use the PostgreSQL function we created
-    const { data, error } = await supabase.rpc('save_user_review', {
-      p_user_id: user_id,
-      p_reviewer_id: user.id,
-      p_rating: rating,
-      p_comment: comment || null
-    });
+    // Use direct PostgreSQL connection to bypass PostgREST cache issues
+    const result = await saveUserReview(
+      user_id,
+      user.id,
+      rating,
+      comment || null
+    );
 
-    if (error) {
-      console.error('RPC Error:', error);
-      
-      // If RPC fails, try direct table insert as fallback
-      const { error: insertError } = await supabase
-        .from('user_reviews')
-        .upsert({
-          user_id,
-          reviewer_id: user.id,
-          rating,
-          comment: comment || null,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,reviewer_id',
-        });
+    console.log('Review saved successfully:', result);
 
-      if (insertError) {
-        console.error('Insert Error:', insertError);
-        return NextResponse.json(
-          { error: 'Database error', details: insertError.message },
-          { status: 500 }
-        );
-      }
-    }
-
-    return NextResponse.json({ success: true, data }, { status: 200 });
+    return NextResponse.json({ success: true, data: result }, { status: 200 });
   } catch (error: any) {
     console.error('API Error:', error);
     return NextResponse.json(
