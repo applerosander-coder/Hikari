@@ -1,11 +1,12 @@
 import { createClient } from '@/utils/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, UserPlus } from 'lucide-react';
+import { Clock, UserPlus, Users } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { Pool } from 'pg';
 import { MarkAsReadButton } from '@/components/mark-as-read-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { ConnectionRequestActions } from '@/components/connection-request-actions';
 
 export default async function NoticesPage() {
   const supabase = await createClient();
@@ -19,6 +20,13 @@ export default async function NoticesPage() {
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
   });
+
+  // Fetch user preferences
+  const preferencesResult = await pool.query(
+    'SELECT skip_connection_confirmation FROM user_preferences WHERE user_id = $1',
+    [user.id]
+  );
+  const skipConfirmation = preferencesResult.rows[0]?.skip_connection_confirmation || false;
 
   // Fetch all notifications with user info, ordered by newest first
   const result = await pool.query(
@@ -90,6 +98,8 @@ export default async function NoticesPage() {
                     <div className="flex-shrink-0 mt-1">
                       {notification.type === 'follow' ? (
                         <UserPlus className="h-5 w-5 text-blue-500" />
+                      ) : notification.type === 'connection_request' ? (
+                        <Users className="h-5 w-5 text-purple-500" />
                       ) : (
                         <Clock className="h-5 w-5 text-gray-500" />
                       )}
@@ -105,8 +115,17 @@ export default async function NoticesPage() {
                     <p className="text-xs text-muted-foreground mt-2">
                       {new Date(notification.created_at).toLocaleString()}
                     </p>
+                    {notification.type === 'connection_request' && notification.from_user && (
+                      <div className="mt-3">
+                        <ConnectionRequestActions
+                          requesterId={notification.from_user.id}
+                          requesterName={notification.from_user.full_name || 'Someone'}
+                          skipConfirmation={skipConfirmation}
+                        />
+                      </div>
+                    )}
                   </div>
-                  {!notification.read && (
+                  {!notification.read && notification.type !== 'connection_request' && (
                     <MarkAsReadButton notificationId={notification.id} />
                   )}
                 </div>

@@ -16,6 +16,7 @@ interface ConnectButtonProps {
 
 export function ConnectButton({ userId }: ConnectButtonProps) {
   const [isConnected, setIsConnected] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
 
@@ -29,6 +30,7 @@ export function ConnectButton({ userId }: ConnectButtonProps) {
       if (response.ok) {
         const data = await response.json();
         setIsConnected(data.isConnected);
+        setIsPending(data.isPending);
       }
     } catch (error) {
       console.error('Error checking connect status:', error);
@@ -40,16 +42,17 @@ export function ConnectButton({ userId }: ConnectButtonProps) {
   const handleConnect = async () => {
     setIsLoading(true);
     try {
-      if (isConnected) {
-        // Disconnect
+      if (isConnected || isPending) {
+        // Disconnect or cancel request
         const response = await fetch(`/api/connect?connectedUserId=${userId}`, {
           method: 'DELETE',
         });
         if (response.ok) {
           setIsConnected(false);
+          setIsPending(false);
         }
       } else {
-        // Connect
+        // Send connection request
         const response = await fetch('/api/connect', {
           method: 'POST',
           headers: {
@@ -58,7 +61,7 @@ export function ConnectButton({ userId }: ConnectButtonProps) {
           body: JSON.stringify({ connectedUserId: userId }),
         });
         if (response.ok) {
-          setIsConnected(true);
+          setIsPending(true);
         }
       }
     } catch (error) {
@@ -92,6 +95,11 @@ export function ConnectButton({ userId }: ConnectButtonProps) {
               <>
                 <UserCheck className="h-4 w-4 mr-2" />
                 Connected
+              </>
+            ) : isPending ? (
+              <>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Pending
               </>
             ) : (
               <>
