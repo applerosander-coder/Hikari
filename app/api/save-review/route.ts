@@ -35,29 +35,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure user exists in public.users table - only insert if missing, preserve existing data
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id, full_name, avatar_url')
-      .eq('id', user.id)
-      .single();
+    // Sync current user profile from auth metadata to public.users table
+    // This ensures comments always display the latest name and avatar
+    const currentName = user.user_metadata?.full_name || user.email?.split('@')[0] || null;
+    const currentAvatar = user.user_metadata?.avatar_url || null;
 
-    if (!existingUser) {
-      // Only create if user doesn't exist - use auth metadata as fallback
-      await supabase.from('users').insert({
-        id: user.id,
-        full_name: user.user_metadata?.full_name || null,
-        avatar_url: user.user_metadata?.avatar_url || null
-      });
-    }
-
-    // Save review using PostgreSQL (Supabase's underlying database)
     const { Pool } = require('pg');
     const pool = new Pool({ 
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
     });
     
+    // First, sync user profile to public.users
+    await pool.query(
+      `INSERT INTO users (id, full_name, avatar_url)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (id) 
+       DO UPDATE SET full_name = $2, avatar_url = $3`,
+      [user.id, currentName, currentAvatar]
+    );
+    
+    // Then save the review
     const insertResult = await pool.query(
       `INSERT INTO user_reviews (user_id, reviewer_id, rating, comment)
        VALUES ($1, $2, $3, $4)
