@@ -21,11 +21,8 @@ export default async function ConnectionsPage() {
 
   // Fetch all accepted connections with user and auction statistics (bidirectional)
   const result = await pool.query(
-    `SELECT DISTINCT
-      CASE 
-        WHEN c.user_id = $1 THEN c.connected_user_id
-        ELSE c.user_id
-      END as connected_user_id,
+    `SELECT 
+      u.id as connected_user_id,
       u.full_name,
       u.avatar_url,
       COUNT(DISTINCT a.id) as total_auctions,
@@ -33,14 +30,16 @@ export default async function ConnectionsPage() {
       COUNT(DISTINCT CASE WHEN a.status = 'ended' THEN a.id END) as ended_auctions,
       MAX(c.created_at) as created_at
      FROM connects c
-     INNER JOIN users u ON u.id = CASE 
-       WHEN c.user_id = $1 THEN c.connected_user_id
-       ELSE c.user_id
-     END
+     INNER JOIN users u ON u.id = (
+       CASE 
+         WHEN c.user_id = $1 THEN c.connected_user_id
+         ELSE c.user_id
+       END
+     )
      LEFT JOIN auctions a ON a.created_by = u.id
      WHERE (c.user_id = $1 OR c.connected_user_id = $1) 
        AND c.status = 'accepted'
-     GROUP BY connected_user_id, u.full_name, u.avatar_url
+     GROUP BY u.id, u.full_name, u.avatar_url
      ORDER BY created_at DESC`,
     [user.id]
   );
