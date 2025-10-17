@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
 
@@ -37,7 +37,7 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
   const [selectedAvatar, setSelectedAvatar] = useState(
     currentAvatar || '/avatars/default-avatar.svg'
   );
-  const [isPending, startTransition] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
   const handleAvatarSelect = (avatarUrl: string) => {
@@ -45,6 +45,7 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
   };
 
   const handleSaveAvatar = async () => {
+    setIsSaving(true);
     try {
       const response = await fetch('/api/update-avatar', {
         method: 'POST',
@@ -56,21 +57,14 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
         throw new Error('Failed to update avatar');
       }
 
-      toast({
-        title: 'Success!',
-        description: 'Your avatar has been updated. Refreshing...',
-      });
+      toast.success('Avatar updated successfully!');
       
-      // Wait for auth metadata update to propagate, then refresh
-      setTimeout(() => {
-        router.refresh();
-      }, 800);
+      // Refresh to show new avatar
+      router.refresh();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update avatar. Please try again.',
-        variant: 'destructive',
-      });
+      toast.error('Failed to update avatar. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -109,7 +103,7 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
                 ? 'border-primary ring-2 ring-primary ring-offset-2'
                 : 'border-gray-300'
             }`}
-            disabled={isPending}
+            disabled={isSaving}
           >
             <Image
               src={avatarUrl}
@@ -132,10 +126,10 @@ export function AvatarPicker({ currentAvatar, userId }: AvatarPickerProps) {
       {hasChanged && (
         <Button
           onClick={handleSaveAvatar}
-          disabled={isPending}
+          disabled={isSaving}
           className="mt-4"
         >
-          {isPending ? 'Saving...' : 'Save Avatar'}
+          {isSaving ? 'Saving...' : 'Save Avatar'}
         </Button>
       )}
     </div>
