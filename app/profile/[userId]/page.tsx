@@ -40,14 +40,15 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     notFound();
   }
 
-  // Fetch profile user using PostgreSQL directly to get fresh avatar data
+  // Use PostgreSQL directly for all database queries to get fresh data
   const { Pool } = require('pg');
-  const profilePool = new Pool({ 
+  const pool = new Pool({ 
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
   });
   
-  const profileResult = await profilePool.query(
+  // Fetch profile user
+  const profileResult = await pool.query(
     'SELECT id, full_name, avatar_url FROM users WHERE id = $1',
     [params.userId]
   );
@@ -56,7 +57,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   // If user not found and it's current user, create profile
   if (!profileUser && currentUser?.id === params.userId) {
-    await profilePool.query(
+    await pool.query(
       `INSERT INTO users (id, full_name, avatar_url) 
        VALUES ($1, $2, $3)
        ON CONFLICT (id) DO NOTHING
@@ -69,26 +70,18 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     );
     
     // Fetch again after insert
-    const newResult = await profilePool.query(
+    const newResult = await pool.query(
       'SELECT id, full_name, avatar_url FROM users WHERE id = $1',
       [params.userId]
     );
     profileUser = newResult.rows[0];
   }
-  
-  await profilePool.end();
 
   const totalAuctions = auctionsData?.length || 0;
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;
   const endedAuctions = auctionsData?.filter(a => a.status === 'ended').length || 0;
 
-  // Fetch reviews using PostgreSQL with JOIN to get fresh reviewer data
-  const { Pool } = require('pg');
-  const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-  });
-  
+  // Fetch reviews with JOIN to get fresh reviewer data
   const reviewsResult = await pool.query(`
     SELECT 
       ur.*,
