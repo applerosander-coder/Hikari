@@ -20,6 +20,26 @@ export default async function LeaderboardPage() {
     .select('*')
     .order('end_date', { ascending: false });
 
+  // Fetch seller info for each auction
+  let auctionsWithSellers = allAuctions || [];
+  if (allAuctions && allAuctions.length > 0) {
+    const sellerIds = [...new Set(allAuctions.map(a => a.created_by).filter(Boolean))];
+    
+    if (sellerIds.length > 0) {
+      const { data: sellers } = await supabase
+        .from('users')
+        .select('id, avatar_url, full_name')
+        .in('id', sellerIds);
+      
+      const sellerMap = new Map(sellers?.map(s => [s.id, s]) || []);
+      
+      auctionsWithSellers = allAuctions.map(auction => ({
+        ...auction,
+        users: auction.created_by ? sellerMap.get(auction.created_by) : null
+      }));
+    }
+  }
+
   // Fetch all auction items with their auction data and bid information
   const { data: allItems } = await supabase
     .from('auction_items')
@@ -71,7 +91,7 @@ export default async function LeaderboardPage() {
   return (
     <LeaderboardClient
       items={itemsWithBidData}
-      auctions={allAuctions || []}
+      auctions={auctionsWithSellers}
     />
   );
 }

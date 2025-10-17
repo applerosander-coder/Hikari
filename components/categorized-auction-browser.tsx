@@ -240,10 +240,14 @@ export function CategorizedAuctionBrowser({
             All Auction items ({items.length + endedItems.length})
           </button>
 
-          {/* Individual Auction Pills (without avatars) */}
+          {/* Individual Auction Pills with Avatars */}
           {auctions.map((auction) => {
             const auctionItemCount = [...items, ...endedItems].filter(item => item.auction_id === auction.id).length;
             if (auctionItemCount === 0) return null;
+
+            const seller = auction.users;
+            const avatarUrl = seller?.avatar_url;
+            const sellerName = seller?.full_name || 'Unknown';
 
             return (
               <button
@@ -253,14 +257,20 @@ export function CategorizedAuctionBrowser({
                   setSelectedCategory('all');
                 }}
                 className={`
-                  flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
+                  flex-shrink-0 pl-2 pr-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2
                   ${selectedAuction === auction.id
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }
                 `}
               >
-                {auction.name} ({auctionItemCount})
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={avatarUrl || ''} alt={sellerName} />
+                  <AvatarFallback className="text-xs">
+                    {sellerName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span>{auction.name} ({auctionItemCount})</span>
               </button>
             );
           })}
