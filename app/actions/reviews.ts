@@ -19,26 +19,14 @@ export async function saveRating(userId: string, rating: number) {
     throw new Error('Rating must be between 1 and 5');
   }
 
-  // Check for existing review to preserve comment
-  const { data: existing } = await supabase
-    .from('user_reviews')
-    .select('comment')
-    .eq('user_id', userId)
-    .eq('reviewer_id', user.id)
-    .maybeSingle();
-
-  const { error } = await supabase
-    .from('user_reviews')
-    .upsert({
-      user_id: userId,
-      reviewer_id: user.id,
-      rating,
-      comment: existing?.comment || null,
-      updated_at: new Date().toISOString(),
-    }, {
-      onConflict: 'user_id,reviewer_id',
-      ignoreDuplicates: false,
-    });
+  // Use custom PostgreSQL function to bypass PostgREST cache
+  // @ts-ignore - Custom RPC function
+  const { data, error } = await supabase.rpc('save_user_review', {
+    p_user_id: userId,
+    p_reviewer_id: user.id,
+    p_rating: rating,
+    p_comment: null // Don't update comment when saving rating
+  });
 
   if (error) {
     console.error('Error saving rating:', error);
@@ -65,18 +53,14 @@ export async function saveComment(userId: string, rating: number, comment: strin
     throw new Error('Rating must be between 1 and 5');
   }
 
-  const { error } = await supabase
-    .from('user_reviews')
-    .upsert({
-      user_id: userId,
-      reviewer_id: user.id,
-      rating,
-      comment: comment.trim() || null,
-      updated_at: new Date().toISOString(),
-    }, {
-      onConflict: 'user_id,reviewer_id',
-      ignoreDuplicates: false,
-    });
+  // Use custom PostgreSQL function to bypass PostgREST cache
+  // @ts-ignore - Custom RPC function
+  const { data, error } = await supabase.rpc('save_user_review', {
+    p_user_id: userId,
+    p_reviewer_id: user.id,
+    p_rating: rating,
+    p_comment: comment.trim() || null
+  });
 
   if (error) {
     console.error('Error saving comment:', error);
