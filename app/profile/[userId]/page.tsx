@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { ReviewForm } from '@/components/review-form';
-import { ReviewList } from '@/components/review-list';
+import { PaginatedReviewList } from '@/components/paginated-review-list';
 import { UserAuctionList } from '@/components/user-auction-list';
 import { FollowButton } from '@/components/follow-button';
 import { ConnectButton } from '@/components/connect-button';
@@ -83,7 +83,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const activeAuctions = auctionsData?.filter(a => a.status === 'active').length || 0;
   const endedAuctions = auctionsData?.filter(a => a.status === 'ended').length || 0;
 
-  // Fetch reviews with JOIN to get fresh reviewer data
+  // Fetch initial 5 reviews with comments for pagination
   const reviewsResult = await pool.query(`
     SELECT 
       ur.*,
@@ -92,13 +92,26 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       u.avatar_url as reviewer_avatar_url
     FROM user_reviews ur
     LEFT JOIN users u ON ur.reviewer_id = u.id
-    WHERE ur.user_id = $1
+    WHERE ur.user_id = $1 AND ur.comment IS NOT NULL AND ur.comment != ''
     ORDER BY ur.created_at DESC
+    LIMIT 5
+  `, [params.userId]);
+
+  // Get total count of reviews with comments
+  const countResult = await pool.query(`
+    SELECT COUNT(*) as total
+    FROM user_reviews
+    WHERE user_id = $1 AND comment IS NOT NULL AND comment != ''
+  `, [params.userId]);
+
+  // Fetch all reviews for average rating calculation (including rating-only ones)
+  const allReviewsResult = await pool.query(`
+    SELECT rating FROM user_reviews WHERE user_id = $1
   `, [params.userId]);
   
   await pool.end();
   
-  const reviews = reviewsResult.rows.map(row => ({
+  const reviewsWithComments = reviewsResult.rows.map(row => ({
     ...row,
     reviewer: row.reviewer_id ? {
       id: row.reviewer_id,
@@ -107,13 +120,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     } : null
   }));
 
-  // Filter reviews to only include those with actual comments
-  const reviewsWithComments = reviews.filter(r => r.comment && r.comment.trim());
+  const totalCommentsCount = parseInt(countResult.rows[0]?.total || '0');
+  const allReviews = allReviewsResult.rows;
 
   // Calculate average rating from ALL reviews (including rating-only ones)
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+  const averageRating = allReviews.length > 0 
+    ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length 
     : 0;
+  const totalRatingsCount = allReviews.length;
 
   const isOwnProfile = currentUser?.id === params.userId;
 
@@ -148,7 +162,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {averageRating.toFixed(1)} ({reviews?.length || 0} {reviews?.length === 1 ? 'rating' : 'ratings'})
+                  {averageRating.toFixed(1)} ({totalRatingsCount} {totalRatingsCount === 1 ? 'rating' : 'ratings'})
                 </p>
               </div>
 
@@ -194,10 +208,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
           <Card>
             <CardHeader>
-              <CardTitle>Comments ({reviewsWithComments?.length || 0})</CardTitle>
+              <CardTitle>Comments ({totalCommentsCount})</CardTitle>
             </CardHeader>
             <CardContent>
-              <ReviewList reviews={reviewsWithComments || []} />
+              <PaginatedReviewList 
+                initialReviews={reviewsWithComments || []} 
+                userId={params.userId}
+                totalCount={totalCommentsCount}
+              />
             </CardContent>
           </Card>
 
