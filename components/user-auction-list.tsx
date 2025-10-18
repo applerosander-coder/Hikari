@@ -37,6 +37,19 @@ export function UserAuctionList({ auctions }: UserAuctionListProps) {
     );
   }
 
+  const getActualStatus = (auction: Auction): Auction['status'] => {
+    const now = new Date();
+    const endDate = new Date(auction.end_date);
+    
+    // If auction has ended (end_date is in the past), show as ended
+    if (endDate < now && auction.status !== 'draft' && auction.status !== 'cancelled') {
+      return 'ended';
+    }
+    
+    // Otherwise use the database status
+    return auction.status;
+  };
+
   const getStatusColor = (status: Auction['status']) => {
     switch (status) {
       case 'active':
@@ -56,32 +69,36 @@ export function UserAuctionList({ auctions }: UserAuctionListProps) {
 
   return (
     <div className="space-y-3">
-      {auctions.map((auction) => (
-        <div key={auction.id} className="border rounded-lg p-4">
-          <Link
-            href={`/auctions/${auction.id}`}
-            className="block hover:opacity-80 transition-opacity"
-          >
-            <div className="flex items-start justify-between gap-2 mb-3">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold mb-1 break-words">
-                  {auction.name || 'Untitled Auction'}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Created {formatDistanceToNow(new Date(auction.created_at), { addSuffix: true })}
-                </p>
+      {auctions.map((auction) => {
+        const actualStatus = getActualStatus(auction);
+        
+        return (
+          <div key={auction.id} className="border rounded-lg p-4">
+            <Link
+              href={`/auctions/${auction.id}`}
+              className="block hover:opacity-80 transition-opacity"
+            >
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 break-words">
+                    {auction.name || 'Untitled Auction'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Created {formatDistanceToNow(new Date(auction.created_at), { addSuffix: true })}
+                  </p>
+                </div>
+                <Badge className={getStatusColor(actualStatus)}>
+                  {actualStatus}
+                </Badge>
               </div>
-              <Badge className={getStatusColor(auction.status)}>
-                {auction.status}
-              </Badge>
-            </div>
-          </Link>
+            </Link>
 
-          {auction.auction_items && auction.auction_items.length > 0 && (
-            <AuctionItemCarousel items={auction.auction_items} auctionId={auction.id} />
-          )}
-        </div>
-      ))}
+            {auction.auction_items && auction.auction_items.length > 0 && (
+              <AuctionItemCarousel items={auction.auction_items} auctionId={auction.id} />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
