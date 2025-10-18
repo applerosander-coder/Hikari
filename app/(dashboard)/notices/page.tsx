@@ -2,7 +2,6 @@ import { createClient } from '@/utils/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, UserPlus, Users, Gavel } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import { Pool } from 'pg';
 import { MarkAsReadButton } from '@/components/mark-as-read-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
@@ -17,43 +16,56 @@ export default async function NoticesPage() {
     redirect('/signin');
   }
 
-  const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-  });
+  // Fetch user preferences using Supabase
+  const { data: preferences } = await supabase
+    .from('user_preferences')
+    .select('skip_connection_confirmation')
+    .eq('user_id', user.id)
+    .maybeSingle();
 
-  // Fetch user preferences
-  const preferencesResult = await pool.query(
-    'SELECT skip_connection_confirmation FROM user_preferences WHERE user_id = $1',
-    [user.id]
-  );
-  const skipConfirmation = preferencesResult.rows[0]?.skip_connection_confirmation || false;
+  const skipConfirmation = preferences?.skip_connection_confirmation || false;
 
-  // Fetch all notifications with user info, ordered by newest first
-  const result = await pool.query(
-    `SELECT 
-      n.*,
-      u.id as from_user_id,
-      u.full_name as from_user_name,
-      u.avatar_url as from_user_avatar
-     FROM notifications n
-     LEFT JOIN users u ON n.from_user_id = u.id
-     WHERE n.user_id = $1 
-     ORDER BY n.created_at DESC`,
-    [user.id]
-  );
+  // Fetch all notifications using Supabase
+  const { data: notifications, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
-  await pool.end();
+  if (error) {
+    console.error('Error fetching notifications:', error);
+  }
 
-  const notifications = result.rows.map(row => ({
-    ...row,
-    from_user: row.from_user_id ? {
-      id: row.from_user_id,
-      full_name: row.from_user_name,
-      avatar_url: row.from_user_avatar
-    } : null
+  const notificationList = notifications || [];
+
+  // Fetch user info for notifications with from_user_id
+  const fromUserIds = notificationList
+    .filter(n => n.from_user_id)
+    .map(n => n.from_user_id);
+
+  let usersMap: Record<string, { id: string; full_name: string; avatar_url: string }> = {};
+
+  if (fromUserIds.length > 0) {
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, full_name, avatar_url')
+      .in('id', fromUserIds);
+
+    if (users) {
+      usersMap = users.reduce((acc, user) => {
+        acc[user.id] = user;
+        return acc;
+      }, {} as Record<string, { id: string; full_name: string; avatar_url: string }>);
+    }
+  }
+
+  // Attach user info to notifications
+  const enrichedNotifications = notificationList.map(notification => ({
+    ...notification,
+    from_user: notification.from_user_id ? usersMap[notification.from_user_id] : null
   }));
-  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const unreadCount = enrichedNotifications.filter(n => !n.read).length;
 
   return (
     <div className="w-full">
@@ -76,13 +88,13 @@ export default async function NoticesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {notifications.length === 0 ? (
+            {enrichedNotifications.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 No notices yet
               </div>
             ) : (
               <div className="divide-y">
-                {notifications.map((notification) => (
+                {enrichedNotifications.map((notification) => (
                   <div
                     key={notification.id}
                     className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-6 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
