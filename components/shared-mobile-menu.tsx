@@ -119,31 +119,27 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         </Link>
       )}
 
-      {/* Navigation Items */}
-      {mobileNavItems.map((item, index) => {
+      {/* Navigation Items - First Group (Auctions, My Bids, Leaderboard, Seller) */}
+      {mobileNavItems.slice(0, 4).map((item, index) => {
         const IconComponent = item.icon;
         const isActive = pathname === item.href;
         
         return (
-          <React.Fragment key={index}>
-            <Link
-              href={item.disabled ? '#' : item.href}
-              onClick={() => !item.disabled && onClose()}
-              className={`flex items-center gap-3 px-2.5 transition-colors ${
-                isActive 
-                  ? 'text-foreground' 
-                  : item.disabled 
-                    ? 'text-muted-foreground/50 cursor-not-allowed' 
-                    : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <IconComponent className="h-4 w-4" />
-              {item.label}
-            </Link>
-            {item.label === 'Seller' && (
-              <div className="border-t border-border" />
-            )}
-          </React.Fragment>
+          <Link
+            key={index}
+            href={item.disabled ? '#' : item.href}
+            onClick={() => !item.disabled && onClose()}
+            className={`flex items-center gap-3 px-2.5 transition-colors ${
+              isActive 
+                ? 'text-foreground' 
+                : item.disabled 
+                  ? 'text-muted-foreground/50 cursor-not-allowed' 
+                  : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <IconComponent className="h-4 w-4" />
+            {item.label}
+          </Link>
         );
       })}
 
@@ -170,6 +166,33 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         <Users className="h-4 w-4" />
         Connections
       </button>
+
+      {/* Divider */}
+      <div className="border-t border-border" />
+
+      {/* Navigation Items - Second Group (Pricing, How it Works, Settings) */}
+      {mobileNavItems.slice(4).map((item, index) => {
+        const IconComponent = item.icon;
+        const isActive = pathname === item.href;
+        
+        return (
+          <Link
+            key={index}
+            href={item.disabled ? '#' : item.href}
+            onClick={() => !item.disabled && onClose()}
+            className={`flex items-center gap-3 px-2.5 transition-colors ${
+              isActive 
+                ? 'text-foreground' 
+                : item.disabled 
+                  ? 'text-muted-foreground/50 cursor-not-allowed' 
+                  : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <IconComponent className="h-4 w-4" />
+            {item.label}
+          </Link>
+        );
+      })}
 
       {/* Divider */}
       <div className="border-t border-border" />
