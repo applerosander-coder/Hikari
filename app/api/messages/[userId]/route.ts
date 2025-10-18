@@ -33,12 +33,10 @@ export async function GET(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    await (supabase as any)
-      .from('messages')
-      .update({ read: true })
-      .eq('receiver_id', user.id)
-      .eq('sender_id', otherUserId)
-      .eq('read', false);
+    await (supabase as any).rpc('mark_messages_read', {
+      p_sender_id: otherUserId,
+      p_receiver_id: user.id
+    });
 
     return NextResponse.json({ messages: messages || [] });
   } catch (error) {

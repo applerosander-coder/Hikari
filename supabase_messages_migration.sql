@@ -34,10 +34,10 @@ CREATE POLICY "Users can send messages"
   FOR INSERT
   WITH CHECK (auth.uid() = sender_id);
 
-CREATE POLICY "Users can update their own messages"
+CREATE POLICY "Users can update only their sent messages"
   ON public.messages
   FOR UPDATE
-  USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+  USING (auth.uid() = sender_id);
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_messages_updated_at()
@@ -58,3 +58,28 @@ CREATE TRIGGER messages_updated_at
 -- Grant permissions
 GRANT ALL ON public.messages TO authenticated;
 GRANT SELECT ON public.messages TO anon;
+
+-- RPC Function to mark messages as read (server-side only)
+-- This bypasses RLS to allow receivers to mark messages as read without full UPDATE access
+CREATE OR REPLACE FUNCTION mark_messages_read(p_sender_id uuid, p_receiver_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Verify the caller is the receiver
+  IF auth.uid() != p_receiver_id THEN
+    RAISE EXCEPTION 'Unauthorized: You can only mark your own received messages as read';
+  END IF;
+
+  -- Update only the read status
+  UPDATE public.messages
+  SET read = true, updated_at = now()
+  WHERE sender_id = p_sender_id
+    AND receiver_id = p_receiver_id
+    AND read = false;
+END;
+$$;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION mark_messages_read(uuid, uuid) TO authenticated;
