@@ -1,19 +1,12 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { Pool } from 'pg';
 
 export async function POST(request: NextRequest) {
-  const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-  });
-
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      await pool.end();
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -21,43 +14,45 @@ export async function POST(request: NextRequest) {
     const { receiver_id, content } = body;
 
     if (!receiver_id || !content || content.trim() === '') {
-      await pool.end();
       return NextResponse.json(
         { error: 'Receiver ID and content are required' },
         { status: 400 }
       );
     }
 
-    // Check if users are connected (bidirectional)
-    const connectionResult = await pool.query(
-      `SELECT status FROM connects
-       WHERE (user_id = $1 AND connected_user_id = $2)
-          OR (user_id = $2 AND connected_user_id = $1)
-       LIMIT 1`,
-      [user.id, receiver_id]
-    );
+    // Check if users are connected (bidirectional) using Supabase
+    const { data: connection, error: connectionError } = await supabase
+      .from('connects')
+      .select('status')
+      .or(`and(user_id.eq.${user.id},connected_user_id.eq.${receiver_id}),and(user_id.eq.${receiver_id},connected_user_id.eq.${user.id})`)
+      .limit(1)
+      .maybeSingle();
 
-    if (connectionResult.rows.length === 0 || connectionResult.rows[0].status !== 'accepted') {
-      await pool.end();
+    if (connectionError) {
+      console.error('Error checking connection:', connectionError);
+      return NextResponse.json(
+        { error: 'Failed to verify connection' },
+        { status: 500 }
+      );
+    }
+
+    if (!connection || connection.status !== 'accepted') {
       return NextResponse.json(
         { error: 'You can only message connected users' },
         { status: 403 }
       );
     }
 
-    // Insert message using Supabase for RLS
-    const { data: message, error } = await (supabase as any)
+    // Insert message using Supabase
+    const { data: message, error } = await supabase
       .from('messages')
       .insert({
         sender_id: user.id,
         receiver_id,
-        content: content.trim(),
-        read: false
+        content: content.trim()
       })
       .select()
       .single();
-
-    await pool.end();
 
     if (error) {
       console.error('Error sending message:', error);
@@ -66,7 +61,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message });
   } catch (error) {
-    await pool.end();
     console.error('Error in send message API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
