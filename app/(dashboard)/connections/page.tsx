@@ -28,6 +28,7 @@ export default async function ConnectionsPage() {
       COUNT(DISTINCT a.id) as total_auctions,
       COUNT(DISTINCT CASE WHEN a.status = 'active' THEN a.id END) as active_auctions,
       COUNT(DISTINCT CASE WHEN a.status = 'ended' THEN a.id END) as ended_auctions,
+      COUNT(DISTINCT CASE WHEN m.read = false AND m.sender_id = u.id AND m.receiver_id = $1 THEN m.id END) as unread_count,
       MAX(c.created_at) as created_at
      FROM connects c
      INNER JOIN users u ON u.id = (
@@ -37,6 +38,7 @@ export default async function ConnectionsPage() {
        END
      )
      LEFT JOIN auctions a ON a.created_by = u.id
+     LEFT JOIN messages m ON m.sender_id = u.id AND m.receiver_id = $1
      WHERE (c.user_id = $1 OR c.connected_user_id = $1) 
        AND c.status = 'accepted'
      GROUP BY u.id, u.full_name, u.avatar_url
@@ -53,7 +55,7 @@ export default async function ConnectionsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-purple-500" />
+            <Users className="h-5 w-5 text-black dark:text-white" />
             Connections {connections.length > 0 && `(${connections.length})`}
           </CardTitle>
         </CardHeader>
@@ -107,13 +109,18 @@ export default async function ConnectionsPage() {
                     </div>
                   </div>
 
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 relative">
                     <Link
                       href={`/chat/${connection.connected_user_id}`}
                       className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors inline-block"
                       title="Send Message"
                     >
                       <MessageCircle className="h-5 w-5 text-gray-500" />
+                      {connection.unread_count > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                          {connection.unread_count}
+                        </span>
+                      )}
                     </Link>
                   </div>
                 </div>
