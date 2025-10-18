@@ -11,7 +11,7 @@ interface Message {
   sender_id: string;
   receiver_id: string;
   content: string;
-  read: boolean;
+  read_at: string | null;
   created_at: string;
 }
 
