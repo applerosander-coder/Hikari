@@ -1,0 +1,69 @@
+Goal: On /notices, show pending connection requests with working Accept and Reject actions using Supabase (supabase-js) only (no PG pool). Enforce RLS. Update UI optimistically and handle realtime updates.
+
+0) Verify DB + RLS (adjust only if missing)
+
+Tables expected: invitations(sender_id, recipient_id, status, message, created_at, responded_at), connections(user_id, peer_id, created_at), notifications(user_id, kind, payload, created_at, read_at).
+
+RLS policies exist as previously specified. If a policy is missing, add it.
+
+1) Create API routes (Next.js, server, supabase-js only)
+
+Create:
+
+app/api/invitations/[id]/accept/route.ts
+
+app/api/invitations/[id]/reject/route.ts
+
+Accept route logic:
+
+Get user via createRouteHandlerClient({ cookies }). 401 if none.
+
+Fetch pending invite: id = params.id, recipient_id = user.id, status='pending'. 404 if not found.
+
+Update invite → status='accepted', responded_at=now().
+
+Insert connection (unordered pair upsert: (least, greatest)); ignore duplicate key.
+
+Insert notification to sender: { kind:'invite_accepted', payload:{ invitation_id, by:user.id } }.
+
+Return 200 JSON { ok:true }.
+
+Reject route logic:
+
+Same 1–2.
+
+Update invite → status='rejected', responded_at=now().
+
+Insert notification to sender: { kind:'invite_rejected', payload:{ invitation_id, by:user.id } }.
+
+Return 200.
+
+Implementation notes:
+
+Use only supabase.from(...).select/insert/update with the user’s JWT.
+
+Do not import or use any PG pool / pg.
+
+2) Wire UI actions on /notices
+
+File: app/(dashboard)/notices/page.tsx (or the component it renders)
+
+Fetch pending invites for current user:
+
+const { data: invites } = await supabase
+  .from("invitations")
+  .select("id, sender_id, message, created_at")
+  .eq("recipient_id", user.id)
+  .eq("status", "pending")
+  .order("created_at", { ascending: false });
+
+
+For each invite, show Accept and Reject buttons:
+
+On click, optimistically remove the card from local state.
+
+POST to /api/invitations/${id}/accept or /reject.
+
+If the request fails, restore the card and show an error toast.
+
+Batch-fetch sender profiles (avatar/name) once for all unique sender_ids to avoid N+1.

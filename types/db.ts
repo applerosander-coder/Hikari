@@ -797,6 +797,36 @@ export interface Database {
         }
         Relationships: []
       }
+      connection_invitations: {
+        Row: {
+          id: string
+          sender_id: string
+          recipient_id: string
+          status: 'pending' | 'accepted' | 'rejected'
+          message: string | null
+          created_at: string
+          responded_at: string | null
+        }
+        Insert: {
+          id?: string
+          sender_id: string
+          recipient_id: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          message?: string | null
+          created_at?: string
+          responded_at?: string | null
+        }
+        Update: {
+          id?: string
+          sender_id?: string
+          recipient_id?: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          message?: string | null
+          created_at?: string
+          responded_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

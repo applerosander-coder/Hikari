@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { connectedUserId } = await request.json();
+    const { connectedUserId, message } = await request.json();
 
     if (!connectedUserId) {
       return NextResponse.json({ error: 'Missing connectedUserId' }, { status: 400 });
@@ -27,40 +27,39 @@ export async function POST(request: Request) {
       .or(`and(user_id.eq.${user.id},peer_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},peer_id.eq.${user.id})`)
       .maybeSingle();
 
-    // Check if there's already a pending notification (request sent but not accepted)
-    const { data: pendingNotification } = await supabase
-      .from('notifications')
-      .select('id')
-      .eq('user_id', connectedUserId)
-      .eq('from_user_id', user.id)
-      .eq('type', 'connection_request')
-      .maybeSingle();
-
-    // Only create notification if no connection exists and no pending request
-    if (!existing && !pendingNotification) {
-      // Get requester's name for notification
-      const { data: requesterData } = await supabase
-        .from('users')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-      
-      const requesterName = requesterData?.full_name || 'Someone';
-
-      // Create notification for connection request
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: connectedUserId,
-          type: 'connection_request',
-          title: 'Connection Request',
-          message: `${requesterName} wants to connect with you`,
-          from_user_id: user.id,
-          read: false
-        });
+    if (existing) {
+      return NextResponse.json({ success: true, isConnected: true });
     }
 
-    return NextResponse.json({ success: true, isConnected: !!existing });
+    // Check if there's already a pending invitation
+    const { data: pendingInvitation } = await supabase
+      .from('connection_invitations')
+      .select('id')
+      .eq('sender_id', user.id)
+      .eq('recipient_id', connectedUserId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (pendingInvitation) {
+      return NextResponse.json({ success: true, isConnected: false, isPending: true });
+    }
+
+    // Create new connection invitation
+    const { error: inviteError } = await supabase
+      .from('connection_invitations')
+      .insert({
+        sender_id: user.id,
+        recipient_id: connectedUserId,
+        message: message || null,
+        status: 'pending',
+      });
+
+    if (inviteError) {
+      console.error('Error creating invitation:', inviteError);
+      return NextResponse.json({ error: 'Failed to send connection request' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, isConnected: false, isPending: true });
   } catch (error) {
     console.error('Error connecting with user:', error);
     return NextResponse.json({ error: 'Failed to connect with user' }, { status: 500 });
@@ -84,18 +83,16 @@ export async function DELETE(request: Request) {
     }
 
     // Delete connection (bidirectional)
-    // RLS ensures user can only delete their own connections
     await supabase
       .from('connections')
       .delete()
       .or(`and(user_id.eq.${user.id},peer_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},peer_id.eq.${user.id})`);
 
-    // Also delete any pending connection_request notifications
+    // Also delete any pending invitations (sent or received)
     await supabase
-      .from('notifications')
+      .from('connection_invitations')
       .delete()
-      .eq('type', 'connection_request')
-      .or(`and(user_id.eq.${user.id},from_user_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},from_user_id.eq.${user.id})`);
+      .or(`and(sender_id.eq.${user.id},recipient_id.eq.${connectedUserId}),and(sender_id.eq.${connectedUserId},recipient_id.eq.${user.id})`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -127,18 +124,27 @@ export async function GET(request: Request) {
       .or(`and(user_id.eq.${user.id},peer_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},peer_id.eq.${user.id})`)
       .maybeSingle();
 
-    // Check for pending notification (connection request sent)
-    const { data: pendingNotification } = await supabase
-      .from('notifications')
-      .select('id')
-      .eq('type', 'connection_request')
-      .or(`and(user_id.eq.${connectedUserId},from_user_id.eq.${user.id}),and(user_id.eq.${user.id},from_user_id.eq.${connectedUserId})`)
+    if (connection) {
+      return NextResponse.json({ 
+        isConnected: true,
+        status: 'accepted',
+        isPending: false,
+      });
+    }
+
+    // Check for pending invitation (sent or received)
+    const { data: pendingInvitation } = await supabase
+      .from('connection_invitations')
+      .select('id, sender_id')
+      .or(`and(sender_id.eq.${user.id},recipient_id.eq.${connectedUserId}),and(sender_id.eq.${connectedUserId},recipient_id.eq.${user.id})`)
+      .eq('status', 'pending')
       .maybeSingle();
 
     return NextResponse.json({ 
-      isConnected: !!connection,
-      status: connection ? 'accepted' : (pendingNotification ? 'pending' : null),
-      isPending: !!pendingNotification && !connection
+      isConnected: false,
+      status: pendingInvitation ? 'pending' : null,
+      isPending: !!pendingInvitation,
+      sentByMe: pendingInvitation?.sender_id === user.id,
     });
   } catch (error) {
     console.error('Error checking connect status:', error);
