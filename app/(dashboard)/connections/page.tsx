@@ -108,12 +108,13 @@ export default async function ConnectionsPage() {
                   </div>
 
                   <div className="flex-shrink-0">
-                    <button
-                      className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      title="Message (Coming Soon)"
+                    <Link
+                      href={`/chat/${connection.connected_user_id}`}
+                      className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors inline-block"
+                      title="Send Message"
                     >
                       <MessageCircle className="h-5 w-5 text-gray-500" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}
