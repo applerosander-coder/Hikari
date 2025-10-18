@@ -18,11 +18,6 @@ module.exports = {
     })
   ],
   darkMode: ['class'],
-  safelist: [
-    {
-      pattern: /gold:.*/,
-    },
-  ],
   theme: {
     container: {
       center: true,
@@ -162,11 +157,5 @@ module.exports = {
       }
     }
   },
-  plugins: [
-    require('tailwindcss-animate'), 
-    require('@tailwindcss/typography'),
-    function({ addVariant }) {
-      addVariant('gold', '.gold &');
-    }
-  ]
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')]
 };
