@@ -20,6 +20,7 @@ import {
 import { usePathname } from 'next/navigation';
 import { NavItem, iconComponents } from '@/config/dashboard';
 import { NotificationBadge } from '@/components/notification-badge';
+import { ConnectionsBadge } from '@/components/connections-badge';
 
 const Sidebar = ({ navConfig }: { navConfig: NavItem[] }) => {
   const pathname = usePathname();
@@ -41,6 +42,7 @@ const Sidebar = ({ navConfig }: { navConfig: NavItem[] }) => {
           const isActive = pathname === item.href;
           const isDisabled = item.disabled;
           const isNotices = item.label === 'Notices';
+          const isConnections = item.label === 'Connections';
           
           return (
             <Tooltip key={index}>
@@ -64,6 +66,8 @@ const Sidebar = ({ navConfig }: { navConfig: NavItem[] }) => {
                     >
                       {isNotices ? (
                         <NotificationBadge />
+                      ) : isConnections ? (
+                        <ConnectionsBadge />
                       ) : (
                         <IconComponent className="h-5 w-5" />
                       )}
