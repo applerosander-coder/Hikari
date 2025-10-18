@@ -18,9 +18,10 @@ You need to run the SQL migration in your Supabase dashboard.
    - Click "New Query" button
 
 4. **Copy and Paste the Migration**
-   - Open the file `supabase_messages_migration_fixed.sql` in this project
+   - Open the file `supabase_messages_migration_clean.sql` in this project
    - Copy ALL the SQL code
    - Paste it into the Supabase SQL Editor
+   - **This will delete any existing messages table and recreate it fresh**
 
 5. **Run the Migration**
    - Click the "Run" button (or press Ctrl+Enter / Cmd+Enter)
