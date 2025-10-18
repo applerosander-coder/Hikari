@@ -16,13 +16,27 @@ export default async function NoticesPage() {
     redirect('/signin');
   }
 
-  // Fetch pending connection invitations
-  const { data: invites } = await supabase
+  // Fetch pending connection invitations with nested sender data
+  const { data: invites, error: invitesError } = await supabase
     .from('connection_invitations')
-    .select('id, sender_id, message, created_at')
+    .select(`
+      id,
+      message,
+      status,
+      created_at,
+      sender:sender_id (
+        id,
+        full_name,
+        avatar_url
+      )
+    `)
     .eq('recipient_id', user.id)
     .eq('status', 'pending')
     .order('created_at', { ascending: false });
+
+  if (invitesError) {
+    console.error('Error fetching invitations:', invitesError);
+  }
 
   const invitationList = invites || [];
 
@@ -35,22 +49,21 @@ export default async function NoticesPage() {
 
   const notificationList = notifications || [];
 
-  // Get unique user IDs from invitations and notifications
-  const inviteSenderIds = invitationList.map(inv => inv.sender_id);
+  // Get unique user IDs from notifications only (invitations already have sender data)
   const notificationFromUserIds = notificationList
     .filter(n => n.from_user_id)
     .map(n => n.from_user_id);
 
-  const allUserIds = [...new Set([...inviteSenderIds, ...notificationFromUserIds])];
+  const uniqueUserIds = [...new Set(notificationFromUserIds)];
 
-  // Batch-fetch sender profiles to avoid N+1
+  // Batch-fetch notification user profiles
   let usersMap: Record<string, { id: string; full_name: string; avatar_url: string }> = {};
 
-  if (allUserIds.length > 0) {
+  if (uniqueUserIds.length > 0) {
     const { data: users } = await supabase
       .from('users')
       .select('id, full_name, avatar_url')
-      .in('id', allUserIds);
+      .in('id', uniqueUserIds);
 
     if (users) {
       usersMap = users.reduce((acc, user) => {
@@ -60,13 +73,6 @@ export default async function NoticesPage() {
     }
   }
 
-  // Attach sender info to invitations
-  const enrichedInvitations = invitationList.map(invitation => ({
-    ...invitation,
-    sender: usersMap[invitation.sender_id],
-    type: 'connection_invitation' as const,
-  }));
-
   // Attach user info to notifications
   const enrichedNotifications = notificationList.map(notification => ({
     ...notification,
@@ -75,7 +81,7 @@ export default async function NoticesPage() {
 
   // Combine invitations and notifications, sort by created_at
   const allItems = [
-    ...enrichedInvitations.map(inv => ({
+    ...invitationList.map(inv => ({
       ...inv,
       isInvitation: true,
       read: false, // Invitations are always unread until responded
@@ -118,25 +124,26 @@ export default async function NoticesPage() {
                 {allItems.map((item) => {
                   if ('isInvitation' in item && item.isInvitation && 'sender' in item) {
                     // Render connection invitation
-                    const invitation = item as typeof enrichedInvitations[number] & { read: boolean };
+                    const invitation = item as typeof invitationList[number] & { read: boolean };
+                    const sender = Array.isArray(invitation.sender) ? invitation.sender[0] : invitation.sender;
                     
                     return (
                       <div
                         key={invitation.id}
                         className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-6 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50 bg-gray-50/50 dark:bg-gray-900/30 border-l-4 border-l-black dark:border-l-white`}
                       >
-                        {invitation.sender && (
+                        {sender && (
                           <Link 
-                            href={`/profile/${invitation.sender.id}`}
+                            href={`/profile/${sender.id}`}
                             className="flex-shrink-0"
                           >
                             <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
                               <AvatarImage 
-                                src={invitation.sender.avatar_url || ''} 
-                                alt={invitation.sender.full_name || 'User'} 
+                                src={sender.avatar_url || '/default-avatar.png'} 
+                                alt={sender.full_name || 'User'} 
                               />
                               <AvatarFallback>
-                                {invitation.sender.full_name?.charAt(0).toUpperCase() || 'U'}
+                                {sender.full_name?.charAt(0).toUpperCase() || 'U'}
                               </AvatarFallback>
                             </Avatar>
                           </Link>
@@ -146,7 +153,7 @@ export default async function NoticesPage() {
                             Connection Request
                           </h3>
                           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">
-                            {invitation.sender?.full_name || 'Someone'} wants to connect with you
+                            {sender?.full_name || 'Someone'} wants to connect with you
                           </p>
                           {invitation.message && (
                             <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic">
@@ -159,7 +166,7 @@ export default async function NoticesPage() {
                           <div className="mt-3 sm:mt-4">
                             <InvitationActions
                               invitationId={invitation.id}
-                              senderName={invitation.sender?.full_name || 'Someone'}
+                              senderName={sender?.full_name || 'Someone'}
                             />
                           </div>
                         </div>
@@ -201,7 +208,7 @@ export default async function NoticesPage() {
                           >
                             <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
                               <AvatarImage 
-                                src={notification.from_user.avatar_url || ''} 
+                                src={notification.from_user.avatar_url || '/default-avatar.png'} 
                                 alt={notification.from_user.full_name || 'User'} 
                               />
                               <AvatarFallback>
