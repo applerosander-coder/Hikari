@@ -1,0 +1,90 @@
+Goal: Create a new public.connections table in Supabase for the social graph (user ↔ user relationships such as friends, followers, or auction connections).
+The table must support RLS, be fully integrated into Supabase migrations, and replace any references to connects.
+
+Tasks:
+
+Create the Supabase table public.connections
+
+Use this SQL in a new migration file:
+
+create table if not exists public.connections (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  peer_id uuid not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, peer_id)
+);
+
+-- Prevent self-connections
+alter table public.connections
+  add constraint if not exists connections_no_self check (user_id <> peer_id);
+
+-- Helpful indexes
+create index if not exists ix_connections_user on public.connections (user_id);
+create index if not exists ix_connections_peer on public.connections (peer_id);
+create unique index if not exists ux_connections_pair
+  on public.connections (least(user_id, peer_id), greatest(user_id, peer_id));
+
+
+Apply RLS & Policies
+
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on public.connections to anon, authenticated;
+
+alter table public.connections enable row level security;
+
+create policy if not exists "connections_read"
+on public.connections for select
+using ( auth.uid() = user_id or auth.uid() = peer_id );
+
+create policy if not exists "connections_insert"
+on public.connections for insert
+with check ( auth.uid() = user_id or auth.uid() = peer_id );
+
+create policy if not exists "connections_update"
+on public.connections for update
+using ( auth.uid() = user_id or auth.uid() = peer_id )
+with check ( auth.uid() = user_id or auth.uid() = peer_id );
+
+create policy if not exists "connections_delete"
+on public.connections for delete
+using ( auth.uid() = user_id or auth.uid() = peer_id );
+
+notify pgrst, 'reload schema';
+
+
+Add to migrations & push
+
+Save it as:
+supabase/migrations/<timestamp>__create_connections_table.sql
+
+Then run in terminal:
+
+supabase link --project-ref <YOUR_PROJECT_REF>
+supabase db pull
+supabase db push
+
+
+Refactor the app
+
+Replace all connects references in your repo with connections.
+
+Update any Supabase queries, types, and API routes accordingly.
+
+Example Supabase query:
+
+const { data, error } = await supabase
+  .from("connections")
+  .select("*")
+  .or(`user_id.eq.${user.id},peer_id.eq.${user.id}`);
+
+
+Verification
+
+In Supabase → Table Editor, confirm you now see connections.
+
+Confirm RLS is enabled and the policies exist.
+
+Run /api/messages and /connections routes again — the 42P01 error should disappear.
+
+The new table should integrate seamlessly with the rest of your app.

@@ -710,32 +710,41 @@ export interface Database {
         }
         Relationships: []
       }
-      connects: {
+      connections: {
         Row: {
           id: string
           user_id: string
-          connected_user_id: string
-          status: string
+          peer_id: string
           created_at: string
-          updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          connected_user_id: string
-          status?: string
+          peer_id: string
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          connected_user_id?: string
-          status?: string
+          peer_id?: string
           created_at?: string
-          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "connections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connections_peer_id_fkey"
+            columns: ["peer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       messages: {
         Row: {
