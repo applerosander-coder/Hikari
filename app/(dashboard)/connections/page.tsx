@@ -22,30 +22,57 @@ export default async function ConnectionsPage() {
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
     });
 
-    // Fetch all accepted connections
-    // Use DISTINCT ON to ensure each connected user appears only once
+    // Fetch all accepted connections with user stats
+    // Use subquery to get auction counts per user, then join with connections
     const connectsResult = await pool.query(
-      `SELECT DISTINCT ON (u.id)
-              CASE WHEN c.user_id = $1 THEN c.connected_user_id ELSE c.user_id END as connected_user_id,
-              u.full_name, 
-              u.avatar_url,
-              c.created_at,
-              COUNT(DISTINCT a.id) as total_auctions,
-              COUNT(DISTINCT CASE WHEN a.status = 'active' THEN a.id END) as active_auctions,
-              COUNT(DISTINCT CASE WHEN a.status = 'ended' THEN a.id END) as ended_auctions,
-              COUNT(DISTINCT CASE WHEN m.read_at IS NULL THEN m.id END) as unread_count
-       FROM connects c
-       INNER JOIN users u ON (
-         CASE 
-           WHEN c.user_id = $1 THEN c.connected_user_id 
-           ELSE c.user_id 
-         END = u.id
+      `WITH connection_users AS (
+         SELECT DISTINCT ON (u.id)
+           c.id as connect_id,
+           u.id as connected_user_id,
+           u.full_name,
+           u.avatar_url,
+           c.created_at
+         FROM connects c
+         INNER JOIN users u ON (
+           CASE 
+             WHEN c.user_id = $1 THEN c.connected_user_id 
+             ELSE c.user_id 
+           END = u.id
+         )
+         WHERE (c.user_id = $1 OR c.connected_user_id = $1) 
+           AND c.status = 'accepted'
+         ORDER BY u.id, c.created_at DESC
+       ),
+       auction_stats AS (
+         SELECT 
+           created_by,
+           COUNT(*) as total_auctions,
+           COUNT(*) FILTER (WHERE status = 'active') as active_auctions,
+           COUNT(*) FILTER (WHERE status = 'ended') as ended_auctions
+         FROM auctions
+         GROUP BY created_by
+       ),
+       message_stats AS (
+         SELECT 
+           sender_id,
+           COUNT(*) as unread_count
+         FROM messages
+         WHERE receiver_id = $1 AND read_at IS NULL
+         GROUP BY sender_id
        )
-       LEFT JOIN auctions a ON a.created_by = u.id
-       LEFT JOIN messages m ON (m.sender_id = u.id AND m.receiver_id = $1 AND m.read_at IS NULL)
-       WHERE ((c.user_id = $1 OR c.connected_user_id = $1) AND c.status = 'accepted')
-       GROUP BY u.id, u.full_name, u.avatar_url, c.user_id, c.connected_user_id, c.created_at
-       ORDER BY u.id, c.created_at DESC`,
+       SELECT 
+         cu.connected_user_id,
+         cu.full_name,
+         cu.avatar_url,
+         cu.created_at,
+         COALESCE(ast.total_auctions, 0) as total_auctions,
+         COALESCE(ast.active_auctions, 0) as active_auctions,
+         COALESCE(ast.ended_auctions, 0) as ended_auctions,
+         COALESCE(ms.unread_count, 0) as unread_count
+       FROM connection_users cu
+       LEFT JOIN auction_stats ast ON ast.created_by = cu.connected_user_id
+       LEFT JOIN message_stats ms ON ms.sender_id = cu.connected_user_id
+       ORDER BY cu.created_at DESC`,
       [user.id]
     );
 
