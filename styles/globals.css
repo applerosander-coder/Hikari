@@ -66,21 +66,21 @@
 
   .royal-gold {
     --background: 0 0% 25%;
-    --foreground: 0 0% 85%;
+    --foreground: 28 73% 83%;
     --card: 0 0% 25%;
-    --card-foreground: 0 0% 85%;
+    --card-foreground: 28 73% 83%;
     --popover: 0 0% 25%;
-    --popover-foreground: 0 0% 85%;
+    --popover-foreground: 28 73% 83%;
     --primary: 36 46% 50%;
-    --primary-foreground: 0 0% 85%;
+    --primary-foreground: 28 73% 83%;
     --secondary: 36 46% 35%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary-foreground: 28 73% 83%;
     --muted: 36 46% 25%;
-    --muted-foreground: 0 0% 65%;
+    --muted-foreground: 28 50% 65%;
     --accent: 36 46% 50%;
-    --accent-foreground: 0 0% 85%;
+    --accent-foreground: 28 73% 83%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 85%;
+    --destructive-foreground: 28 73% 83%;
     --border: 36 46% 25%;
     --input: 36 46% 25%;
     --ring: 36 46% 50%;
