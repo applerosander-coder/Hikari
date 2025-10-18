@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
-import { Pool } from 'pg';
 
 export async function POST(request: Request) {
   try {
@@ -21,63 +20,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cannot connect with yourself' }, { status: 400 });
     }
 
-    const pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-    });
+    // Check if connection already exists (bidirectional check)
+    const { data: existing } = await supabase
+      .from('connections')
+      .select('id')
+      .or(`and(user_id.eq.${user.id},peer_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},peer_id.eq.${user.id})`)
+      .maybeSingle();
 
-    // Check if connection request already exists
-    const existingResult = await pool.query(
-      'SELECT id, status FROM connects WHERE user_id = $1 AND connected_user_id = $2',
-      [user.id, connectedUserId]
-    );
+    // Check if there's already a pending notification (request sent but not accepted)
+    const { data: pendingNotification } = await supabase
+      .from('notifications')
+      .select('id')
+      .eq('user_id', connectedUserId)
+      .eq('from_user_id', user.id)
+      .eq('type', 'connection_request')
+      .maybeSingle();
 
-    const existingConnection = existingResult.rows[0];
-
-    // Only create/update request and notification if it's new or was rejected
-    if (!existingConnection || existingConnection.status === 'rejected') {
-      if (existingConnection?.status === 'rejected') {
-        // Update rejected request back to pending
-        await pool.query(
-          `UPDATE connects 
-           SET status = 'pending', created_at = NOW() 
-           WHERE user_id = $1 AND connected_user_id = $2`,
-          [user.id, connectedUserId]
-        );
-      } else {
-        // Insert new connection request with pending status
-        await pool.query(
-          `INSERT INTO connects (user_id, connected_user_id, status) 
-           VALUES ($1, $2, 'pending')`,
-          [user.id, connectedUserId]
-        );
-      }
-
+    // Only create notification if no connection exists and no pending request
+    if (!existing && !pendingNotification) {
       // Get requester's name for notification
-      const requesterResult = await pool.query(
-        'SELECT full_name FROM users WHERE id = $1',
-        [user.id]
-      );
-      const requesterName = requesterResult.rows[0]?.full_name || 'Someone';
+      const { data: requesterData } = await supabase
+        .from('users')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      
+      const requesterName = requesterData?.full_name || 'Someone';
 
-      // Create notification for the user being requested to connect
-      await pool.query(
-        `INSERT INTO notifications (user_id, type, title, message, from_user_id, read) 
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [
-          connectedUserId,
-          'connection_request',
-          'Connection Request',
-          `${requesterName} wants to connect with you`,
-          user.id,
-          false
-        ]
-      );
+      // Create notification for connection request
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: connectedUserId,
+          type: 'connection_request',
+          title: 'Connection Request',
+          message: `${requesterName} wants to connect with you`,
+          from_user_id: user.id,
+          read: false
+        });
     }
 
-    await pool.end();
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, isConnected: !!existing });
   } catch (error) {
     console.error('Error connecting with user:', error);
     return NextResponse.json({ error: 'Failed to connect with user' }, { status: 500 });
@@ -100,28 +83,19 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Missing connectedUserId' }, { status: 400 });
     }
 
-    const pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-    });
-
-    // Delete connection in both directions for bidirectional relationship
-    await pool.query(
-      `DELETE FROM connects 
-       WHERE (user_id = $1 AND connected_user_id = $2) 
-       OR (user_id = $2 AND connected_user_id = $1)`,
-      [user.id, connectedUserId]
-    );
+    // Delete connection (bidirectional)
+    // RLS ensures user can only delete their own connections
+    await supabase
+      .from('connections')
+      .delete()
+      .or(`and(user_id.eq.${user.id},peer_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},peer_id.eq.${user.id})`);
 
     // Also delete any pending connection_request notifications
-    await pool.query(
-      `DELETE FROM notifications 
-       WHERE type = 'connection_request' 
-       AND ((user_id = $1 AND from_user_id = $2) OR (user_id = $2 AND from_user_id = $1))`,
-      [user.id, connectedUserId]
-    );
-
-    await pool.end();
+    await supabase
+      .from('notifications')
+      .delete()
+      .eq('type', 'connection_request')
+      .or(`and(user_id.eq.${user.id},from_user_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},from_user_id.eq.${user.id})`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -146,28 +120,25 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Missing connectedUserId' }, { status: 400 });
     }
 
-    const pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-    });
+    // Check for connection (bidirectional)
+    const { data: connection } = await supabase
+      .from('connections')
+      .select('id')
+      .or(`and(user_id.eq.${user.id},peer_id.eq.${connectedUserId}),and(user_id.eq.${connectedUserId},peer_id.eq.${user.id})`)
+      .maybeSingle();
 
-    // Check for connection in both directions
-    const result = await pool.query(
-      `SELECT status FROM connects 
-       WHERE (user_id = $1 AND connected_user_id = $2) 
-       OR (user_id = $2 AND connected_user_id = $1)
-       ORDER BY created_at DESC
-       LIMIT 1`,
-      [user.id, connectedUserId]
-    );
+    // Check for pending notification (connection request sent)
+    const { data: pendingNotification } = await supabase
+      .from('notifications')
+      .select('id')
+      .eq('type', 'connection_request')
+      .or(`and(user_id.eq.${connectedUserId},from_user_id.eq.${user.id}),and(user_id.eq.${user.id},from_user_id.eq.${connectedUserId})`)
+      .maybeSingle();
 
-    await pool.end();
-
-    const connection = result.rows[0];
     return NextResponse.json({ 
-      isConnected: connection?.status === 'accepted',
-      status: connection?.status || null,
-      isPending: connection?.status === 'pending'
+      isConnected: !!connection,
+      status: connection ? 'accepted' : (pendingNotification ? 'pending' : null),
+      isPending: !!pendingNotification && !connection
     });
   } catch (error) {
     console.error('Error checking connect status:', error);

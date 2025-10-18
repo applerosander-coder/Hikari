@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { Pool } from 'pg';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -24,35 +23,27 @@ export default async function ChatPage({ params }: ChatPageProps) {
     redirect('/connections');
   }
 
-  const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-  });
+  // Check if connection exists using Supabase
+  const { data: connection } = await supabase
+    .from('connections')
+    .select('id')
+    .or(`and(user_id.eq.${user.id},peer_id.eq.${params.userId}),and(user_id.eq.${params.userId},peer_id.eq.${user.id})`)
+    .maybeSingle();
 
-  const connectionResult = await pool.query(
-    `SELECT status FROM connects
-     WHERE (user_id = $1 AND connected_user_id = $2)
-        OR (user_id = $2 AND connected_user_id = $1)`,
-    [user.id, params.userId]
-  );
-
-  if (connectionResult.rows.length === 0 || connectionResult.rows[0].status !== 'accepted') {
-    await pool.end();
+  if (!connection) {
     redirect('/connections');
   }
 
-  const userResult = await pool.query(
-    'SELECT id, full_name, avatar_url FROM users WHERE id = $1',
-    [params.userId]
-  );
+  // Get other user details
+  const { data: otherUser } = await supabase
+    .from('users')
+    .select('id, full_name, avatar_url')
+    .eq('id', params.userId)
+    .single();
 
-  await pool.end();
-
-  if (userResult.rows.length === 0) {
+  if (!otherUser) {
     redirect('/connections');
   }
-
-  const otherUser = userResult.rows[0];
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8">
@@ -77,7 +68,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
             currentUserId={user.id}
             otherUserId={params.userId}
             otherUserName={otherUser.full_name || 'User'}
-            otherUserAvatar={otherUser.avatar_url}
+            otherUserAvatar={otherUser.avatar_url || ''}
           />
         </CardContent>
       </Card>

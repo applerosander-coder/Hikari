@@ -17,40 +17,69 @@ export default async function ConnectionsPage() {
   let pool: Pool | null = null;
 
   try {
+    // Fetch all connections using Supabase
+    const { data: connections, error: connectionsError } = await supabase
+      .from('connections')
+      .select('id, user_id, peer_id, created_at')
+      .or(`user_id.eq.${user.id},peer_id.eq.${user.id}`);
+
+    if (connectionsError) {
+      console.error('Error fetching connections:', connectionsError);
+      throw connectionsError;
+    }
+
+    if (!connections || connections.length === 0) {
+      return (
+        <div className="w-full max-w-4xl mx-auto px-4 py-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-black dark:text-white" />
+                Connections
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                No connections yet
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    // Get the peer user IDs (the user who is NOT the current user)
+    const peerIds = connections.map(conn => 
+      conn.user_id === user.id ? conn.peer_id : conn.user_id
+    );
+
+    // Use PostgreSQL pool for complex query with auctions and messages (hybrid approach)
     pool = new Pool({ 
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
     });
 
-    // Fetch all accepted connections
-    // Use DISTINCT ON to ensure each connected user appears only once
-    const connectsResult = await pool.query(
-      `SELECT DISTINCT ON (u.id)
-              CASE WHEN c.user_id = $1 THEN c.connected_user_id ELSE c.user_id END as connected_user_id,
-              u.full_name, 
-              u.avatar_url,
-              c.created_at,
-              COUNT(DISTINCT a.id) as total_auctions,
-              COUNT(DISTINCT CASE WHEN a.status = 'active' THEN a.id END) as active_auctions,
-              COUNT(DISTINCT CASE WHEN a.status = 'ended' THEN a.id END) as ended_auctions,
-              COUNT(DISTINCT CASE WHEN m.read_at IS NULL THEN m.id END) as unread_count
-       FROM connects c
-       INNER JOIN users u ON (
-         CASE 
-           WHEN c.user_id = $1 THEN c.connected_user_id 
-           ELSE c.user_id 
-         END = u.id
-       )
+    // Fetch user details, auction stats, and unread counts for all connections
+    const result = await pool.query(
+      `SELECT 
+        u.id as peer_id,
+        u.full_name, 
+        u.avatar_url,
+        COUNT(DISTINCT a.id) as total_auctions,
+        COUNT(DISTINCT CASE WHEN a.status = 'active' THEN a.id END) as active_auctions,
+        COUNT(DISTINCT CASE WHEN a.status = 'ended' THEN a.id END) as ended_auctions,
+        COUNT(DISTINCT CASE WHEN m.read_at IS NULL THEN m.id END) as unread_count
+       FROM users u
        LEFT JOIN auctions a ON a.created_by = u.id
        LEFT JOIN messages m ON (m.sender_id = u.id AND m.receiver_id = $1 AND m.read_at IS NULL)
-       WHERE ((c.user_id = $1 OR c.connected_user_id = $1) AND c.status = 'accepted')
-       GROUP BY u.id, u.full_name, u.avatar_url, c.user_id, c.connected_user_id, c.created_at
-       ORDER BY u.id, c.created_at DESC`,
-      [user.id]
+       WHERE u.id = ANY($2::uuid[])
+       GROUP BY u.id, u.full_name, u.avatar_url
+       ORDER BY u.full_name ASC`,
+      [user.id, peerIds]
     );
 
-    const connections = connectsResult.rows.map(row => ({
-      connected_user_id: row.connected_user_id,
+    const connectionsWithDetails = result.rows.map(row => ({
+      peer_id: row.peer_id,
       full_name: row.full_name,
       avatar_url: row.avatar_url,
       total_auctions: parseInt(row.total_auctions, 10),
@@ -65,23 +94,23 @@ export default async function ConnectionsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-black dark:text-white" />
-              Connections {connections.length > 0 && `(${connections.length})`}
+              Connections ({connectionsWithDetails.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {connections.length === 0 ? (
+            {connectionsWithDetails.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 No connections yet
               </div>
             ) : (
               <div className="space-y-3">
-                {connections.map((connection) => (
+                {connectionsWithDetails.map((connection) => (
                   <div
-                    key={connection.connected_user_id}
+                    key={connection.peer_id}
                     className="flex items-center gap-4 p-4 rounded-lg border bg-gray-50 dark:bg-gray-900/20"
                   >
                     <Link 
-                      href={`/profile/${connection.connected_user_id}`}
+                      href={`/profile/${connection.peer_id}`}
                       className="flex-shrink-0"
                     >
                       <Avatar className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity">
@@ -97,7 +126,7 @@ export default async function ConnectionsPage() {
                     
                     <div className="flex-1 min-w-0">
                       <Link 
-                        href={`/profile/${connection.connected_user_id}`}
+                        href={`/profile/${connection.peer_id}`}
                         className="hover:underline"
                       >
                         <h3 className="font-semibold text-base">
@@ -120,7 +149,7 @@ export default async function ConnectionsPage() {
 
                     <div className="flex-shrink-0 relative">
                       <Link
-                        href={`/chat/${connection.connected_user_id}`}
+                        href={`/chat/${connection.peer_id}`}
                         className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors inline-block"
                         title="Send Message"
                       >
