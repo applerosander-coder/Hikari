@@ -190,6 +190,7 @@ export default async function NoticesPage() {
                                 fill
                                 className="object-cover"
                                 sizes="(max-width: 640px) 64px, 80px"
+                                unoptimized
                               />
                             </div>
                           </Link>
