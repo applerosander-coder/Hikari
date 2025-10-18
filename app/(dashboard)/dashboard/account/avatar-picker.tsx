@@ -26,6 +26,9 @@ const AVATAR_OPTIONS = [
   '/avatars/avatar-14.jpg',
   '/avatars/avatar-15.jpg',
   '/avatars/avatar-16.jpg',
+  '/avatars/avatar-17.jpg',
+  '/avatars/avatar-18.jpg',
+  '/avatars/avatar-19.jpg',
 ];
 
 interface AvatarPickerProps {
