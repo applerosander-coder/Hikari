@@ -1,10 +1,13 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { Pool } from 'pg';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
+  let pool: Pool | null = null;
+  
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -15,37 +18,42 @@ export async function GET(
 
     const otherUserId = params.userId;
 
-    // Fetch messages between current user and other user
-    const { data: messages, error } = await supabase
-      .from('messages')
-      .select(`
-        id,
-        sender_id,
-        receiver_id,
-        content,
-        read_at,
-        created_at
-      `)
-      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching messages:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    // Mark messages as read using RPC function
-    await supabase.rpc('mark_messages_read', {
-      p_sender_id: otherUserId,
-      p_receiver_id: user.id
+    pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
     });
 
-    return NextResponse.json({ messages: messages || [] });
+    // Fetch messages between current user and other user
+    // RLS policies still apply at database level
+    const messagesResult = await pool.query(
+      `SELECT id, sender_id, receiver_id, content, read_at, created_at
+       FROM messages
+       WHERE (sender_id = $1 AND receiver_id = $2)
+          OR (sender_id = $2 AND receiver_id = $1)
+       ORDER BY created_at ASC`,
+      [user.id, otherUserId]
+    );
+
+    // Mark messages as read
+    await pool.query(
+      `UPDATE messages 
+       SET read_at = NOW() 
+       WHERE sender_id = $1 
+         AND receiver_id = $2 
+         AND read_at IS NULL`,
+      [otherUserId, user.id]
+    );
+
+    return NextResponse.json({ messages: messagesResult.rows || [] });
   } catch (error) {
     console.error('Error in messages API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
+  } finally {
+    if (pool) {
+      await pool.end();
+    }
   }
 }
