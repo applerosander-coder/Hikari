@@ -125,21 +125,25 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         const isActive = pathname === item.href;
         
         return (
-          <Link
-            key={index}
-            href={item.disabled ? '#' : item.href}
-            onClick={() => !item.disabled && onClose()}
-            className={`flex items-center gap-3 px-2.5 transition-colors ${
-              isActive 
-                ? 'text-foreground' 
-                : item.disabled 
-                  ? 'text-muted-foreground/50 cursor-not-allowed' 
-                  : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <IconComponent className="h-4 w-4" />
-            {item.label}
-          </Link>
+          <React.Fragment key={index}>
+            <Link
+              href={item.disabled ? '#' : item.href}
+              onClick={() => !item.disabled && onClose()}
+              className={`flex items-center gap-3 px-2.5 transition-colors ${
+                isActive 
+                  ? 'text-foreground' 
+                  : item.disabled 
+                    ? 'text-muted-foreground/50 cursor-not-allowed' 
+                    : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <IconComponent className="h-4 w-4" />
+              {item.label}
+            </Link>
+            {item.label === 'Seller' && (
+              <div className="border-t border-border" />
+            )}
+          </React.Fragment>
         );
       })}
 
