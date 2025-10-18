@@ -157,11 +157,5 @@ module.exports = {
       }
     }
   },
-  plugins: [
-    require('tailwindcss-animate'), 
-    require('@tailwindcss/typography'),
-    function({ addVariant }) {
-      addVariant('royal-gold', '.royal-gold &')
-    }
-  ]
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')]
 };

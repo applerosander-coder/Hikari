@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { Sun, Moon } from 'lucide-react';
+import * as React from 'react';
 import {
   Tooltip,
   TooltipTrigger,
@@ -10,6 +11,11 @@ import {
 
 export function SidebarThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     if (theme === 'light') {
@@ -27,6 +33,25 @@ export function SidebarThemeToggle() {
     return 'Switch to Light Mode';
   };
 
+  if (!mounted) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={toggleTheme}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+          >
+            <Sun className="h-5 w-5" />
+            <span className="sr-only">Toggle theme</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          Switch theme
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -34,9 +59,13 @@ export function SidebarThemeToggle() {
           onClick={toggleTheme}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
         >
-          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 royal-gold:-rotate-90 royal-gold:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 royal-gold:rotate-90 royal-gold:scale-0" />
-          <span className="absolute rotate-90 scale-0 transition-all royal-gold:rotate-0 royal-gold:scale-100 text-lg">👑</span>
+          {theme === 'royal-gold' ? (
+            <span className="text-lg">👑</span>
+          ) : theme === 'dark' ? (
+            <Moon className="h-5 w-5" />
+          ) : (
+            <Sun className="h-5 w-5" />
+          )}
           <span className="sr-only">Toggle theme</span>
         </button>
       </TooltipTrigger>

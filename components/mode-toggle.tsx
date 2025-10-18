@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button';
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     if (theme === 'light') {
@@ -18,11 +23,24 @@ export function ModeToggle() {
     }
   };
 
+  if (!mounted) {
+    return (
+      <Button className="size-8 px-0" size="sm" variant="ghost" onClick={toggleTheme}>
+        <Icons.sun className="h-[1.2rem] w-[1.2rem]" />
+        <span className="sr-only">Toggle theme</span>
+      </Button>
+    );
+  }
+
   return (
     <Button className="size-8 px-0" size="sm" variant="ghost" onClick={toggleTheme}>
-      <Icons.sun className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 royal-gold:-rotate-90 royal-gold:scale-0" />
-      <Icons.moon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 royal-gold:rotate-90 royal-gold:scale-0" />
-      <span className="absolute rotate-90 scale-0 transition-all royal-gold:rotate-0 royal-gold:scale-100 text-base">👑</span>
+      {theme === 'royal-gold' ? (
+        <span className="text-base">👑</span>
+      ) : theme === 'dark' ? (
+        <Icons.moon className="h-[1.2rem] w-[1.2rem]" />
+      ) : (
+        <Icons.sun className="h-[1.2rem] w-[1.2rem]" />
+      )}
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
