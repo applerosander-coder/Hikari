@@ -91,12 +91,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           fontHeading.variable
         )}
       >
-        <ThemeProvider 
-          attribute="class" 
-          defaultTheme="light" 
-          enableSystem={false}
-          themes={['light', 'dark', 'royal-gold']}
-        >
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <DynamicThemeColor />
           <NavigationProgress />
           <RootProvider>
