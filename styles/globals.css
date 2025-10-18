@@ -63,6 +63,33 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+  .royal-gold {
+    --background: 0 0% 4%;
+    --foreground: 28 73% 83%;
+    --card: 0 0% 4%;
+    --card-foreground: 28 73% 83%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 28 73% 83%;
+    --primary: 36 46% 50%;
+    --primary-foreground: 28 73% 83%;
+    --secondary: 36 46% 35%;
+    --secondary-foreground: 28 73% 83%;
+    --muted: 36 46% 25%;
+    --muted-foreground: 28 50% 65%;
+    --accent: 36 46% 50%;
+    --accent-foreground: 28 73% 83%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 28 73% 83%;
+    --border: 36 46% 25%;
+    --input: 36 46% 25%;
+    --ring: 36 46% 50%;
+    --chart-1: 36 80% 55%;
+    --chart-2: 28 70% 60%;
+    --chart-3: 40 75% 50%;
+    --chart-4: 32 65% 55%;
+    --chart-5: 44 70% 50%;
+  }
 }
 
 @layer base {
