@@ -182,27 +182,25 @@ export function ChatInterface({
       </div>
 
       <form onSubmit={handleSend} className="border-t bg-background p-4">
-        <div className="flex items-end gap-2">
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              value={newMessage}
-              onChange={handleTextareaChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              rows={1}
-              className="w-full resize-none rounded-2xl px-4 py-3 pr-12 border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 bg-muted/30 text-sm max-h-[120px] overflow-y-auto"
-              style={{ minHeight: '44px' }}
-              disabled={isSending}
-            />
-          </div>
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={newMessage}
+            onChange={handleTextareaChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message..."
+            rows={1}
+            className="w-full resize-none rounded-2xl px-4 py-3 pr-14 border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 bg-muted/30 text-sm max-h-[120px] overflow-y-auto"
+            style={{ minHeight: '44px' }}
+            disabled={isSending}
+          />
           <Button
             type="submit"
             size="icon"
             disabled={!newMessage.trim() || isSending}
-            className="h-11 w-11 rounded-full flex-shrink-0"
+            className="absolute bottom-1 right-1 h-9 w-9 rounded-full flex-shrink-0"
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-4 w-4" />
           </Button>
         </div>
       </form>
