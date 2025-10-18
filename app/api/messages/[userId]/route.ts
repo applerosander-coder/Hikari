@@ -1,50 +1,45 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { Pool } from 'pg';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
-  const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-  });
-
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      await pool.end();
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const otherUserId = params.userId;
 
-    const result = await pool.query(
-      `SELECT id, sender_id, receiver_id, content, read, created_at
-       FROM messages
-       WHERE (sender_id = $1 AND receiver_id = $2)
-          OR (sender_id = $2 AND receiver_id = $1)
-       ORDER BY created_at ASC`,
-      [user.id, otherUserId]
-    );
+    const { data: messages, error } = await (supabase as any)
+      .from('messages')
+      .select(`
+        id,
+        sender_id,
+        receiver_id,
+        content,
+        read,
+        created_at
+      `)
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
+      .order('created_at', { ascending: true });
 
-    const messages = result.rows;
+    if (error) {
+      console.error('Error fetching messages:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-    await pool.query(
-      `UPDATE messages
-       SET read = true
-       WHERE sender_id = $1 AND receiver_id = $2 AND read = false`,
-      [otherUserId, user.id]
-    );
-
-    await pool.end();
+    await (supabase as any).rpc('mark_messages_read', {
+      p_sender_id: otherUserId,
+      p_receiver_id: user.id
+    });
 
     return NextResponse.json({ messages: messages || [] });
   } catch (error) {
-    await pool.end();
     console.error('Error in messages API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

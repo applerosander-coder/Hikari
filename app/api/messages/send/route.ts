@@ -45,17 +45,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert message using Pool (same database as reads)
-    const insertResult = await pool.query(
-      `INSERT INTO messages (sender_id, receiver_id, content, read, created_at)
-       VALUES ($1, $2, $3, $4, NOW())
-       RETURNING *`,
-      [user.id, receiver_id, content.trim(), false]
-    );
+    // Insert message using Supabase for RLS
+    const { data: message, error } = await (supabase as any)
+      .from('messages')
+      .insert({
+        sender_id: user.id,
+        receiver_id,
+        content: content.trim(),
+        read: false
+      })
+      .select()
+      .single();
 
     await pool.end();
 
-    const message = insertResult.rows[0];
+    if (error) {
+      console.error('Error sending message:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     return NextResponse.json({ message });
   } catch (error) {
     await pool.end();
