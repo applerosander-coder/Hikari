@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: connection, error: connectionError } = await supabase
+    const { data: connection, error: connectionError } = await (supabase as any)
       .from('connects')
       .select('status')
       .or(`and(user_id.eq.${user.id},connected_user_id.eq.${receiver_id}),and(user_id.eq.${receiver_id},connected_user_id.eq.${user.id})`)
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: message, error } = await supabase
+    const { data: message, error } = await (supabase as any)
       .from('messages')
       .insert({
         sender_id: user.id,

@@ -15,7 +15,7 @@ export async function GET(
 
     const otherUserId = params.userId;
 
-    const { data: messages, error } = await supabase
+    const { data: messages, error } = await (supabase as any)
       .from('messages')
       .select(`
         id,
@@ -33,7 +33,7 @@ export async function GET(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    await supabase
+    await (supabase as any)
       .from('messages')
       .update({ read: true })
       .eq('receiver_id', user.id)
