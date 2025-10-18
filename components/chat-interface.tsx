@@ -198,7 +198,7 @@ export function ChatInterface({
             type="submit"
             size="icon"
             disabled={!newMessage.trim() || isSending}
-            className="absolute bottom-2 right-2 h-9 w-9 rounded-full flex-shrink-0"
+            className="absolute bottom-2 right-1.5 h-9 w-9 rounded-full flex-shrink-0"
           >
             <Send className="h-4 w-4" />
           </Button>
