@@ -191,7 +191,7 @@ export function ChatInterface({
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               rows={1}
-              className="w-full resize-none rounded-full px-4 py-3 pr-12 border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 bg-muted/30 text-sm max-h-[120px] overflow-y-auto"
+              className="w-full resize-none rounded-2xl px-4 py-3 pr-12 border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 bg-muted/30 text-sm max-h-[120px] overflow-y-auto"
               style={{ minHeight: '44px' }}
               disabled={isSending}
             />
