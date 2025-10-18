@@ -44,6 +44,8 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
     
     if (theme === 'light' || theme === 'system') {
       setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('gold');
     } else {
       setTheme('light');
     }
@@ -203,11 +205,12 @@ export function SharedMobileMenu({ user, userDetails, onClose }: SharedMobileMen
         className="flex items-center gap-3 px-2.5 text-muted-foreground hover:text-foreground transition-colors w-full text-left"
       >
         <span className="relative size-4 inline-flex items-center justify-center shrink-0">
-          <Sun className="absolute h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Sun className="absolute h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 gold:-rotate-180 gold:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 gold:-rotate-90 gold:scale-0" />
+          <span className="absolute text-base scale-0 transition-all gold:scale-100">👑</span>
         </span>
         <span>
-          {!mounted ? 'Theme' : theme === 'light' || theme === 'system' ? 'Light Mode' : 'Dark Mode'}
+          {!mounted ? 'Theme' : theme === 'gold' ? 'Gold Mode' : theme === 'light' || theme === 'system' ? 'Light Mode' : 'Dark Mode'}
         </span>
       </button>
 
