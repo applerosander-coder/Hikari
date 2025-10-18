@@ -65,11 +65,11 @@
   }
 
   .royal-gold {
-    --background: 0 0% 4%;
+    --background: 0 0% 25%;
     --foreground: 28 73% 83%;
-    --card: 0 0% 4%;
+    --card: 0 0% 25%;
     --card-foreground: 28 73% 83%;
-    --popover: 0 0% 4%;
+    --popover: 0 0% 25%;
     --popover-foreground: 28 73% 83%;
     --primary: 36 46% 50%;
     --primary-foreground: 28 73% 83%;
