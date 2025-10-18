@@ -2,10 +2,11 @@ import { createClient } from '@/utils/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, UserPlus, Users, Gavel } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { Pool } from 'pg';
 import { MarkAsReadButton } from '@/components/mark-as-read-button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { InvitationActions } from '@/components/invitation-actions';
+import { ConnectionRequestActions } from '@/components/connection-request-actions';
 import Image from 'next/image';
 
 export default async function NoticesPage() {
@@ -16,83 +17,43 @@ export default async function NoticesPage() {
     redirect('/signin');
   }
 
-  // Fetch pending connection invitations with nested sender data
-  const { data: invites, error: invitesError } = await supabase
-    .from('connection_invitations')
-    .select(`
-      id,
-      message,
-      status,
-      created_at,
-      sender:sender_id (
-        id,
-        full_name,
-        avatar_url
-      )
-    `)
-    .eq('recipient_id', user.id)
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false });
+  const pool = new Pool({ 
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+  });
 
-  if (invitesError) {
-    console.error('Error fetching invitations:', invitesError);
-  }
+  // Fetch user preferences
+  const preferencesResult = await pool.query(
+    'SELECT skip_connection_confirmation FROM user_preferences WHERE user_id = $1',
+    [user.id]
+  );
+  const skipConfirmation = preferencesResult.rows[0]?.skip_connection_confirmation || false;
 
-  const invitationList = invites || [];
+  // Fetch all notifications with user info, ordered by newest first
+  const result = await pool.query(
+    `SELECT 
+      n.*,
+      u.id as from_user_id,
+      u.full_name as from_user_name,
+      u.avatar_url as from_user_avatar
+     FROM notifications n
+     LEFT JOIN users u ON n.from_user_id = u.id
+     WHERE n.user_id = $1 
+     ORDER BY n.created_at DESC`,
+    [user.id]
+  );
 
-  // Fetch all other notifications
-  const { data: notifications } = await supabase
-    .from('notifications')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  await pool.end();
 
-  const notificationList = notifications || [];
-
-  // Get unique user IDs from notifications only (invitations already have sender data)
-  const notificationFromUserIds = notificationList
-    .filter(n => n.from_user_id)
-    .map(n => n.from_user_id);
-
-  const uniqueUserIds = [...new Set(notificationFromUserIds)];
-
-  // Batch-fetch notification user profiles
-  let usersMap: Record<string, { id: string; full_name: string; avatar_url: string }> = {};
-
-  if (uniqueUserIds.length > 0) {
-    const { data: users } = await supabase
-      .from('users')
-      .select('id, full_name, avatar_url')
-      .in('id', uniqueUserIds);
-
-    if (users) {
-      usersMap = users.reduce((acc, user) => {
-        acc[user.id] = user;
-        return acc;
-      }, {} as Record<string, { id: string; full_name: string; avatar_url: string }>);
-    }
-  }
-
-  // Attach user info to notifications
-  const enrichedNotifications = notificationList.map(notification => ({
-    ...notification,
-    from_user: notification.from_user_id ? usersMap[notification.from_user_id] : null,
+  const notifications = result.rows.map(row => ({
+    ...row,
+    from_user: row.from_user_id ? {
+      id: row.from_user_id,
+      full_name: row.from_user_name,
+      avatar_url: row.from_user_avatar
+    } : null
   }));
-
-  // Combine invitations and notifications, sort by created_at
-  const allItems = [
-    ...invitationList.map(inv => ({
-      ...inv,
-      isInvitation: true,
-      read: false, // Invitations are always unread until responded
-    })),
-    ...enrichedNotifications.map(not => ({
-      ...not,
-      isInvitation: false,
-    })),
-  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  const unreadCount = allItems.filter(item => !item.read).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="w-full">
@@ -115,156 +76,107 @@ export default async function NoticesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {allItems.length === 0 ? (
+            {notifications.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 No notices yet
               </div>
             ) : (
               <div className="divide-y">
-                {allItems.map((item) => {
-                  if ('isInvitation' in item && item.isInvitation && 'sender' in item) {
-                    // Render connection invitation
-                    const invitation = item as typeof invitationList[number] & { read: boolean };
-                    const sender = Array.isArray(invitation.sender) ? invitation.sender[0] : invitation.sender;
-                    
-                    return (
-                      <div
-                        key={invitation.id}
-                        className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-6 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50 bg-gray-50/50 dark:bg-gray-900/30 border-l-4 border-l-black dark:border-l-white`}
-                      >
-                        {sender && (
-                          <Link 
-                            href={`/profile/${sender.id}`}
-                            className="flex-shrink-0"
-                          >
-                            <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
-                              <AvatarImage 
-                                src={sender.avatar_url || '/default-avatar.png'} 
-                                alt={sender.full_name || 'User'} 
-                              />
-                              <AvatarFallback>
-                                {sender.full_name?.charAt(0).toUpperCase() || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </Link>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
-                            Connection Request
-                          </h3>
-                          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">
-                            {sender?.full_name || 'Someone'} wants to connect with you
-                          </p>
-                          {invitation.message && (
-                            <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic">
-                              "{invitation.message}"
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-2 sm:mt-3">
-                            {new Date(invitation.created_at).toLocaleString()}
-                          </p>
-                          <div className="mt-3 sm:mt-4">
-                            <InvitationActions
-                              invitationId={invitation.id}
-                              senderName={sender?.full_name || 'Someone'}
-                            />
-                          </div>
-                        </div>
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-6 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
+                      !notification.read 
+                        ? 'bg-gray-50/50 dark:bg-gray-900/30 border-l-4 border-l-black dark:border-l-white' 
+                        : 'border-l-4 border-l-transparent'
+                    }`}
+                  >
+                  {notification.type === 'outbid' && notification.image_url ? (
+                    <Link 
+                      href={`/auctions/${notification.auction_item_id}`}
+                      className="flex-shrink-0"
+                    >
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
+                        <Image
+                          src={notification.image_url}
+                          alt="Auction item"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 64px, 80px"
+                        />
                       </div>
-                    );
-                  } else {
-                    // Render regular notification
-                    const notification = item as typeof enrichedNotifications[number];
-                    
-                    return (
-                      <div
-                        key={notification.id}
-                        className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-6 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
-                          !notification.read 
-                            ? 'bg-gray-50/50 dark:bg-gray-900/30 border-l-4 border-l-black dark:border-l-white' 
-                            : 'border-l-4 border-l-transparent'
-                        }`}
-                      >
-                        {notification.type === 'outbid' && notification.image_url ? (
-                          <Link 
-                            href={`/auctions/${notification.auction_item_id}`}
-                            className="flex-shrink-0"
-                          >
-                            <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity">
-                              <Image
-                                src={notification.image_url}
-                                alt="Auction item"
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 640px) 64px, 80px"
-                                unoptimized
-                              />
-                            </div>
-                          </Link>
-                        ) : notification.from_user ? (
-                          <Link 
-                            href={`/profile/${notification.from_user.id}`}
-                            className="flex-shrink-0"
-                          >
-                            <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
-                              <AvatarImage 
-                                src={notification.from_user.avatar_url || '/default-avatar.png'} 
-                                alt={notification.from_user.full_name || 'User'} 
-                              />
-                              <AvatarFallback>
-                                {notification.from_user.full_name?.charAt(0).toUpperCase() || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </Link>
+                    </Link>
+                  ) : notification.from_user ? (
+                    <Link 
+                      href={`/profile/${notification.from_user.id}`}
+                      className="flex-shrink-0"
+                    >
+                      <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
+                        <AvatarImage 
+                          src={notification.from_user.avatar_url || ''} 
+                          alt={notification.from_user.full_name || 'User'} 
+                        />
+                        <AvatarFallback>
+                          {notification.from_user.full_name?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <div className="flex-shrink-0">
+                      <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        {notification.type === 'follow' ? (
+                          <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
+                        ) : notification.type === 'connection_request' ? (
+                          <Users className="h-5 w-5 sm:h-6 sm:w-6" />
+                        ) : notification.type === 'outbid' ? (
+                          <Gavel className="h-5 w-5 sm:h-6 sm:w-6" />
                         ) : (
-                          <div className="flex-shrink-0">
-                            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                              {notification.type === 'follow' ? (
-                                <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
-                              ) : notification.type === 'connection_request' ? (
-                                <Users className="h-5 w-5 sm:h-6 sm:w-6" />
-                              ) : notification.type === 'outbid' ? (
-                                <Gavel className="h-5 w-5 sm:h-6 sm:w-6" />
-                              ) : (
-                                <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          {notification.type === 'outbid' && notification.auction_item_id ? (
-                            <Link href={`/auctions/${notification.auction_item_id}`} className="block hover:underline">
-                              <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
-                                {notification.title}
-                              </h3>
-                            </Link>
-                          ) : (
-                            <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
-                              {notification.title}
-                            </h3>
-                          )}
-                          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">
-                            {notification.message}
-                          </p>
-                          {notification.type !== 'outbid' && (
-                            <p className="text-xs text-muted-foreground mt-2 sm:mt-3">
-                              {new Date(notification.created_at).toLocaleString()}
-                            </p>
-                          )}
-                        </div>
-                        {!notification.read && (
-                          <div className="flex-shrink-0 self-center">
-                            <MarkAsReadButton notificationId={notification.id} />
-                          </div>
+                          <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
                         )}
                       </div>
-                    );
-                  }
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {notification.type === 'outbid' && notification.auction_item_id ? (
+                      <Link href={`/auctions/${notification.auction_item_id}`} className="block hover:underline">
+                        <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
+                          {notification.title}
+                        </h3>
+                      </Link>
+                    ) : (
+                      <h3 className="font-semibold text-sm sm:text-base mb-1 leading-tight">
+                        {notification.title}
+                      </h3>
+                    )}
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">
+                      {notification.message}
+                    </p>
+                    {notification.type !== 'outbid' && (
+                      <p className="text-xs text-muted-foreground mt-2 sm:mt-3">
+                        {new Date(notification.created_at).toLocaleString()}
+                      </p>
+                    )}
+                    {notification.type === 'connection_request' && notification.from_user && (
+                      <div className="mt-3 sm:mt-4">
+                        <ConnectionRequestActions
+                          requesterId={notification.from_user.id}
+                          requesterName={notification.from_user.full_name || 'Someone'}
+                          skipConfirmation={skipConfirmation}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {!notification.read && notification.type !== 'connection_request' && (
+                    <div className="flex-shrink-0 self-center">
+                      <MarkAsReadButton notificationId={notification.id} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
       </div>
     </div>
   );

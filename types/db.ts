@@ -710,41 +710,32 @@ export interface Database {
         }
         Relationships: []
       }
-      connections: {
+      connects: {
         Row: {
           id: string
           user_id: string
-          peer_id: string
+          connected_user_id: string
+          status: string
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          peer_id: string
+          connected_user_id: string
+          status?: string
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          peer_id?: string
+          connected_user_id?: string
+          status?: string
           created_at?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "connections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "connections_peer_id_fkey"
-            columns: ["peer_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       messages: {
         Row: {
@@ -770,60 +761,6 @@ export interface Database {
           content?: string
           read_at?: string | null
           created_at?: string
-        }
-        Relationships: []
-      }
-      user_preferences: {
-        Row: {
-          id: string
-          user_id: string
-          skip_connection_confirmation: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          skip_connection_confirmation?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          skip_connection_confirmation?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      connection_invitations: {
-        Row: {
-          id: string
-          sender_id: string
-          recipient_id: string
-          status: 'pending' | 'accepted' | 'rejected'
-          message: string | null
-          created_at: string
-          responded_at: string | null
-        }
-        Insert: {
-          id?: string
-          sender_id: string
-          recipient_id: string
-          status?: 'pending' | 'accepted' | 'rejected'
-          message?: string | null
-          created_at?: string
-          responded_at?: string | null
-        }
-        Update: {
-          id?: string
-          sender_id?: string
-          recipient_id?: string
-          status?: 'pending' | 'accepted' | 'rejected'
-          message?: string | null
-          created_at?: string
-          responded_at?: string | null
         }
         Relationships: []
       }

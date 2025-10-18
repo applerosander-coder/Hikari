@@ -19,11 +19,10 @@ The application uses Next.js 14 with the App Router and Supabase for PostgreSQL 
 
 **Technical Implementations:**
 - **Real-time Functionality:** Supabase real-time subscriptions for live auction updates and countdowns. Notification polling for real-time unread count updates.
-- **Database Schema:** Custom tables for `auctions`, `auction_items`, `bids`, `customers`, `payments`, `watchlist`, `notifications`, `invitations`, `follows`, `connections`, `user_preferences`, `user_reviews`, and `messages`. Bids are linked to `auction_items`. Follows track relationships. Connections manage bidirectional user relationships with RLS enforcement. User_preferences stores connection confirmation settings. Messages store chat conversations (hybrid: messages use PostgreSQL pool, to be migrated).
+- **Database Schema:** Custom tables for `auctions`, `auction_items`, `bids`, `customers`, `payments`, `watchlist`, `notifications`, `invitations`, `follows`, `connects`, `user_preferences`, `user_reviews`, and `messages`. Bids are linked to `auction_items`. Follows track relationships. Connects manage bidirectional requests. User_preferences stores connection confirmation settings. Messages store chat conversations with secure RLS and read receipt functionality via RPC.
 - **Storage:** Supabase Storage for `seller-auctions` and `avatar` images, with automatic compression.
 - **State Management:** TanStack Query for data fetching/caching, and tRPC for API communication.
 - **Performance Optimizations:** Exponential backoff, `router.refresh()`, retry logic, and Postgres RPC functions.
-- **Security:** Connections and notifications now use Supabase client with Row Level Security (RLS) for database-level security enforcement. Messages table still uses PostgreSQL pool (to be migrated).
 - **Deployment:** Configured for Replit Autoscale.
 - **Auction Management:** Draft system, multi-item editing, auto-publishing, and AI-powered generation of title, description, and category from images. Enhanced seller UX with location detection.
 - **Winner Processing:** Automated off-session Stripe charging with failure handling.

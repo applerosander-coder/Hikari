@@ -22,27 +22,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify connection exists using Supabase client
-    const { data: connection } = await supabase
-      .from('connections')
-      .select('id')
-      .or(`and(user_id.eq.${user.id},peer_id.eq.${receiver_id}),and(user_id.eq.${receiver_id},peer_id.eq.${user.id})`)
-      .maybeSingle();
+    pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
+    });
 
-    if (!connection) {
+    // Verify connection exists
+    const connectionCheck = await pool.query(
+      `SELECT 1 FROM connects 
+       WHERE ((user_id = $1 AND connected_user_id = $2) 
+           OR (user_id = $2 AND connected_user_id = $1))
+         AND status = 'accepted'`,
+      [user.id, receiver_id]
+    );
+
+    if (connectionCheck.rows.length === 0) {
       return NextResponse.json(
         { error: 'You can only message connected users' },
         { status: 403 }
       );
     }
 
-    // Use PostgreSQL pool for messages table (still in hybrid mode)
-    pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
-    });
-
     // Insert message
+    // RLS policies ensure sender_id matches authenticated user
     const result = await pool.query(
       `INSERT INTO messages (sender_id, receiver_id, content)
        VALUES ($1, $2, $3)
