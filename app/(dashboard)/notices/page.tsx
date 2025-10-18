@@ -111,7 +111,7 @@ export default async function NoticesPage() {
                       href={`/profile/${notification.from_user.id}`}
                       className="flex-shrink-0"
                     >
-                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
+                      <Avatar className="h-16 w-16 sm:h-20 sm:w-20 cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-700">
                         <AvatarImage 
                           src={notification.from_user.avatar_url || ''} 
                           alt={notification.from_user.full_name || 'User'} 
@@ -123,7 +123,7 @@ export default async function NoticesPage() {
                     </Link>
                   ) : (
                     <div className="flex-shrink-0">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                         {notification.type === 'follow' ? (
                           <UserPlus className="h-5 w-5 sm:h-6 sm:w-6" />
                         ) : notification.type === 'connection_request' ? (
